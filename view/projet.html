@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Courses Faciles - Gabon</title>
+    <link rel="stylesheet" href="/Assets/Css/projet.css">
+</head>
+<body>
+    <header>
+        <div class="header-main">
+            <div class="logo">🛒 Mes Courses Faciles</div>
+            <div class="search-container">
+                <input type="text" placeholder="Rechercher un produit (ex: Riz, Lait...)">
+                <button>Rechercher</button>
+            </div>
+            <div class="auth-buttons">
+                <a href="Inscription.html"><button class="btn-login" onclick="showAuthMessage()">S'identifier / S'inscrire</button></a>
+                <div class="cart-summary">🛒 0 CFA</div>
+            </div>
+        </div>
+        
+        <nav>
+            <div class="nav-links">
+                <a href="alimentaire.html">Produits Alimentaires</a>
+                <a href="netoyage.html">Produits de Nettoyage</a>
+            </div>
+            <div class="store-selection">
+                <label for="store-select">🛒 Magasin :</label>
+                <select id="store-select">
+                    <option value="Mbolo">Mbolo</option>
+                    <option value="priximport">Prix Import</option>
+                    <option value="sangel">Sangel</option>
+                    <option value="cecado">Cécado</option>
+                    <option value="gaboprix">Gaboprix</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="banner">
+            <h1>Vos courses à domicile au Gabon</h1>
+            <p>Sélectionnez votre magasin et faites-vous livrer sans vous déplacer.</p>
+        </div>
+
+        <section class="category-section">
+            <h2>Produits Alimentaires</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="img-placeholder">🍌</div>
+                    <h3>Bananes (Régime)</h3>
+                    <p class="price">1 500 CFA</p>
+                    <button class="add-to-cart" onclick="showAuthMessage()">Ajouter au panier</button>
+                </div>
+                <div class="product-card">
+                    <div class="img-placeholder">🍚</div>
+                    <h3>Riz Parfumé (5kg)</h3>
+                    <p class="price">4 500 CFA</p>
+                    <button class="add-to-cart" onclick="showAuthMessage()">Ajouter au panier</button>
+                </div>
+                <div class="product-card">
+                    <div class="img-placeholder">🥛</div>
+                    <h3>Lait de croissance</h3>
+                    <p class="price">2 800 CFA</p>
+                    <button class="add-to-cart" onclick="showAuthMessage()">Ajouter au panier</button>
+                </div>
+                <div class="product-card">
+                    <div class="img-placeholder">🍗</div>
+                    <h3>Poulet Entier</h3>
+                    <p class="price">3 200 CFA</p>
+                    <button class="add-to-cart" onclick="showAuthMessage()">Ajouter au panier</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="category-section">
+            <h2>Produits de Nettoyage</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="img-placeholder">🧼</div>
+                    <h3>Lave-Vaisselle (Liquide)</h3>
+                    <p class="price">1 200 CFA</p>
+                    <button class="add-to-cart" onclick="showAuthMessage()">Ajouter au panier</button>
+                </div>
+                <div class="product-card">
+                    <div class="img-placeholder">🧺</div>
+                    <h3>Lessive en poudre</h3>
+                    <p class="price">2 500 CFA</p>
+                    <button class="add-to-cart" onclick="showAuthMessage()">Ajouter au panier</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="payment-section">
+                <h3>Modes de Paiement</h3>
+                <div class="payment-icons">
+                    <span class="pay-badge">Airtel Money</span>
+                    <span class="pay-badge">Moov Money</span>
+                    <span class="pay-badge">Mobicash</span>
+                    <span class="pay-badge">Carte Bancaire</span>
+                    <span class="pay-badge delivery">Paiement à la Livraison</span>
+                </div>
+            </div>
+            <p class="disclaimer">Note : L'authentification est obligatoire pour finaliser la commande.</p>
+        </div>
+    </footer>
+
+    <script>
+        function showAuthMessage() {
+            alert("Veuillez vous authentifier pour effectuer des achats. Vous pouvez visiter le site, mais la commande nécessite un compte.");
+        }
+    </script>
+</body>
+</html>
