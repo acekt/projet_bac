@@ -15,7 +15,7 @@ export interface CartItem {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: any) => void;
+  addToCart: (product: Omit<CartItem, 'quantity' | 'id'> & { name: string }) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -45,7 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('mcf_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: Omit<CartItem, 'quantity' | 'id'> & { name: string }) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.name); // Using name as ID for mock products
       if (existingItem) {

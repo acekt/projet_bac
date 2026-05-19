@@ -29,9 +29,17 @@ L'application a été auditée et migrée vers un socle technique robuste. Les f
    npm install
    ```
 
-3. Configurez la base de données (SQLite pré-configuré pour le dev) :
+3. Configurez la base de données (MySQL via XAMPP) :
+   - Assurez-vous que MySQL est lancé dans votre panneau XAMPP.
+   - Créez une base de données nommée `mes_courses_faciles` dans phpMyAdmin.
+   - Configurez l'environnement :
    ```bash
+   # Sur Windows (PowerShell)
+   copy .env.example .env
+
+   # Sur Linux/Mac
    cp .env.example .env
+
    npx prisma generate
    npx prisma db push
    ```
