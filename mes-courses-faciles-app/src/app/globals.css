@@ -1,26 +1,60 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-primary: #10b981;
+  --color-brand-primary-hover: #059669;
+  --color-brand-secondary: #0f172a;
+  --color-brand-accent: #f0fdf4;
+
+  --color-surface-base: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-surface-card: #ffffff;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  --font-sans: "Inter", var(--font-geist-sans), ui-sans-serif, system-ui;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary: #10b981;
+  --secondary: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom UI Utilities */
+@layer components {
+  .btn-primary {
+    @apply bg-brand-primary text-white px-6 py-3 rounded-xl font-semibold transition-all hover:bg-brand-primary-hover active:scale-95 shadow-lg shadow-brand-primary/20;
+  }
+
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all outline-none bg-white;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s ease-out forwards;
 }

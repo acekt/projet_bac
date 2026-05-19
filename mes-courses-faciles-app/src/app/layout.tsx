@@ -1,22 +1,25 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { BottomTabBar } from "@/components/layout/BottomTabBar";
+import { CartProvider } from "@/context/CartContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Mes Courses Faciles - Vos courses au Gabon",
-  description: "Plateforme E-Commerce Multi-Magasins à Libreville, Gabon",
+  title: "Mes Courses Faciles | Le meilleur des magasins de Libreville à votre porte",
+  description: "Faites vos courses en ligne dans les plus grands magasins du Gabon (Mbolo, Géant Casino, Prix Import) et faites-vous livrer rapidement.",
+  manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#10b981",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -26,12 +29,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
-        <Navbar />
-        <main className="flex-grow bg-gray-50">
-          {children}
-        </main>
-        <Footer />
+      <body className={`${inter.variable} font-sans min-h-screen flex flex-col pb-16 lg:pb-0`}>
+        <CartProvider>
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <BottomTabBar />
+        </CartProvider>
       </body>
     </html>
   );

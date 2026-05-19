@@ -1,70 +1,155 @@
-import Link from 'next/link';
+import React from 'react';
+import { StoreCard } from '@/components/ui/StoreCard';
+import { Button } from '@/components/ui/Button';
+import { ShoppingBag, Truck, ShieldCheck, Zap } from 'lucide-react';
 
-export default function Home() {
+const STORES = [
+  {
+    id: 'mbolo',
+    name: 'Mbolo',
+    image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
+    location: 'Bvd Triomphal, Libreville',
+    rating: 4.8,
+    deliveryTime: '30-45 min',
+    categories: ['Supermarché', 'Boulangerie', 'Épicerie'],
+  },
+  {
+    id: 'geant-casino',
+    name: 'Géant Casino',
+    image: 'https://images.unsplash.com/photo-1604719312563-861ac03ef4d2?q=80&w=800&auto=format&fit=crop',
+    location: 'Camp de Gaulle, Libreville',
+    rating: 4.6,
+    deliveryTime: '40-60 min',
+    categories: ['Alimentation', 'Maison', 'High-Tech'],
+  },
+  {
+    id: 'prix-import',
+    name: 'Prix Import',
+    image: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?q=80&w=800&auto=format&fit=crop',
+    location: 'Olumi, Libreville',
+    rating: 4.5,
+    deliveryTime: '25-40 min',
+    categories: ['Grossiste', 'Alimentation', 'Hygiène'],
+  },
+  {
+    id: 'supergros',
+    name: 'Supergros',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop',
+    location: 'Owendo, Libreville',
+    rating: 4.2,
+    deliveryTime: '50-75 min',
+    categories: ['Gros & Demi-gros', 'Boissons'],
+  }
+];
+
+export default function HomePage() {
   return (
-    <div>
-      {/* Banner */}
-      <section className="relative h-[400px] flex items-center justify-center text-white text-center">
-        <div
-          className="absolute inset-0 bg-cover bg-center z-0"
-          style={{
-            backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1000&q=80')"
-          }}
-        ></div>
-        <div className="relative z-10 px-4">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Vos courses à domicile au Gabon</h1>
-          <p className="text-xl max-w-2xl mx-auto">Sélectionnez votre magasin et faites-vous livrer sans vous déplacer.</p>
+    <div className="flex flex-col gap-12 pb-20">
+      {/* Hero Section */}
+      <section className="relative h-[500px] lg:h-[600px] flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1600&auto=format&fit=crop"
+            alt="Hero background"
+            className="w-full h-full object-cover brightness-50"
+          />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-2xl text-white space-y-6 animate-in">
+            <span className="inline-block px-4 py-1.5 bg-brand-primary rounded-full text-sm font-bold tracking-wide uppercase">
+              Simple • Rapide • Fiable
+            </span>
+            <h1 className="text-4xl lg:text-6xl font-extrabold leading-tight">
+              Vos courses de <span className="text-brand-primary">Libreville</span> livrées chez vous.
+            </h1>
+            <p className="text-lg lg:text-xl text-slate-200 leading-relaxed">
+              Commandez dans vos magasins préférés comme Mbolo ou Géant Casino et recevez vos produits en moins d&apos;une heure.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button size="lg" className="text-lg h-16 sm:px-10">
+                Commencer mes courses
+              </Button>
+              <Button variant="outline" size="lg" className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white hover:text-brand-secondary h-16 sm:px-10">
+                Voir les magasins
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Featured Sections */}
-      <div className="container mx-auto px-4 py-12 space-y-12">
-
-        {/* Categories / Sections placeholder */}
-        <section>
-          <h2 className="text-2xl font-bold mb-8 border-l-4 border-green-600 pl-4">Produits Alimentaires</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[
-              { id: 1, name: 'Bananes (Régime)', price: 1500, icon: '🍌' },
-              { id: 2, name: 'Riz Parfumé (5kg)', price: 4500, icon: '🍚' },
-              { id: 3, name: 'Lait de croissance', price: 2800, icon: '🥛' },
-              { id: 4, name: 'Poulet Entier', price: 3200, icon: '🍗' },
-            ].map((p) => (
-              <div key={p.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center border border-gray-100 group">
-                <div className="text-6xl h-32 flex items-center justify-center bg-gray-50 rounded-lg mb-4 group-hover:scale-105 transition-transform">
-                  {p.icon}
-                </div>
-                <h3 className="font-bold text-lg mb-2">{p.name}</h3>
-                <p className="text-green-600 font-bold text-xl mb-4">{p.price.toLocaleString()} CFA</p>
-                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                  Ajouter au panier
-                </button>
+      {/* Features */}
+      <section className="container mx-auto px-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-12">
+          {[
+            { icon: Truck, title: 'Livraison Rapide', desc: 'En moins de 60min' },
+            { icon: ShieldCheck, title: 'Paiement Sécurisé', desc: 'Airtel & Moov Money' },
+            { icon: Zap, title: 'Meilleurs Prix', desc: 'Identiques au magasin' },
+            { icon: ShoppingBag, title: 'Large Choix', desc: '+5000 produits' },
+          ].map((feature, i) => (
+            <div key={i} className="flex flex-col items-center text-center space-y-3">
+              <div className="w-16 h-16 bg-brand-accent rounded-2xl flex items-center justify-center text-brand-primary">
+                <feature.icon size={32} />
               </div>
-            ))}
-          </div>
-        </section>
+              <h3 className="font-bold text-slate-800">{feature.title}</h3>
+              <p className="text-sm text-slate-500">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-        <section>
-          <h2 className="text-2xl font-bold mb-8 border-l-4 border-green-600 pl-4">Produits de Nettoyage</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {[
-              { id: 5, name: 'Lave-Vaisselle (Liquide)', price: 1200, icon: '🧼' },
-              { id: 6, name: 'Lessive en poudre', price: 2500, icon: '🧺' },
-            ].map((p) => (
-              <div key={p.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow text-center border border-gray-100 group">
-                <div className="text-6xl h-32 flex items-center justify-center bg-gray-50 rounded-lg mb-4 group-hover:scale-105 transition-transform">
-                  {p.icon}
-                </div>
-                <h3 className="font-bold text-lg mb-2">{p.name}</h3>
-                <p className="text-green-600 font-bold text-xl mb-4">{p.price.toLocaleString()} CFA</p>
-                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                  Ajouter au panier
-                </button>
-              </div>
-            ))}
+      {/* Stores Section */}
+      <section className="container mx-auto px-4 space-y-8">
+        <div className="flex justify-between items-end">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-extrabold text-slate-800">Magasins Partenaires</h2>
+            <p className="text-slate-500">Choisissez votre magasin habituel pour commencer.</p>
           </div>
-        </section>
-      </div>
+          <Button variant="ghost" className="hidden sm:flex items-center gap-2">
+            Voir tous les magasins
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {STORES.map((store) => (
+            <StoreCard key={store.id} {...store} />
+          ))}
+        </div>
+      </section>
+
+      {/* Promotional Banner */}
+      <section className="container mx-auto px-4">
+        <div className="bg-brand-secondary rounded-[2rem] p-8 lg:p-16 relative overflow-hidden flex flex-col lg:flex-row items-center gap-12">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-brand-primary/10 skew-x-12 translate-x-1/4" />
+
+          <div className="relative z-10 flex-1 space-y-6">
+            <h2 className="text-3xl lg:text-5xl font-bold text-white leading-tight">
+              Gagnez du temps, <br />
+              <span className="text-brand-primary">on s&apos;occupe de tout.</span>
+            </h2>
+            <p className="text-slate-400 text-lg max-w-lg">
+              Téléchargez notre application mobile pour une expérience encore plus fluide et recevez des notifications en temps réel sur vos livraisons.
+            </p>
+            <div className="flex gap-4">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store" className="h-12 cursor-pointer" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-12 cursor-pointer" />
+            </div>
+          </div>
+
+          <div className="relative z-10 flex-1 flex justify-center">
+            <div className="relative w-64 h-[450px] bg-slate-800 rounded-[3rem] border-[8px] border-slate-700 shadow-2xl overflow-hidden">
+               <div className="absolute top-0 w-full h-6 bg-slate-700 flex justify-center">
+                 <div className="w-20 h-4 bg-slate-800 rounded-b-xl" />
+               </div>
+               <img
+                 src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop"
+                 alt="App Preview"
+                 className="w-full h-full object-cover opacity-80"
+               />
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
