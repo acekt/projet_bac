@@ -2,11 +2,13 @@
 
 import React, { useState, use } from 'react';
 import { Button } from '@/components/ui/Button';
+import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const _params = use(params);
+  const { addToCart, updateQuantity, cart } = useCart();
   const [quantity, setQuantity] = useState(1);
 
   const product = {
@@ -15,6 +17,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     oldPrice: 5200,
     category: "Épicerie",
     store: "Mbolo",
+    unit: "sac",
     description: "Ce riz long grain parfumé est sélectionné pour sa qualité supérieure et son arôme délicat. Idéal pour accompagner tous vos plats africains préférés comme le riz gras ou le thieboudienne. Grain fin qui ne colle pas après cuisson.",
     image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop",
     features: [
@@ -114,7 +117,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     <Plus size={20} />
                   </button>
                 </div>
-                <Button size="lg" className="flex-1 h-14 rounded-2xl shadow-xl shadow-brand-primary/30">
+                <Button
+                  onClick={() => {
+                    for(let i=0; i<quantity; i++) addToCart(product);
+                  }}
+                  size="lg"
+                  className="flex-1 h-14 rounded-2xl shadow-xl shadow-brand-primary/30"
+                >
                   <ShoppingCart className="mr-2" size={24} />
                   Ajouter au panier
                 </Button>

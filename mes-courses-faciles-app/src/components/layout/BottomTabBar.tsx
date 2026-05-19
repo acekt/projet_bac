@@ -12,10 +12,10 @@ export const BottomTabBar = () => {
 
   const navItems = [
     { icon: Home, label: 'Accueil', href: '/' },
-    { icon: Search, label: 'Explorer', href: '/search' },
+    { icon: Search, label: 'Chercher', href: '/search' },
     { icon: ShoppingBag, label: 'Panier', href: '/cart', badge: totalItems },
     { icon: Heart, label: 'Favoris', href: '/favorites' },
-    { icon: User, label: 'Compte', href: '/profile' },
+    { icon: User, label: 'Profil', href: '/profile' },
   ];
 
   return (
