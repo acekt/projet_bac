@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -20,7 +21,11 @@ import Link from 'next/link';
 type Step = 'delivery' | 'payment' | 'confirmation';
 
 export default function CheckoutPage() {
+  const { cart, totalPrice } = useCart();
   const [step, setStep] = useState<Step>('delivery');
+
+  const deliveryFee = 2000;
+  const finalTotal = totalPrice + deliveryFee;
 
   const steps = [
     { id: 'delivery', label: 'Adresse', icon: MapPin },
@@ -137,7 +142,7 @@ export default function CheckoutPage() {
                 </Card>
 
                 <Button onClick={() => setStep('confirmation')} className="w-full h-14 text-lg">
-                  Valider ma commande (14 500 CFA)
+                  Valider ma commande ({finalTotal.toLocaleString()} CFA)
                 </Button>
               </div>
             )}
@@ -170,19 +175,19 @@ export default function CheckoutPage() {
                 <ShoppingBag size={20} /> Récapitulatif
               </h3>
               <div className="space-y-4 max-h-60 overflow-y-auto no-scrollbar mb-6">
-                {[1, 2].map((i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 flex-shrink-0">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex gap-4">
+                    <div className="w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 flex-shrink-0 relative overflow-hidden">
                       <img
-                        src="https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=100&auto=format&fit=crop"
+                        src={item.image}
                         className="w-full h-full object-contain p-2"
-                        alt="Produit"
+                        alt={item.name}
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-bold text-slate-800 line-clamp-1">Riz Long Grain 5kg</h4>
-                      <p className="text-xs text-slate-500">Quantité: 1</p>
-                      <p className="text-sm font-bold text-brand-primary">4 500 CFA</p>
+                      <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{item.name}</h4>
+                      <p className="text-xs text-slate-500">Quantité: {item.quantity}</p>
+                      <p className="text-sm font-bold text-brand-primary">{(item.price * item.quantity).toLocaleString()} CFA</p>
                     </div>
                   </div>
                 ))}
@@ -193,15 +198,15 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm text-slate-500">
                   <span>Sous-total</span>
-                  <span className="font-bold text-slate-800">12 500 CFA</span>
+                  <span className="font-bold text-slate-800">{totalPrice.toLocaleString()} CFA</span>
                 </div>
                 <div className="flex justify-between text-sm text-slate-500">
                   <span className="flex items-center gap-1">Livraison <Truck size={14} /></span>
-                  <span className="font-bold text-slate-800">2 000 CFA</span>
+                  <span className="font-bold text-slate-800">{deliveryFee.toLocaleString()} CFA</span>
                 </div>
                 <div className="pt-4 flex justify-between items-end border-t border-slate-100">
                   <span className="text-lg font-bold text-slate-800">Total</span>
-                  <span className="text-2xl font-black text-brand-primary">14 500 CFA</span>
+                  <span className="text-2xl font-black text-brand-primary">{finalTotal.toLocaleString()} CFA</span>
                 </div>
               </div>
             </Card>

@@ -29,8 +29,9 @@ L'application a été auditée et migrée vers un socle technique robuste. Les f
    npm install
    ```
 
-3. Configurez la base de données (SQLite par défaut pour le dev) :
+3. Configurez la base de données (SQLite pré-configuré pour le dev) :
    ```bash
+   cp .env.example .env
    npx prisma generate
    npx prisma db push
    ```

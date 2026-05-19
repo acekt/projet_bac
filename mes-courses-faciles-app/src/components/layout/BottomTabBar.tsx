@@ -4,14 +4,16 @@ import React from 'react';
 import Link from 'next/link';
 import { Home, ShoppingBag, Search, User, Heart } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
 
 export const BottomTabBar = () => {
   const pathname = usePathname();
+  const { totalItems } = useCart();
 
   const navItems = [
     { icon: Home, label: 'Accueil', href: '/' },
     { icon: Search, label: 'Explorer', href: '/search' },
-    { icon: ShoppingBag, label: 'Panier', href: '/cart', badge: 0 },
+    { icon: ShoppingBag, label: 'Panier', href: '/cart', badge: totalItems },
     { icon: Heart, label: 'Favoris', href: '/favorites' },
     { icon: User, label: 'Compte', href: '/profile' },
   ];
@@ -30,7 +32,7 @@ export const BottomTabBar = () => {
               <div className={`relative p-1 rounded-xl transition-colors ${isActive ? 'text-brand-primary' : 'text-slate-400'}`}>
                 <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                 {item.badge !== undefined && item.badge > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                  <span className="absolute -top-1 -right-1 bg-brand-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
                     {item.badge}
                   </span>
                 )}

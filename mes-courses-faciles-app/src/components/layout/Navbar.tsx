@@ -4,8 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import { ShoppingCart, User, Search, MapPin, ChevronDown } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useCart } from '@/context/CartContext';
 
 export const Navbar = () => {
+  const { totalItems } = useCart();
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-100">
       <div className="container mx-auto px-4 h-16 lg:h-20 flex items-center justify-between gap-4">
@@ -44,9 +46,11 @@ export const Navbar = () => {
         <div className="flex items-center gap-2 lg:gap-4">
           <Link href="/cart" className="relative p-2 text-slate-600 hover:text-brand-primary transition-colors">
             <ShoppingCart size={24} />
-            <span className="absolute top-0 right-0 bg-brand-primary text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">
-              0
-            </span>
+            {totalItems > 0 && (
+              <span className="absolute top-0 right-0 bg-brand-primary text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white">
+                {totalItems}
+              </span>
+            )}
           </Link>
 
           <div className="h-8 w-px bg-slate-200 mx-2 hidden lg:block" />

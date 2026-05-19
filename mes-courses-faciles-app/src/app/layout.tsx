@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { BottomTabBar } from "@/components/layout/BottomTabBar";
+import { CartProvider } from "@/context/CartContext";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -29,12 +30,14 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={`${inter.variable} font-sans min-h-screen flex flex-col pb-16 lg:pb-0`}>
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-        <BottomTabBar />
+        <CartProvider>
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+          <BottomTabBar />
+        </CartProvider>
       </body>
     </html>
   );
