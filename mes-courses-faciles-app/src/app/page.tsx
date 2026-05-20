@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { StoreCard } from '@/components/ui/StoreCard';
 import { Button } from '@/components/ui/Button';
 import { ShoppingBag, Truck, ShieldCheck, Zap } from 'lucide-react';
@@ -48,10 +49,12 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative h-[500px] lg:h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1600&auto=format&fit=crop"
             alt="Hero background"
-            className="w-full h-full object-cover brightness-50"
+            fill
+            priority
+            className="object-cover brightness-50"
           />
         </div>
 
@@ -138,13 +141,14 @@ export default function HomePage() {
 
           <div className="relative z-10 flex-1 flex justify-center">
             <div className="relative w-64 h-[450px] bg-slate-800 rounded-[3rem] border-[8px] border-slate-700 shadow-2xl overflow-hidden">
-               <div className="absolute top-0 w-full h-6 bg-slate-700 flex justify-center">
+               <div className="absolute top-0 w-full h-6 bg-slate-700 flex justify-center z-20">
                  <div className="w-20 h-4 bg-slate-800 rounded-b-xl" />
                </div>
-               <img
+               <Image
                  src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop"
                  alt="App Preview"
-                 className="w-full h-full object-cover opacity-80"
+                 fill
+                 className="object-cover opacity-80"
                />
             </div>
           </div>

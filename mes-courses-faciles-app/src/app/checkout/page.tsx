@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -178,9 +179,10 @@ export default function CheckoutPage() {
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-4">
                     <div className="w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 flex-shrink-0 relative overflow-hidden">
-                      <img
+                      <Image
                         src={item.image}
-                        className="w-full h-full object-contain p-2"
+                        fill
+                        className="object-contain p-2"
                         alt={item.name}
                       />
                     </div>
