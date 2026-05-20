@@ -48,6 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = (product: Omit<CartItem, 'quantity' | 'id'> & { name: string }) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.name); // Using name as ID for mock products
+
       if (existingItem) {
         return prevCart.map(item =>
           item.id === product.name ? { ...item, quantity: item.quantity + 1 } : item

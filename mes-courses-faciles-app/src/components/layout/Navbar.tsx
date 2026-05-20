@@ -33,14 +33,18 @@ export const Navbar = () => {
         </div>
 
         {/* Barre de recherche (Desktop) */}
-        <div className="hidden md:flex flex-1 max-w-xl relative">
+        <form
+          action="/search"
+          className="hidden md:flex flex-1 max-w-xl relative"
+        >
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input
+            name="q"
             type="text"
             placeholder="Rechercher un produit, une marque..."
             className="w-full bg-slate-50 border-none rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-brand-primary/20 transition-all outline-none"
           />
-        </div>
+        </form>
 
         {/* Actions */}
         <div className="flex items-center gap-2 lg:gap-4">
@@ -55,27 +59,31 @@ export const Navbar = () => {
 
           <div className="h-8 w-px bg-slate-200 mx-2 hidden lg:block" />
 
-          <Button variant="ghost" className="hidden lg:flex items-center gap-2 text-slate-600">
-            <User size={20} />
-            Connexion
-          </Button>
+          <Link href="/auth/login">
+            <Button variant="ghost" className="hidden lg:flex items-center gap-2 text-slate-600">
+              <User size={20} />
+              Connexion
+            </Button>
+          </Link>
 
-          <Button size="sm" className="hidden lg:flex">
-            S&apos;inscrire
-          </Button>
+          <Link href="/auth/register">
+            <Button size="sm" className="hidden lg:flex">
+              S&apos;inscrire
+            </Button>
+          </Link>
         </div>
       </div>
 
       {/* Search Bar Mobile */}
       <div className="md:hidden px-4 pb-3">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="Riz, lait, savon..."
-            className="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-brand-primary/20 outline-none"
-          />
-        </div>
+        <Link href="/search" className="block">
+          <div className="relative pointer-events-none">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <div className="w-full bg-slate-100 border-none rounded-xl py-2.5 pl-11 pr-4 text-sm text-slate-400">
+              Riz, lait, savon...
+            </div>
+          </div>
+        </Link>
       </div>
     </header>
   );
