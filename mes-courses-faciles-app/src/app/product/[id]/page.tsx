@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, use } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
@@ -41,10 +42,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           {/* Product Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100">
-               <img
+               <Image
                  src={product.image}
                  alt={product.name}
-                 className="w-full h-full object-contain p-12"
+                 fill
+                 className="object-contain p-12"
                />
                <button className="absolute top-6 right-6 h-12 w-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors">
                  <Heart size={24} />
@@ -52,8 +54,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </div>
             <div className="grid grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`aspect-square rounded-2xl bg-slate-50 border-2 transition-all cursor-pointer ${i === 1 ? 'border-brand-primary' : 'border-transparent hover:border-slate-200'}`}>
-                  <img src={product.image} alt="" className="w-full h-full object-contain p-2" />
+                <div key={i} className={`relative aspect-square rounded-2xl bg-slate-50 border-2 transition-all cursor-pointer ${i === 1 ? 'border-brand-primary' : 'border-transparent hover:border-slate-200'}`}>
+                  <Image src={product.image} alt="" fill className="object-contain p-2" />
                 </div>
               ))}
             </div>

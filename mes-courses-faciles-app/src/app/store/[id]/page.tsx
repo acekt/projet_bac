@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, use } from 'react';
+import Image from 'next/image';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { Button } from '@/components/ui/Button';
 import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
@@ -31,11 +32,12 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 overflow-hidden">
-                <img
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 overflow-hidden relative">
+                <Image
                    src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=100&auto=format&fit=crop"
                    alt="Store logo"
-                   className="w-full h-full object-cover"
+                   fill
+                   className="object-cover"
                 />
               </div>
               <div>
