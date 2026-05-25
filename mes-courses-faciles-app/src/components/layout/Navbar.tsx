@@ -2,12 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShoppingCart, User, Search, MapPin, ChevronDown } from 'lucide-react';
+import { ShoppingCart, User, Search, MapPin, ChevronDown, LogOut } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export const Navbar = () => {
   const { totalItems } = useCart();
+  const { user, logout, isAuthenticated } = useAuth();
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-100">
       <div className="container mx-auto px-4 h-16 lg:h-20 flex items-center justify-between gap-4">
@@ -59,18 +61,37 @@ export const Navbar = () => {
 
           <div className="h-8 w-px bg-slate-200 mx-2 hidden lg:block" />
 
-          <Link href="/auth/login">
-            <Button variant="ghost" className="hidden lg:flex items-center gap-2 text-slate-600">
-              <User size={20} />
-              Connexion
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <div className="hidden lg:flex items-center gap-4">
+              <Link href="/profile" className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-brand-primary transition-colors">
+                <div className="w-8 h-8 bg-brand-accent rounded-full flex items-center justify-center text-brand-primary">
+                  {user?.name?.charAt(0)}
+                </div>
+                {user?.name}
+              </Link>
+              {user?.role === 'ADMIN' && (
+                <Link href="/admin" className="text-xs font-black text-brand-secondary hover:underline">ADMIN</Link>
+              )}
+              <button onClick={logout} className="text-slate-400 hover:text-red-500 transition-colors">
+                 <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link href="/auth/login">
+                <Button variant="ghost" className="hidden lg:flex items-center gap-2 text-slate-600">
+                  <User size={20} />
+                  Connexion
+                </Button>
+              </Link>
 
-          <Link href="/auth/register">
-            <Button size="sm" className="hidden lg:flex">
-              S&apos;inscrire
-            </Button>
-          </Link>
+              <Link href="/auth/register">
+                <Button size="sm" className="hidden lg:flex">
+                  S&apos;inscrire
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
 

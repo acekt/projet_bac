@@ -1,16 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { BottomTabBar } from "@/components/layout/BottomTabBar";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Mes Courses Faciles | Le meilleur des magasins de Libreville à votre porte",
+  title: "Mes Achats 241 | Le meilleur des magasins de Libreville à votre porte",
   description: "Faites vos courses en ligne dans les plus grands magasins du Gabon (Mbolo, Géant Casino, Prix Import) et faites-vous livrer rapidement.",
   manifest: "/manifest.json",
 };
@@ -30,16 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className={`${inter.variable} font-sans min-h-screen flex flex-col pb-16 lg:pb-0`}>
+      <body className={`${inter.variable} font-sans min-h-screen flex flex-col`}>
         <ErrorBoundary>
-          <CartProvider>
-            <Navbar />
-            <main className="flex-grow">
+          <AuthProvider>
+            <CartProvider>
               {children}
-            </main>
-            <Footer />
-            <BottomTabBar />
-          </CartProvider>
+            </CartProvider>
+          </AuthProvider>
         </ErrorBoundary>
       </body>
     </html>

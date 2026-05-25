@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -15,18 +16,68 @@ import {
   Wallet,
   Smartphone,
   ArrowLeft,
-  ShieldCheck
+  ShieldCheck,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 type Step = 'delivery' | 'payment' | 'confirmation';
 
 export default function CheckoutPage() {
-  const { cart, totalPrice } = useCart();
+  const { cart, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
   const [step, setStep] = useState<Step>('delivery');
+  const [loading, setLoading] = useState(false);
+  const [orderId, setOrderId] = useState('');
 
   const deliveryFee = 2000;
   const finalTotal = totalPrice + deliveryFee;
+
+  const [deliveryData, setDeliveryData] = useState({
+    name: user?.name || '',
+    phone: '',
+    address: '',
+    indications: ''
+  });
+
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+
+  const handlePlaceOrder = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user?.id,
+          storeId: cart[0]?.storeId || 'default',
+          items: cart.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          total: finalTotal,
+          deliveryFee,
+          paymentMethod,
+          deliveryAddress: `${deliveryData.address} - ${deliveryData.indications} (${deliveryData.phone})`
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de la commande');
+
+      setOrderId(data.id);
+      setStep('confirmation');
+      clearCart();
+    } catch (e) {
+      console.error(e);
+      alert('Une erreur est survenue lors de la validation de votre commande.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const steps = [
     { id: 'delivery', label: 'Adresse', icon: MapPin },
@@ -83,30 +134,55 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-slate-500 uppercase">Nom Complet</label>
-                      <input type="text" placeholder="Jean Dupont" className="input-field" />
+                      <input
+                        type="text"
+                        value={deliveryData.name}
+                        onChange={(e) => setDeliveryData({...deliveryData, name: e.target.value})}
+                        placeholder="Jean Dupont"
+                        className="input-field"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-slate-500 uppercase">Téléphone</label>
-                      <input type="tel" placeholder="+241 07 00 00 00" className="input-field" />
+                      <input
+                        type="tel"
+                        value={deliveryData.phone}
+                        onChange={(e) => setDeliveryData({...deliveryData, phone: e.target.value})}
+                        placeholder="+241 07 00 00 00"
+                        className="input-field"
+                      />
                     </div>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase">Quartier / Zone</label>
-                    <select className="input-field appearance-none">
-                      <option>Sélectionnez votre quartier</option>
-                      <option>Louis</option>
-                      <option>Angondjé</option>
-                      <option>Glass</option>
-                      <option>Akanda</option>
+                    <select
+                      className="input-field appearance-none"
+                      value={deliveryData.address}
+                      onChange={(e) => setDeliveryData({...deliveryData, address: e.target.value})}
+                    >
+                      <option value="">Sélectionnez votre quartier</option>
+                      <option value="Louis">Louis</option>
+                      <option value="Angondjé">Angondjé</option>
+                      <option value="Glass">Glass</option>
+                      <option value="Akanda">Akanda</option>
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-slate-500 uppercase">Indications complémentaires</label>
-                    <textarea placeholder="Ex: Maison bleue après la boulangerie..." className="input-field h-32 resize-none" />
+                    <textarea
+                      placeholder="Ex: Maison bleue après la boulangerie..."
+                      className="input-field h-32 resize-none"
+                      value={deliveryData.indications}
+                      onChange={(e) => setDeliveryData({...deliveryData, indications: e.target.value})}
+                    />
                   </div>
 
                   <div className="pt-4">
-                    <Button onClick={() => setStep('payment')} className="w-full h-14 text-lg">
+                    <Button
+                      onClick={() => setStep('payment')}
+                      disabled={!deliveryData.name || !deliveryData.phone || !deliveryData.address}
+                      className="w-full h-14 text-lg"
+                    >
                       Continuer vers le paiement <ChevronRight className="ml-2" />
                     </Button>
                   </div>
@@ -120,11 +196,15 @@ export default function CheckoutPage() {
                   <h2 className="text-2xl font-bold text-slate-800 mb-6">Mode de paiement</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[
-                      { id: 'airtel', name: 'Airtel Money', icon: Smartphone, color: 'border-red-500 text-red-500' },
-                      { id: 'moov', name: 'Moov Money', icon: Smartphone, color: 'border-blue-500 text-blue-500' },
-                      { id: 'cash', name: 'Espèces', icon: Wallet, color: 'border-green-500 text-green-500' }
+                      { id: 'airtel', name: 'Airtel Money', icon: Smartphone, color: 'border-red-500 bg-red-50/30 text-red-500' },
+                      { id: 'moov', name: 'Moov Money', icon: Smartphone, color: 'border-blue-500 bg-blue-50/30 text-blue-500' },
+                      { id: 'cash', name: 'Espèces', icon: Wallet, color: 'border-green-500 bg-green-50/30 text-green-500' }
                     ].map((method) => (
-                      <button key={method.id} className={`flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all hover:bg-slate-50 ${method.id === 'airtel' ? method.color : 'border-slate-100'}`}>
+                      <button
+                        key={method.id}
+                        onClick={() => setPaymentMethod(method.id)}
+                        className={`flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all hover:bg-slate-50 ${paymentMethod === method.id ? method.color : 'border-slate-100'}`}
+                      >
                         <method.icon size={32} />
                         <span className="font-bold">{method.name}</span>
                       </button>
@@ -142,8 +222,8 @@ export default function CheckoutPage() {
                   </div>
                 </Card>
 
-                <Button onClick={() => setStep('confirmation')} className="w-full h-14 text-lg">
-                  Valider ma commande ({finalTotal.toLocaleString()} CFA)
+                <Button onClick={handlePlaceOrder} disabled={loading} className="w-full h-14 text-lg">
+                  {loading ? <Loader2 className="animate-spin" /> : `Valider ma commande (${finalTotal.toLocaleString()} CFA)`}
                 </Button>
               </div>
             )}
@@ -155,11 +235,11 @@ export default function CheckoutPage() {
                 </div>
                 <h2 className="text-3xl font-black text-slate-800 mb-4">Commande Confirmée !</h2>
                 <p className="text-slate-500 text-lg mb-8 max-w-md mx-auto">
-                  Merci pour votre confiance. Votre commande <span className="font-bold text-brand-primary">#MCF-2025</span> est en cours de préparation chez Mbolo.
+                  Merci pour votre confiance. Votre commande <span className="font-bold text-brand-primary">#{orderId.slice(-6).toUpperCase()}</span> est en cours de préparation.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Link href="/orders/2025">
-                    <Button variant="outline" className="w-full sm:w-auto h-12 px-8">Suivre ma commande</Button>
+                  <Link href="/profile">
+                    <Button variant="outline" className="w-full sm:w-auto h-12 px-8">Voir mes commandes</Button>
                   </Link>
                   <Link href="/">
                     <Button className="w-full sm:w-auto h-12 px-8">Retour à l&apos;accueil</Button>
