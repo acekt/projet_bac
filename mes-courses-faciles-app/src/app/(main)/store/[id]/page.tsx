@@ -1,29 +1,40 @@
 "use client";
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import Image from 'next/image';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { Button } from '@/components/ui/Button';
-import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal, Loader2 } from 'lucide-react';
 
 const CATEGORIES = [
-  'Tous', 'Produits Frais', 'Épicerie', 'Boissons', 'Hygiène', 'Bébé', 'Maison', 'Animaux'
-];
-
-const PRODUCTS = [
-  { name: 'Riz Long Grain 5kg', price: 4500, category: 'Épicerie', unit: 'sac', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Huile de Tournesol 1L', price: 1200, category: 'Épicerie', unit: 'bouteille', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbadb8c5?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Lait Entier 1L', price: 850, category: 'Produits Frais', unit: 'brique', image: 'https://images.unsplash.com/photo-1550583724-125581dc228b?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Pâtes Spaghetti 500g', price: 600, category: 'Épicerie', unit: 'paquet', image: 'https://images.unsplash.com/photo-1551462147-3a8836a9b40d?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Eau Minérale 1.5L (Pack de 6)', price: 2100, category: 'Boissons', unit: 'pack', image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf3d?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Savon de Toilette', price: 450, category: 'Hygiène', unit: 'unité', image: 'https://images.unsplash.com/photo-1605264964528-06403738d6dc?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Yaourt Nature x4', price: 1400, category: 'Produits Frais', unit: 'pack', image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Jus d\'Orange 1L', price: 1100, category: 'Boissons', unit: 'bouteille', image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?q=80&w=400&auto=format&fit=crop' },
+  'Tous', 'Alimentaire', 'Nettoyage', 'Hygiène', 'Bébé', 'Boissons'
 ];
 
 export default function StorePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const [activeCategory, setActiveCategory] = useState('Tous');
+  const [products, setProducts] = useState<Record<string, any>[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        let url = `/api/products?storeId=${resolvedParams.id}`;
+        if (activeCategory !== 'Tous') {
+          url += `&category=${activeCategory}`;
+        }
+        const res = await fetch(url);
+        const data = await res.json();
+        setProducts(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [resolvedParams.id, activeCategory]);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -122,7 +133,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
           <main className="flex-1 space-y-6">
             <div className="flex justify-between items-center">
               <p className="text-slate-500 text-sm font-medium">
-                <span className="text-slate-800 font-bold">{PRODUCTS.length}</span> produits trouvés
+                <span className="text-slate-800 font-bold">{products.length}</span> produits trouvés
               </p>
               <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg p-1">
                 <button className="p-1.5 rounded bg-slate-100 text-brand-primary"><LayoutGrid size={18} /></button>
@@ -130,11 +141,24 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              {PRODUCTS.map((product, i) => (
-                <ProductCard key={i} {...product} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center py-20">
+                <Loader2 className="animate-spin text-brand-primary" size={48} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    name={product.name}
+                    price={product.price}
+                    category={product.category}
+                    unit={product.unit}
+                    image={product.images?.[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop'}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="flex justify-center pt-8 pb-12">
               <Button variant="outline" className="px-12 border-slate-300">

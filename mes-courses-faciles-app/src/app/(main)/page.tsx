@@ -3,47 +3,24 @@ import Image from 'next/image';
 import { StoreCard } from '@/components/ui/StoreCard';
 import { Button } from '@/components/ui/Button';
 import { ShoppingBag, Truck, ShieldCheck, Zap } from 'lucide-react';
+import prisma from '@/lib/prisma';
+import Link from 'next/link';
 
-const STORES = [
-  {
-    id: 'mbolo',
-    name: 'Mbolo',
-    image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=800&auto=format&fit=crop',
-    location: 'Bvd Triomphal, Libreville',
-    rating: 4.8,
-    deliveryTime: '30-45 min',
-    categories: ['Supermarché', 'Boulangerie', 'Épicerie'],
-  },
-  {
-    id: 'geant-casino',
-    name: 'Géant Casino',
-    image: 'https://images.unsplash.com/photo-1604719312563-861ac03ef4d2?q=80&w=800&auto=format&fit=crop',
-    location: 'Camp de Gaulle, Libreville',
-    rating: 4.6,
-    deliveryTime: '40-60 min',
-    categories: ['Alimentation', 'Maison', 'High-Tech'],
-  },
-  {
-    id: 'prix-import',
-    name: 'Prix Import',
-    image: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?q=80&w=800&auto=format&fit=crop',
-    location: 'Olumi, Libreville',
-    rating: 4.5,
-    deliveryTime: '25-40 min',
-    categories: ['Grossiste', 'Alimentation', 'Hygiène'],
-  },
-  {
-    id: 'supergros',
-    name: 'Supergros',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop',
-    location: 'Owendo, Libreville',
-    rating: 4.2,
-    deliveryTime: '50-75 min',
-    categories: ['Gros & Demi-gros', 'Boissons'],
+async function getStores() {
+  try {
+    const stores = await prisma.store.findMany({
+      where: { isActive: true },
+      take: 4,
+    });
+    return stores;
+  } catch (e) {
+    console.error(e);
+    return [];
   }
-];
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stores = await getStores();
   return (
     <div className="flex flex-col gap-12 pb-20">
       {/* Hero Section */}
@@ -114,8 +91,17 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {STORES.map((store) => (
-            <StoreCard key={store.id} {...store} />
+          {stores.map((store) => (
+            <StoreCard
+               key={store.id}
+               id={store.id}
+               name={store.name}
+               image={store.logo || ''}
+               location={store.address}
+               rating={4.5}
+               deliveryTime="30-45 min"
+               categories={['Alimentation', 'Hygiène']}
+            />
           ))}
         </div>
       </section>

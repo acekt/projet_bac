@@ -1,33 +1,36 @@
 "use client";
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const _params = use(params);
-  const { addToCart, updateQuantity, cart } = useCart();
+  const resolvedParams = use(params);
+  const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<Record<string, any> | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const product = {
-    name: "Riz Long Grain Parfumé - 5kg",
-    price: 4500,
-    oldPrice: 5200,
-    category: "Épicerie",
-    store: "Mbolo",
-    unit: "sac",
-    description: "Ce riz long grain parfumé est sélectionné pour sa qualité supérieure et son arôme délicat. Idéal pour accompagner tous vos plats africains préférés comme le riz gras ou le thieboudienne. Grain fin qui ne colle pas après cuisson.",
-    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop",
-    features: [
-      "Origine : Thaïlande",
-      "Poids net : 5kg",
-      "Qualité : Extra",
-      "Conservation : Lieu sec"
-    ]
-  };
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await fetch(`/api/products/${resolvedParams.id}`);
+        const data = await res.json();
+        setProduct(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [resolvedParams.id]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>;
+  if (!product) return <div className="min-h-screen flex items-center justify-center text-xl font-bold">Produit non trouvé</div>;
 
   return (
     <div className="min-h-screen bg-white">
@@ -69,7 +72,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   {product.category}
                 </span>
                 <span className="text-slate-400 text-sm font-medium">•</span>
-                <span className="text-slate-500 text-sm font-bold uppercase">{product.store}</span>
+                <span className="text-slate-500 text-sm font-bold uppercase">{product.store?.name}</span>
               </div>
               <h1 className="text-3xl lg:text-5xl font-extrabold text-slate-800 leading-tight">
                 {product.name}
@@ -91,12 +94,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {product.features.map((feature, i) => (
-                <div key={i} className="flex items-center gap-2 text-slate-700 font-medium">
-                  <div className="w-1.5 h-1.5 bg-brand-primary rounded-full" />
-                  {feature}
-                </div>
-              ))}
+              <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="w-1.5 h-1.5 bg-brand-primary rounded-full" />
+                Unité : {product.unit}
+              </div>
+              <div className="flex items-center gap-2 text-slate-700 font-medium">
+                <div className="w-1.5 h-1.5 bg-brand-primary rounded-full" />
+                Stock : {product.stock} disponibles
+              </div>
             </div>
 
             <div className="h-px bg-slate-100" />
@@ -121,7 +126,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 </div>
                 <Button
                   onClick={() => {
-                    for(let i=0; i<quantity; i++) addToCart(product);
+                    if (!product) return;
+                    for(let i=0; i<quantity; i++) addToCart({
+                      name: product.name,
+                      price: product.price,
+                      category: product.category,
+                      unit: product.unit,
+                      image: product.images?.[0] || '',
+                      storeId: product.storeId
+                    });
                   }}
                   size="lg"
                   className="flex-1 h-14 rounded-2xl shadow-xl shadow-brand-primary/30"
