@@ -27,8 +27,11 @@ export async function POST(request: Request) {
     const { password: _password, ...userWithoutPassword } = user;
 
     return NextResponse.json(userWithoutPassword, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    if (error.code === 'P2024' || error.message.includes('Can\'t reach database server')) {
+      return NextResponse.json({ error: 'La base de données est inaccessible. Veuillez vérifier que MySQL est lancé dans XAMPP.' }, { status: 503 });
+    }
+    return NextResponse.json({ error: 'Une erreur interne est survenue.' }, { status: 500 });
   }
 }
