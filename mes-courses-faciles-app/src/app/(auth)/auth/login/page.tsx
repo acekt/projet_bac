@@ -38,7 +38,13 @@ function LoginForm() {
       if (!res.ok) throw new Error(data.error || 'Erreur lors de la connexion');
 
       login(data);
-      router.push(callbackUrl);
+
+      // Dynamic redirection based on role
+      if (data.role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push(callbackUrl);
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {

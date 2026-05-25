@@ -21,6 +21,8 @@ async function getStores() {
 
 export default async function HomePage() {
   const stores = await getStores();
+  const dbError = stores.length === 0;
+
   return (
     <div className="flex flex-col gap-12 pb-20">
       {/* Hero Section */}
@@ -91,18 +93,28 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {stores.map((store) => (
-            <StoreCard
-               key={store.id}
-               id={store.id}
-               name={store.name}
-               image={store.logo || ''}
-               location={store.address}
-               rating={4.5}
-               deliveryTime="30-45 min"
-               categories={['Alimentation', 'Hygiène']}
-            />
-          ))}
+          {dbError ? (
+            <div className="col-span-full p-12 bg-red-50 border-2 border-red-100 rounded-[2rem] text-center space-y-4">
+              <h3 className="text-xl font-bold text-red-600">Oups ! Les magasins sont temporairement inaccessibles</h3>
+              <p className="text-red-500 max-w-md mx-auto font-medium">Nous rencontrons un problème de connexion à notre base de données. Veuillez vérifier que votre serveur MySQL est bien lancé dans XAMPP.</p>
+              <Link href="/">
+                <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-100">Réessayer</Button>
+              </Link>
+            </div>
+          ) : (
+            stores.map((store) => (
+              <StoreCard
+                 key={store.id}
+                 id={store.id}
+                 name={store.name}
+                 image={store.logo || ''}
+                 location={store.address}
+                 rating={4.5}
+                 deliveryTime="30-45 min"
+                 categories={['Alimentation', 'Hygiène']}
+              />
+            ))
+          )}
         </div>
       </section>
 
