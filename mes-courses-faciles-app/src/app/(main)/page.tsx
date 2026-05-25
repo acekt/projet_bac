@@ -120,8 +120,8 @@ export default async function HomePage() {
               Téléchargez notre application mobile pour une expérience encore plus fluide et recevez des notifications en temps réel sur vos livraisons.
             </p>
             <div className="flex gap-4">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store" className="h-12 cursor-pointer" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" className="h-12 cursor-pointer" />
+              <Image unoptimized src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store" width={135} height={40} className="h-12 w-auto cursor-pointer" />
+              <Image unoptimized src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store" width={120} height={40} className="h-12 w-auto cursor-pointer" />
             </div>
           </div>
 
