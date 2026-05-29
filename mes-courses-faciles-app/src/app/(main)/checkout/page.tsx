@@ -25,14 +25,13 @@ import { useRouter } from 'next/navigation';
 type Step = 'delivery' | 'payment' | 'confirmation';
 
 export default function CheckoutPage() {
-  const { cart, totalPrice, clearCart } = useCart();
+  const { cart, totalPrice, clearCart, deliveryFee } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState<Step>('delivery');
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState('');
 
-  const deliveryFee = 2000;
   const finalTotal = totalPrice + deliveryFee;
 
   const [deliveryData, setDeliveryData] = useState({

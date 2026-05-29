@@ -56,14 +56,34 @@ describe('Orders API', () => {
   });
 
   it('should return 500 on database error', async () => {
+    const orderData = {
+      userId: 'user1',
+      storeId: 'store1',
+      items: [{ id: 'prod1', quantity: 2, price: 1000 }],
+      total: 2000,
+      deliveryFee: 500,
+      paymentMethod: 'cash',
+      deliveryAddress: 'Test Address'
+    };
+
     const request = new Request('http://localhost/api/orders', {
       method: 'POST',
-      body: JSON.stringify({})
+      body: JSON.stringify(orderData)
     });
 
     prismaMock.order.create.mockRejectedValue(new Error('DB Error'));
 
     const response = await POST(request);
     expect(response.status).toBe(500);
+  });
+
+  it('should return 400 on validation error', async () => {
+    const request = new Request('http://localhost/api/orders', {
+      method: 'POST',
+      body: JSON.stringify({ invalid: 'data' })
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(400);
   });
 });

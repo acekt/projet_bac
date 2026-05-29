@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
+import { userSchema } from '@/lib/validations/schemas';
+import { ZodError } from 'zod';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, phone, address } = await request.json();
+    const body = await request.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
-    }
+    // Server-side deep validation
+    const validatedData = userSchema.parse(body);
+    const { name, email, password, phone } = validatedData;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -26,15 +28,26 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         phone,
-        address,
       },
     });
 
     const { password: _password, ...userWithoutPassword } = user;
 
     return NextResponse.json(userWithoutPassword, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
+
+    if (error instanceof ZodError) {
+      return NextResponse.json({
+        error: 'Validation failed',
+        details: error.flatten().fieldErrors
+      }, { status: 400 });
+    }
+
+    if (error.code === 'P2024' || error.message.includes('Can\'t reach database server')) {
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 503 });
+    }
+
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
