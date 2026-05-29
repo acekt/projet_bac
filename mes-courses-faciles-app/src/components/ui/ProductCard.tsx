@@ -6,20 +6,22 @@ import { Button } from './Button';
 import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
+  id: string;
   name: string;
   price: number;
   image: string;
   category: string;
   unit: string;
+  storeId: string;
 }
 
-export const ProductCard = ({ name, price, image, category, unit }: ProductCardProps) => {
+export const ProductCard = ({ id, name, price, image, category, unit, storeId }: ProductCardProps) => {
   const { addToCart } = useCart();
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart({ name, price, image, category, unit });
+    addToCart({ id, name, price, image, category, unit, storeId });
   };
 
   return (

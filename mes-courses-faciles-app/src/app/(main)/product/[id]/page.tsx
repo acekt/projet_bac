@@ -36,9 +36,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs */}
-        <Link href="/store/mbolo" className="inline-flex items-center gap-2 text-slate-500 hover:text-brand-primary text-sm font-medium mb-8 group">
+        <Link href={`/store/${product.storeId}`} className="inline-flex items-center gap-2 text-slate-500 hover:text-brand-primary text-sm font-medium mb-8 group">
           <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-          Retour au magasin {product.store}
+          Retour au magasin {product.store?.name}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
@@ -46,7 +46,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           <div className="space-y-4">
             <div className="relative aspect-square bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100">
                <Image
-                 src={product.image}
+                 src={(() => {
+                   try {
+                     const imgs = JSON.parse(product.images || '[]');
+                     return imgs[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop';
+                   } catch(e) {
+                     return product.images || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop';
+                   }
+                 })()}
                  alt={product.name}
                  fill
                  className="object-contain p-12"
@@ -56,9 +63,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                </button>
             </div>
             <div className="grid grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`relative aspect-square rounded-2xl bg-slate-50 border-2 transition-all cursor-pointer ${i === 1 ? 'border-brand-primary' : 'border-transparent hover:border-slate-200'}`}>
-                  <Image src={product.image} alt="" fill className="object-contain p-2" />
+              {(() => {
+                try {
+                  const imgs = JSON.parse(product.images || '[]');
+                  return imgs.length > 0 ? imgs : [product.image];
+                } catch(e) {
+                  return [product.images];
+                }
+              })().map((img: string, i: number) => (
+                <div key={i} className={`relative aspect-square rounded-2xl bg-slate-50 border-2 transition-all cursor-pointer ${i === 0 ? 'border-brand-primary' : 'border-transparent hover:border-slate-200'}`}>
+                  <Image src={img || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop'} alt="" fill className="object-contain p-2" />
                 </div>
               ))}
             </div>
@@ -128,11 +142,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   onClick={() => {
                     if (!product) return;
                     for(let i=0; i<quantity; i++) addToCart({
+                      id: product.id,
                       name: product.name,
                       price: product.price,
                       category: product.category,
                       unit: product.unit,
-                      image: product.images?.[0] || '',
+                      image: (() => {
+                        try {
+                          const imgs = JSON.parse(product.images || '[]');
+                          return imgs[0] || '';
+                        } catch(e) { return product.images || ''; }
+                      })(),
                       storeId: product.storeId
                     });
                   }}

@@ -34,7 +34,7 @@ describe('CartContext', () => {
 
   it('should add an item to the cart', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    const product = { name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit' };
+    const product = { id: 'p1', name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit', storeId: 's1' };
 
     act(() => {
       result.current.addToCart(product);
@@ -48,7 +48,7 @@ describe('CartContext', () => {
 
   it('should increment quantity when adding the same product', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    const product = { name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit' };
+    const product = { id: 'p1', name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit', storeId: 's1' };
 
     act(() => {
       result.current.addToCart(product);
@@ -63,14 +63,14 @@ describe('CartContext', () => {
 
   it('should update quantity', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    const product = { name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit' };
+    const product = { id: 'p1', name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit', storeId: 's1' };
 
     act(() => {
       result.current.addToCart(product);
     });
 
     act(() => {
-      result.current.updateQuantity('Test Product', 5);
+      result.current.updateQuantity('p1', 5);
     });
 
     expect(result.current.cart[0].quantity).toBe(5);
@@ -79,14 +79,14 @@ describe('CartContext', () => {
 
   it('should remove item from cart', () => {
     const { result } = renderHook(() => useCart(), { wrapper });
-    const product = { name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit' };
+    const product = { id: 'p1', name: 'Test Product', price: 1000, image: '', category: 'Test', unit: 'unit', storeId: 's1' };
 
     act(() => {
       result.current.addToCart(product);
     });
 
     act(() => {
-      result.current.removeFromCart('Test Product');
+      result.current.removeFromCart('p1');
     });
 
     expect(result.current.cart.length).toBe(0);

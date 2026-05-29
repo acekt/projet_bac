@@ -15,7 +15,7 @@ export interface CartItem {
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Omit<CartItem, 'quantity' | 'id'> & { name: string }) => void;
+  addToCart: (product: Omit<CartItem, 'quantity'>) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -46,24 +46,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('mcf_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Omit<CartItem, 'quantity' | 'id'> & { name: string }) => {
+  const addToCart = (product: Omit<CartItem, 'quantity'>) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.name); // Using name as ID for mock products
+      // Check if product from another store
+      if (prevCart.length > 0 && product.storeId && prevCart[0].storeId !== product.storeId) {
+        if (!confirm("Votre panier contient déjà des articles d'un autre magasin. Voulez-vous vider votre panier pour ajouter cet article ?")) {
+          return prevCart;
+        }
+        return [{ ...product, quantity: 1 }];
+      }
+
+      const existingItem = prevCart.find(item => item.id === product.id);
 
       if (existingItem) {
         return prevCart.map(item =>
-          item.id === product.name ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevCart, {
-        id: product.name,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: 1,
-        unit: product.unit || 'unité',
-        category: product.category || 'Général'
-      }];
+      return [...prevCart, { ...product, quantity: 1 }];
     });
   };
 

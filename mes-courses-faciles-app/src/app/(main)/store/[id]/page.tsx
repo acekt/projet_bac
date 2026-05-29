@@ -150,11 +150,20 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
+                    id={product.id}
                     name={product.name}
                     price={product.price}
                     category={product.category}
                     unit={product.unit}
-                    image={product.images?.[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop'}
+                    storeId={product.storeId}
+                    image={(() => {
+                      try {
+                        const imgs = JSON.parse(product.images || '[]');
+                        return imgs[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                      } catch(e) {
+                        return product.images || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                      }
+                    })()}
                   />
                 ))}
               </div>
