@@ -8,19 +8,36 @@ import { ProductCard } from '@/components/ui/ProductCard';
 import { Card } from '@/components/ui/Card';
 
 const RECENT_SEARCHES = ['Riz 5kg', 'Lait', 'Huile', 'Savon'];
-const SUGGESTED_PRODUCTS = [
-  { name: 'Riz Long Grain 5kg', price: 4500, category: 'Épicerie', unit: 'sac', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Lait Entier 1L', price: 850, category: 'Produits Frais', unit: 'brique', image: 'https://images.unsplash.com/photo-1550583724-125581dc228b?q=80&w=400&auto=format&fit=crop' },
-];
-
 function SearchContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
+
+  useEffect(() => {
+    if (query) {
+      const fetchResults = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`/api/products?q=${query}`);
+          const data = await res.json();
+          setResults(data);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchResults();
+    } else {
+      setResults([]);
+    }
+  }, [query]);
 
   return (
     <div className="min-h-screen bg-slate-50 py-8">
@@ -97,11 +114,30 @@ function SearchContent() {
             <p className="text-slate-500">
               Résultats pour &quot;<span className="font-bold text-slate-800">{query}</span>&quot;
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {SUGGESTED_PRODUCTS.map((p, i) => (
-                <ProductCard key={i} {...p} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="h-64 bg-slate-100 animate-pulse rounded-2xl" />
+                ))}
+              </div>
+            ) : results.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {results.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    name={p.name}
+                    price={p.price}
+                    category={p.category}
+                    unit={p.unit}
+                    image={p.images?.[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop'}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center text-slate-400 font-bold">
+                Aucun produit trouvé pour cette recherche.
+              </div>
+            )}
           </div>
         )}
       </div>

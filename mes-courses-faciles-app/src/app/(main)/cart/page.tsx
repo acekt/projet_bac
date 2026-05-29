@@ -9,7 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeFromCart, totalPrice, totalItems } = useCart();
+  const { cart, updateQuantity, removeFromCart, totalPrice, totalItems, deliveryFee } = useCart();
 
   if (cart.length === 0) {
     return (
@@ -116,13 +116,13 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-slate-500">
                   <span>Frais de livraison</span>
-                  <span className="font-bold text-slate-800">2 000 CFA</span>
+                  <span className="font-bold text-slate-800">{deliveryFee.toLocaleString()} CFA</span>
                 </div>
                 <div className="h-px bg-slate-100 my-2" />
                 <div className="flex justify-between items-end">
                   <span className="text-lg font-bold text-slate-800">Total</span>
                   <div className="text-right">
-                    <p className="text-3xl font-black text-brand-primary">{(totalPrice + 2000).toLocaleString()} <span className="text-sm">CFA</span></p>
+                    <p className="text-3xl font-black text-brand-primary">{(totalPrice + deliveryFee).toLocaleString()} <span className="text-sm">CFA</span></p>
                   </div>
                 </div>
               </div>

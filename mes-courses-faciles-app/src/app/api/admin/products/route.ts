@@ -1,24 +1,33 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { productSchema } from '@/lib/validations/schemas';
+import { ZodError } from 'zod';
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const body = await request.json();
+    const validatedData = productSchema.parse(body);
+
     const product = await prisma.product.create({
       data: {
-        name: data.name,
-        description: data.description,
-        price: parseFloat(data.price),
-        category: data.category,
-        unit: data.unit,
-        stock: parseInt(data.stock),
-        images: data.images || [],
-        storeId: data.storeId,
+        name: validatedData.name,
+        description: validatedData.description,
+        price: validatedData.price,
+        category: validatedData.category,
+        unit: validatedData.unit,
+        stock: validatedData.stock,
+        images: validatedData.image, // Assuming we store the single URL for now as per schema string
+        storeId: validatedData.storeId,
       }
     });
     return NextResponse.json(product, { status: 201 });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error('Admin product creation error:', error);
+
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Validation error', details: error.flatten().fieldErrors }, { status: 400 });
+    }
+
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -1,20 +1,23 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { orderSchema } from '@/lib/validations/schemas';
+import { ZodError } from 'zod';
 
 export async function POST(request: Request) {
   try {
-    const { userId, storeId, items, total, deliveryFee, paymentMethod, deliveryAddress } = await request.json();
+    const body = await request.json();
+    const validatedData = orderSchema.parse(body);
 
     const order = await prisma.order.create({
       data: {
-        userId,
-        storeId,
-        total,
-        deliveryFee,
-        paymentMethod,
-        deliveryAddress,
+        userId: validatedData.userId,
+        storeId: validatedData.storeId,
+        total: validatedData.total,
+        deliveryFee: validatedData.deliveryFee,
+        paymentMethod: validatedData.paymentMethod,
+        deliveryAddress: validatedData.deliveryAddress,
         orderItems: {
-          create: items.map((item: { id: string; quantity: number; price: number }) => ({
+          create: validatedData.items.map((item) => ({
             productId: item.id,
             quantity: item.quantity,
             price: item.price,
@@ -24,8 +27,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(order, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Order creation error:', error);
+    if (error instanceof ZodError) {
+       return NextResponse.json({ error: 'Validation échouée', details: error.flatten().fieldErrors }, { status: 400 });
+    }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const storeId = searchParams.get('storeId');
   const category = searchParams.get('category');
+  const query = searchParams.get('q');
 
   try {
     const products = await prisma.product.findMany({
@@ -12,6 +13,13 @@ export async function GET(request: Request) {
         isActive: true,
         ...(storeId && { storeId }),
         ...(category && { category }),
+        ...(query && {
+          OR: [
+            { name: { contains: query } },
+            { description: { contains: query } },
+            { category: { contains: query } },
+          ]
+        })
       },
       include: {
         store: {

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
+import { loginSchema } from '@/lib/validations/schemas';
+import { ZodError } from 'zod';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
-    }
+    const body = await request.json();
+    const validatedData = loginSchema.parse(body);
+    const { email, password } = validatedData;
 
     const user = await prisma.user.findUnique({
       where: { email },
@@ -29,6 +29,11 @@ export async function POST(request: Request) {
     return NextResponse.json(userWithoutPassword, { status: 200 });
   } catch (error: any) {
     console.error('Login error:', error);
+
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: 'Validation échouée', details: error.flatten().fieldErrors }, { status: 400 });
+    }
+
     if (error.code === 'P2024' || error.message.includes('Can\'t reach database server')) {
       return NextResponse.json({ error: 'La base de données est inaccessible. Veuillez vérifier que MySQL est lancé dans XAMPP.' }, { status: 503 });
     }
