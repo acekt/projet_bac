@@ -5,8 +5,10 @@ import { User, Package, MapPin, Heart, Bell, Settings, LogOut, ChevronRight, Sho
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfilePage() {
+  const { user, logout } = useAuth();
   const MENU_ITEMS = [
     { icon: Package, label: 'Mes Commandes', href: '/orders', color: 'text-blue-500 bg-blue-50' },
     { icon: Heart, label: 'Mes Favoris', href: '/favorites', color: 'text-red-500 bg-red-50' },
@@ -21,13 +23,15 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 bg-brand-primary rounded-3xl flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-brand-primary/20">
-            JD
+            {user?.name?.charAt(0) || 'U'}
           </div>
           <div className="space-y-1">
-            <h1 className="text-3xl font-black text-slate-800">Jean Dupont</h1>
-            <p className="text-slate-500 font-medium">jean.dupont@email.com</p>
+            <h1 className="text-3xl font-black text-slate-800">{user?.name}</h1>
+            <p className="text-slate-500 font-medium">{user?.email}</p>
             <div className="flex gap-2 pt-1">
-              <span className="px-2 py-1 bg-brand-accent text-brand-primary text-[10px] font-bold rounded-md uppercase tracking-wider">Membre Gold</span>
+              <span className="px-2 py-1 bg-brand-accent text-brand-primary text-[10px] font-bold rounded-md uppercase tracking-wider">
+                {user?.role === 'ADMIN' ? 'Administrateur' : 'Membre Client'}
+              </span>
             </div>
           </div>
         </div>
@@ -73,7 +77,7 @@ export default function ProfilePage() {
            <ShoppingBag size={120} className="absolute -bottom-10 -right-10 text-white/5 rotate-12" />
         </Card>
 
-        <Button variant="outline" className="w-full h-14 text-red-500 border-red-100 hover:bg-red-50 hover:text-red-600 gap-2 font-bold">
+        <Button onClick={logout} variant="outline" className="w-full h-14 text-red-500 border-red-100 hover:bg-red-50 hover:text-red-600 gap-2 font-bold">
           <LogOut size={20} /> Se déconnecter
         </Button>
       </div>

@@ -125,11 +125,20 @@ function SearchContent() {
                 {results.map((p) => (
                   <ProductCard
                     key={p.id}
+                    id={p.id}
                     name={p.name}
                     price={p.price}
                     category={p.category}
                     unit={p.unit}
-                    image={p.images?.[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop'}
+                    storeId={p.storeId}
+                    image={(() => {
+                      try {
+                        const imgs = JSON.parse(p.images || '[]');
+                        return imgs[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                      } catch(e) {
+                        return p.images || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                      }
+                    })()}
                   />
                 ))}
               </div>

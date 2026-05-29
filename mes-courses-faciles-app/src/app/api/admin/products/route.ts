@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         category: validatedData.category,
         unit: validatedData.unit,
         stock: validatedData.stock,
-        images: validatedData.image, // Assuming we store the single URL for now as per schema string
+        images: JSON.stringify([validatedData.image]),
         storeId: validatedData.storeId,
       }
     });
