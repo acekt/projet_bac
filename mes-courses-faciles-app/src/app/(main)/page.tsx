@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import Image from 'next/image';
 import { StoreCard } from '@/components/ui/StoreCard';
 import { Button } from '@/components/ui/Button';
@@ -6,24 +6,51 @@ import { ShoppingBag, Truck, ShieldCheck, Zap } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { PageWrapper } from '@/components/common/PageWrapper';
+import { StoreSkeleton } from '@/components/common/Skeletons';
 
-async function getStores() {
-  try {
-    const stores = await prisma.store.findMany({
-      where: { isActive: true },
-      take: 4,
-    });
-    return stores;
-  } catch (e) {
-    console.error(e);
-    return [];
+async function StoreList() {
+  const stores = await prisma.store.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      name: true,
+      logo: true,
+      address: true,
+    },
+    take: 4,
+  });
+
+  if (stores.length === 0) {
+    return (
+      <div className="col-span-full p-12 bg-red-50 border-2 border-red-100 rounded-[2rem] text-center space-y-4">
+        <h3 className="text-xl font-bold text-red-600">Oups ! Les magasins sont temporairement inaccessibles</h3>
+        <p className="text-red-500 max-w-md mx-auto font-medium">Nous rencontrons un problème de connexion à notre base de données. Veuillez vérifier que votre serveur MySQL est bien lancé dans XAMPP.</p>
+        <Link href="/">
+          <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-100">Réessayer</Button>
+        </Link>
+      </div>
+    );
   }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {stores.map((store) => (
+        <StoreCard
+          key={store.id}
+          id={store.id}
+          name={store.name}
+          image={store.logo || ''}
+          location={store.address}
+          rating={4.5}
+          deliveryTime="30-45 min"
+          categories={['Alimentation', 'Hygiène']}
+        />
+      ))}
+    </div>
+  );
 }
 
 export default async function HomePage() {
-  const stores = await getStores();
-  const dbError = stores.length === 0;
-
   return (
     <PageWrapper>
     <div className="flex flex-col gap-12 pb-20">
@@ -89,35 +116,20 @@ export default async function HomePage() {
             <h2 className="text-3xl font-extrabold text-slate-800">Magasins Partenaires</h2>
             <p className="text-slate-500">Choisissez votre magasin habituel pour commencer.</p>
           </div>
-          <Button variant="ghost" className="hidden sm:flex items-center gap-2">
-            Voir tous les magasins
-          </Button>
+          <Link href="/search?type=stores">
+            <Button variant="ghost" className="hidden sm:flex items-center gap-2">
+              Voir tous les magasins
+            </Button>
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {dbError ? (
-            <div className="col-span-full p-12 bg-red-50 border-2 border-red-100 rounded-[2rem] text-center space-y-4">
-              <h3 className="text-xl font-bold text-red-600">Oups ! Les magasins sont temporairement inaccessibles</h3>
-              <p className="text-red-500 max-w-md mx-auto font-medium">Nous rencontrons un problème de connexion à notre base de données. Veuillez vérifier que votre serveur MySQL est bien lancé dans XAMPP.</p>
-              <Link href="/">
-                <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-100">Réessayer</Button>
-              </Link>
-            </div>
-          ) : (
-            stores.map((store) => (
-              <StoreCard
-                 key={store.id}
-                 id={store.id}
-                 name={store.name}
-                 image={store.logo || ''}
-                 location={store.address}
-                 rating={4.5}
-                 deliveryTime="30-45 min"
-                 categories={['Alimentation', 'Hygiène']}
-              />
-            ))
-          )}
-        </div>
+        <Suspense fallback={
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[1,2,3,4].map(i => <StoreSkeleton key={i} />)}
+          </div>
+        }>
+          <StoreList />
+        </Suspense>
       </section>
 
       {/* Promotional Banner */}

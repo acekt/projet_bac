@@ -48,8 +48,10 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     try {
+      if (!user?.id) throw new Error("Utilisateur non connecté");
+
       const res = await createOrderAction({
-        userId: user?.id,
+        userId: user.id,
         storeId: cart[0]?.storeId || 'default',
         items: cart.map(item => ({
           id: item.id,
@@ -58,7 +60,7 @@ export default function CheckoutPage() {
         })),
         total: finalTotal,
         deliveryFee,
-        paymentMethod,
+        paymentMethod: paymentMethod as any,
         deliveryAddress: `${deliveryData.address} - ${deliveryData.indications} (${deliveryData.phone})`
       });
 

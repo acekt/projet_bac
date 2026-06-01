@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Plus, Trash2, Edit2, Loader2, Package } from 'lucide-react';
 import { createProductAction } from '@/actions/ecommerce';
+import { Product as ProductType, Store as StoreType } from '@/types';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Record<string, any>[]>([]);
-  const [stores, setStores] = useState<Record<string, any>[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [stores, setStores] = useState<StoreType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -40,7 +41,7 @@ export default function AdminProductsPage() {
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const res = await createProductAction(data);
+      const res = await createProductAction(data as any);
       if (res.success) {
         setShowForm(false);
         fetchData();

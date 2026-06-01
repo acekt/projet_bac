@@ -14,6 +14,7 @@
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "clsx": "^2.1.1",
+    "cookies-next": "^6.1.1",
     "dotenv": "^16.4.7",
     "framer-motion": "^12.40.0",
     "lucide-react": "^0.475.0",

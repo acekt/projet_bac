@@ -8,11 +8,13 @@ import { ProductCard } from '@/components/ui/ProductCard';
 import { Card } from '@/components/ui/Card';
 
 const RECENT_SEARCHES = ['Riz 5kg', 'Lait', 'Huile', 'Savon'];
+import { Product as ProductType } from '@/types';
+
 function SearchContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -129,7 +131,7 @@ function SearchContent() {
                     name={p.name}
                     price={p.price}
                     category={p.category}
-                    unit={p.unit}
+                    unit={p.unit || 'unité'}
                     storeId={p.storeId}
                     image={(() => {
                       try {

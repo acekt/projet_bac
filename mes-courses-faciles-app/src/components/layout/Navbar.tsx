@@ -11,7 +11,7 @@ export const Navbar = () => {
   const { totalItems } = useCart();
   const { user, logout, isAuthenticated } = useAuth();
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <header className="sticky top-0 z-40 w-full glass border-b border-white/20">
       <div className="container mx-auto px-4 h-16 lg:h-20 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
