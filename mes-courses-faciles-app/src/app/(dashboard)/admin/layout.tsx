@@ -76,7 +76,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-white/10">
-             <button className="flex items-center gap-4 w-full px-4 py-3.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all">
+             <button
+               onClick={() => {
+                 localStorage.removeItem('mcf_user');
+                 window.location.href = '/';
+               }}
+               className="flex items-center gap-4 w-full px-4 py-3.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
+             >
                <LogOut size={22} />
                {isSidebarOpen && <span className="font-medium">Déconnexion</span>}
              </button>

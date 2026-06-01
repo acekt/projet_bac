@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { PageWrapper } from '@/components/common/PageWrapper';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -33,6 +34,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (!product) return <div className="min-h-screen flex items-center justify-center text-xl font-bold">Produit non trouvé</div>;
 
   return (
+    <PageWrapper>
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumbs */}
@@ -182,5 +184,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         </div>
       </div>
     </div>
+    </PageWrapper>
   );
 }

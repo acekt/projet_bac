@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { ShoppingBag, Truck, ShieldCheck, Zap } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import { PageWrapper } from '@/components/common/PageWrapper';
 
 async function getStores() {
   try {
@@ -24,6 +25,7 @@ export default async function HomePage() {
   const dbError = stores.length === 0;
 
   return (
+    <PageWrapper>
     <div className="flex flex-col gap-12 pb-20">
       {/* Hero Section */}
       <section className="relative h-[500px] lg:h-[600px] flex items-center overflow-hidden">
@@ -153,5 +155,6 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+    </PageWrapper>
   );
 }

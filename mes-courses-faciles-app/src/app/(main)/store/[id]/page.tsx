@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { Button } from '@/components/ui/Button';
 import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { PageWrapper } from '@/components/common/PageWrapper';
 
 const CATEGORIES = [
   'Tous', 'Alimentaire', 'Nettoyage', 'Hygiène', 'Bébé', 'Boissons'
@@ -37,6 +38,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   }, [resolvedParams.id, activeCategory]);
 
   return (
+    <PageWrapper>
     <div className="min-h-screen bg-slate-50">
       {/* Store Header */}
       <div className="bg-white border-b border-slate-200 sticky top-16 md:top-20 z-30">
@@ -178,5 +180,6 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
         </div>
       </div>
     </div>
+    </PageWrapper>
   );
 }
