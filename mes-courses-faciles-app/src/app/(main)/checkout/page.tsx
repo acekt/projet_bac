@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createOrderAction } from '@/actions/ecommerce';
 
 type Step = 'delivery' | 'payment' | 'confirmation';
 
@@ -46,33 +47,28 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          storeId: cart[0]?.storeId || 'default',
-          items: cart.map(item => ({
-            id: item.id,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          total: finalTotal,
-          deliveryFee,
-          paymentMethod,
-          deliveryAddress: `${deliveryData.address} - ${deliveryData.indications} (${deliveryData.phone})`
-        })
+      const res = await createOrderAction({
+        userId: user?.id,
+        storeId: cart[0]?.storeId || 'default',
+        items: cart.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        total: finalTotal,
+        deliveryFee,
+        paymentMethod,
+        deliveryAddress: `${deliveryData.address} - ${deliveryData.indications} (${deliveryData.phone})`
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur lors de la commande');
+      if (!res.success) throw new Error(res.error || 'Erreur lors de la commande');
 
-      setOrderId(data.id);
+      setOrderId(res.id as string);
       setStep('confirmation');
       clearCart();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert('Une erreur est survenue lors de la validation de votre commande.');
+      alert(e.message || 'Une erreur est survenue lors de la validation de votre commande.');
     } finally {
       setLoading(false);
     }

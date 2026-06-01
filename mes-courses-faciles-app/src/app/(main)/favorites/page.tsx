@@ -7,9 +7,9 @@ import { ProductCard } from '@/components/ui/ProductCard';
 import Link from 'next/link';
 
 const FAVORITES = [
-  { name: 'Riz Long Grain 5kg', price: 4500, category: 'Épicerie', unit: 'sac', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Lait Entier 1L', price: 850, category: 'Produits Frais', unit: 'brique', image: 'https://images.unsplash.com/photo-1550583724-125581dc228b?q=80&w=400&auto=format&fit=crop' },
-  { name: 'Huile de Tournesol 1L', price: 1200, category: 'Épicerie', unit: 'bouteille', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbadb8c5?q=80&w=400&auto=format&fit=crop' },
+  { id: '1', storeId: 'mbolo', name: 'Riz Long Grain 5kg', price: 4500, category: 'Épicerie', unit: 'sac', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop' },
+  { id: '2', storeId: 'mbolo', name: 'Lait Entier 1L', price: 850, category: 'Produits Frais', unit: 'brique', image: 'https://images.unsplash.com/photo-1550583724-125581dc228b?q=80&w=400&auto=format&fit=crop' },
+  { id: '3', storeId: 'mbolo', name: 'Huile de Tournesol 1L', price: 1200, category: 'Épicerie', unit: 'bouteille', image: 'https://images.unsplash.com/photo-1474979266404-7eaacbadb8c5?q=80&w=400&auto=format&fit=crop' },
 ];
 
 export default function FavoritesPage() {

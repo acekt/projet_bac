@@ -56,6 +56,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                  })()}
                  alt={product.name}
                  fill
+                 priority
                  className="object-contain p-12"
                />
                <button className="absolute top-6 right-6 h-12 w-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors">
