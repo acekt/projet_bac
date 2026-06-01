@@ -7,6 +7,7 @@ import { Mail, Lock, User, Phone, ArrowRight, ShoppingCart, Loader2 } from 'luci
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { registerAction } from '@/actions/auth';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,20 +24,19 @@ export default function RegisterPage() {
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+      const res = await registerAction(data);
+
+      if (!res.success || !res.user) throw new Error(res.error || 'Erreur lors de l\'inscription');
+
+      login({
+        id: res.user.id,
+        email: res.user.email,
+        name: res.user.name || 'Nouvel Utilisateur',
+        role: res.user.role
       });
-
-      const userData = await res.json();
-
-      if (!res.ok) throw new Error(userData.error || 'Erreur lors de l\'inscription');
-
-      login(userData);
       router.push('/');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }

@@ -13,21 +13,20 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (user) {
-      fetchOrders();
+      const loadOrders = async () => {
+        try {
+          const res = await fetch(`/api/orders?userId=${user?.id}`);
+          const data = await res.json();
+          setOrders(data);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadOrders();
     }
   }, [user]);
-
-  const fetchOrders = async () => {
-    try {
-      const res = await fetch(`/api/orders?userId=${user?.id}`);
-      const data = await res.json();
-      setOrders(data);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>;
 

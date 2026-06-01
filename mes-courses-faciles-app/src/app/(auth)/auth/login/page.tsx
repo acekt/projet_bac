@@ -7,6 +7,7 @@ import { Mail, Lock, ArrowRight, ShoppingCart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { loginAction } from '@/actions/auth';
 
 function LoginForm() {
   const router = useRouter();
@@ -27,26 +28,25 @@ function LoginForm() {
     const password = formData.get('password');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const res = await loginAction({ email, password });
+
+      if (!res.success || !res.user) throw new Error(res.error || 'Erreur lors de la connexion');
+
+      login({
+        id: res.user.id,
+        email: res.user.email,
+        name: res.user.name || 'Utilisateur',
+        role: res.user.role
       });
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || 'Erreur lors de la connexion');
-
-      login(data);
-
       // Dynamic redirection based on role
-      if (data.role === 'ADMIN') {
+      if (res.user.role === 'ADMIN') {
         router.push('/admin');
       } else {
         router.push(callbackUrl);
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }

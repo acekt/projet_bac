@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Plus, Trash2, Edit2, Loader2, Package } from 'lucide-react';
+import { createProductAction } from '@/actions/ecommerce';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Record<string, any>[]>([]);
@@ -39,20 +40,16 @@ export default function AdminProductsPage() {
     const data = Object.fromEntries(formData.entries());
 
     try {
-      const res = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          images: [data.image]
-        })
-      });
-      if (res.ok) {
+      const res = await createProductAction(data);
+      if (res.success) {
         setShowForm(false);
         fetchData();
+      } else {
+        alert(res.error);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message);
     } finally {
       setSubmitting(false);
     }
