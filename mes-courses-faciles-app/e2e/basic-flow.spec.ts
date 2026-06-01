@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('navigation and cart workflow', async ({ page }) => {
   // Go to homepage
   await page.goto('/');
-  await expect(page).toHaveTitle(/Mes Achats 241/);
+  await expect(page).toHaveTitle(/Mes Courses Faciles/);
 
   // Check if stores are displayed (at least one)
   const storeCards = page.locator('a[href^="/store/"]');
