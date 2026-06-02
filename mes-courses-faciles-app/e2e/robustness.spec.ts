@@ -1,17 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Robustness and Navigation', () => {
-  test('Graceful failure or Store Display based on DB state', async ({ page }) => {
+  test('Graceful failure when DB is down', async ({ page }) => {
     await page.goto('/');
 
+    // We expect the error message we implemented earlier
     const dbAlert = page.locator('text=temporairement inaccessibles');
-    const storeHeader = page.locator('text=Magasins Partenaires');
+    await expect(dbAlert).toBeVisible();
 
-    // Make the test resilient by accepting either normal display or DB alert
-    const isDbAlertVisible = await dbAlert.isVisible();
-    const isStoreHeaderVisible = await storeHeader.isVisible();
-
-    expect(isDbAlertVisible || isStoreHeaderVisible).toBe(true);
+    const retryBtn = page.locator('button:has-text("Réessayer")');
+    await expect(retryBtn).toBeVisible();
   });
 
   test('Authentication redirect remains functional', async ({ page }) => {

@@ -40,7 +40,7 @@ describe('AuthContext', () => {
     expect(result.current.user).toBeNull();
   });
 
-  it('should login and save to localStorage', () => {
+  it('should login', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     const user = { id: '1', email: 'test@example.com', name: 'Test User', role: 'CLIENT' };
 
@@ -50,10 +50,9 @@ describe('AuthContext', () => {
 
     expect(result.current.isAuthenticated).toBe(true);
     expect(result.current.user).toEqual(user);
-    expect(localStorage.getItem('mcf_user')).toBe(JSON.stringify(user));
   });
 
-  it('should logout and clear localStorage', () => {
+  it('should logout', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
     const user = { id: '1', email: 'test@example.com', name: 'Test User', role: 'CLIENT' };
 
@@ -67,6 +66,5 @@ describe('AuthContext', () => {
 
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.user).toBeNull();
-    expect(localStorage.getItem('mcf_user')).toBeNull();
   });
 });

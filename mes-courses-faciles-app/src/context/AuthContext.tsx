@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { setCookie, deleteCookie, getCookie } from 'cookies-next/client';
 
 interface User {
   id: string;
@@ -20,19 +21,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const PROTECTED_ROUTES = ['/profile', '/checkout', '/favorites', '/admin'];
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('mcf_user');
+    const savedUser = getCookie('mcf_user_session');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        setUser(JSON.parse(savedUser as string));
       } catch (e) {
         console.error("Failed to parse user", e);
       }
@@ -40,23 +38,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading) {
-      const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname?.startsWith(route));
-      if (isProtectedRoute && !user) {
-        router.push(`/auth/login?callbackUrl=${pathname}`);
-      }
-    }
-  }, [user, pathname, isLoading, router]);
-
   const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem('mcf_user', JSON.stringify(userData));
+    setCookie('mcf_user_session', JSON.stringify(userData), { maxAge: 60 * 60 * 24 * 7 }); // 1 week
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('mcf_user');
+    deleteCookie('mcf_user_session');
     router.push('/');
   };
 

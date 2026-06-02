@@ -16,7 +16,7 @@ export const Button = ({
   isLoading,
   className = '',
   ...props
-}: any) => {
+}: ButtonProps) => {
   const baseStyles = "inline-flex items-center justify-center rounded-xl font-semibold transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none";
 
   const variants: Record<string, string> = {
@@ -37,13 +37,13 @@ export const Button = ({
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.98 }}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
-      disabled={isLoading}
-      {...props}
+      disabled={isLoading || (props.disabled as boolean)}
+      {...(props as any)}
     >
       {isLoading ? (
         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
       ) : null}
-      {children}
+      {children as React.ReactNode}
     </motion.button>
   );
 };

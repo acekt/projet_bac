@@ -58,3 +58,23 @@ body {
 .animate-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
+
+/* Glassmorphism Classes */
+.glass {
+  @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-xl;
+}
+
+.glass-dark {
+  @apply bg-slate-900/70 backdrop-blur-lg border border-white/10 shadow-xl;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}

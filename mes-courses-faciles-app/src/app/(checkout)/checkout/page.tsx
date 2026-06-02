@@ -22,6 +22,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createOrderAction } from '@/actions/ecommerce';
+import { PageWrapper } from '@/components/common/PageWrapper';
 
 type Step = 'delivery' | 'payment' | 'confirmation';
 
@@ -47,8 +48,10 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setLoading(true);
     try {
+      if (!user?.id) throw new Error("Utilisateur non connecté");
+
       const res = await createOrderAction({
-        userId: user?.id,
+        userId: user.id,
         storeId: cart[0]?.storeId || 'default',
         items: cart.map(item => ({
           id: item.id,
@@ -57,7 +60,7 @@ export default function CheckoutPage() {
         })),
         total: finalTotal,
         deliveryFee,
-        paymentMethod,
+        paymentMethod: paymentMethod as any,
         deliveryAddress: `${deliveryData.address} - ${deliveryData.indications} (${deliveryData.phone})`
       });
 
@@ -110,14 +113,9 @@ export default function CheckoutPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-12 pb-24">
+    <PageWrapper>
+    <div className="bg-slate-50 pt-12 pb-24">
       <div className="container mx-auto px-4 max-w-5xl">
-        <div className="mb-8">
-           <Link href="/cart" className="text-slate-500 flex items-center gap-2 font-bold hover:text-brand-primary transition-colors">
-             <ArrowLeft size={20} /> Retour au panier
-           </Link>
-        </div>
-
         {renderStepIndicator()}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -291,5 +289,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </PageWrapper>
   );
 }

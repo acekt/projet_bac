@@ -3,8 +3,9 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { orderSchema, productSchema } from "@/lib/validations/schemas";
+import { z } from "zod";
 
-export async function createOrderAction(data: any) {
+export async function createOrderAction(data: z.infer<typeof orderSchema>) {
   try {
     const validated = orderSchema.parse(data);
     const order = await prisma.order.create({
@@ -32,7 +33,7 @@ export async function createOrderAction(data: any) {
   }
 }
 
-export async function createProductAction(data: any) {
+export async function createProductAction(data: z.infer<typeof productSchema>) {
   try {
     const validated = productSchema.parse(data);
     const product = await prisma.product.create({
