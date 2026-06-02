@@ -7,12 +7,13 @@ import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { PageWrapper } from '@/components/common/PageWrapper';
+import { Product as ProductType } from '@/types';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [product, setProduct] = useState<Record<string, any> | null>(null);
+  const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,11 +70,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               {(() => {
                 try {
                   const imgs = JSON.parse(product.images || '[]');
-                  return imgs.length > 0 ? imgs : [product.image];
+                  return imgs.length > 0 ? imgs : [null];
                 } catch(e) {
                   return [product.images];
                 }
-              })().map((img: string, i: number) => (
+              })().map((img: string | null, i: number) => (
                 <div key={i} className={`relative aspect-square rounded-2xl bg-slate-50 border-2 transition-all cursor-pointer ${i === 0 ? 'border-brand-primary' : 'border-transparent hover:border-slate-200'}`}>
                   <Image src={img || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop'} alt="" fill className="object-contain p-2" />
                 </div>
@@ -149,7 +150,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       name: product.name,
                       price: product.price,
                       category: product.category,
-                      unit: product.unit,
+                      unit: product.unit || 'unité',
                       image: (() => {
                         try {
                           const imgs = JSON.parse(product.images || '[]');

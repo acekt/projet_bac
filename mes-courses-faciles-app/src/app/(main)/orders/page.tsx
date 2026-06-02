@@ -5,28 +5,28 @@ import { useAuth } from '@/context/AuthContext';
 import { Card } from '@/components/ui/Card';
 import { Package, Truck, CheckCircle2, Clock, ChevronRight, Loader2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { Order as OrderType } from '@/types';
 
 export default function OrdersPage() {
   const { user } = useAuth();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      const loadOrders = async () => {
-        try {
-          const res = await fetch(`/api/orders?userId=${user?.id}`);
-          const data = await res.json();
-          setOrders(data);
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadOrders();
-    }
-  }, [user]);
+    const loadOrders = async () => {
+      if (!user?.id) return;
+      try {
+        const res = await fetch(`/api/orders?userId=${user.id}`);
+        const data = await res.json();
+        setOrders(data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadOrders();
+  }, [user?.id]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>;
 

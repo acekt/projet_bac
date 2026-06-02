@@ -47,15 +47,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart]);
 
   const addToCart = (product: Omit<CartItem, 'quantity'>) => {
-    setCart(prevCart => {
-      // Check if product from another store
-      if (prevCart.length > 0 && product.storeId && prevCart[0].storeId !== product.storeId) {
-        if (!confirm("Votre panier contient déjà des articles d'un autre magasin. Voulez-vous vider votre panier pour ajouter cet article ?")) {
-          return prevCart;
-        }
-        return [{ ...product, quantity: 1 }];
-      }
+    // Handling store conflict before state update to avoid window.confirm in state updater
+    const isDifferentStore = cart.length > 0 && product.storeId && cart[0].storeId !== product.storeId;
 
+    if (isDifferentStore) {
+      const shouldEmpty = window.confirm("Votre panier contient déjà des articles d'un autre magasin. Voulez-vous vider votre panier pour ajouter cet article ?");
+      if (!shouldEmpty) return;
+
+      setCart([{ ...product, quantity: 1 }]);
+      return;
+    }
+
+    setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
 
       if (existingItem) {
