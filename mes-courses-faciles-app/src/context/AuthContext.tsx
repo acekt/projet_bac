@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { setCookie, deleteCookie, getCookie } from 'cookies-next';
+import { useRouter } from 'next/navigation';
+import { setCookie, deleteCookie, getCookie } from 'cookies-next/client';
 
 interface User {
   id: string;
@@ -20,8 +20,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const PROTECTED_ROUTES = ['/profile', '/checkout', '/favorites', '/admin'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
