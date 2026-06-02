@@ -156,8 +156,20 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
-                      <button className="p-2 text-slate-400 hover:text-brand-primary transition-colors"><Edit2 size={18} /></button>
-                      <button className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                      <button 
+                        onClick={() => alert('Fonctionnalité de modification à implémenter')}
+                        className="p-2 text-slate-400 hover:text-brand-primary transition-colors"
+                        title="Modifier"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button 
+                        onClick={() => alert('Fonctionnalité de suppression à implémenter')}
+                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                        title="Supprimer"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
                   </td>
                 </tr>
