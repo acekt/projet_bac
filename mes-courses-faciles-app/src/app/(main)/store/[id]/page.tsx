@@ -42,7 +42,6 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
-      <Navbar />
     <PageWrapper>
     <div className="flex-grow">
       {/* Store Header */}
