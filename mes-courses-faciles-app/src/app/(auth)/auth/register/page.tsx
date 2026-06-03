@@ -26,7 +26,23 @@ export default function RegisterPage() {
     try {
       const res = await registerAction(data);
 
-      if (!res.success || !res.user) throw new Error(res.error || 'Erreur lors de l\'inscription');
+      if (!res.success || !res.user) {
+        let errorMessage = res.error || 'Erreur lors de l\'inscription';
+
+        // Handle Zod JSON error string
+        if (errorMessage.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(errorMessage);
+            if (Array.isArray(parsed) && parsed[0]?.message) {
+              errorMessage = parsed[0].message;
+            }
+          } catch (e) {
+            // Keep original if parsing fails
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
 
       login({
         id: res.user.id,

@@ -4,9 +4,11 @@ import React, { useState, use, useEffect } from 'react';
 import Image from 'next/image';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { Button } from '@/components/ui/Button';
-import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal, Loader2, PackageX } from 'lucide-react';
 import { PageWrapper } from '@/components/common/PageWrapper';
 import { Product as ProductType } from '@/types';
+import { ProductSkeleton } from '@/components/common/Skeletons';
+import { Navbar } from '@/components/layout/Navbar';
 
 const CATEGORIES = [
   'Tous', 'Alimentaire', 'Nettoyage', 'Hygiène', 'Bébé', 'Boissons'
@@ -39,8 +41,10 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   }, [resolvedParams.id, activeCategory]);
 
   return (
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <Navbar />
     <PageWrapper>
-    <div className="min-h-screen bg-slate-50">
+    <div className="flex-grow">
       {/* Store Header */}
       <div className="bg-white border-b border-slate-200 sticky top-16 md:top-20 z-30">
         <div className="container mx-auto px-4 py-6">
@@ -145,8 +149,23 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {loading ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="animate-spin text-brand-primary" size={48} />
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <ProductSkeleton key={i} />
+                ))}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-32 space-y-4 bg-white rounded-[2.5rem] border border-slate-100">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-300">
+                  <PackageX size={40} />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-slate-800">Aucun produit trouvé</h3>
+                  <p className="text-slate-500">Essayez de changer de catégorie ou de filtre.</p>
+                </div>
+                <Button variant="outline" onClick={() => setActiveCategory('Tous')}>
+                  Voir tous les produits
+                </Button>
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -182,5 +201,6 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
       </div>
     </div>
     </PageWrapper>
+    </div>
   );
 }
