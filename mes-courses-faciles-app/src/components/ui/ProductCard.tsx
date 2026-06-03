@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Card } from './Card';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart, Package } from 'lucide-react';
 import { Button } from './Button';
 import { useCart } from '@/context/CartContext';
 
@@ -17,6 +17,9 @@ interface ProductCardProps {
 
 export const ProductCard = ({ id, name, price, image, category, unit, storeId }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const [imgError, setImgError] = useState(false);
+
+  const fallbackImage = "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop";
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -26,13 +29,21 @@ export const ProductCard = ({ id, name, price, image, category, unit, storeId }:
 
   return (
     <Card className="group">
-      <div className="relative h-44 w-full bg-slate-50 p-4">
-        <Image
-          src={image}
-          alt={name}
-          fill
-          className="object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
-        />
+      <div className="relative h-44 w-full bg-slate-50 p-4 overflow-hidden">
+        {(!image || imgError) ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-slate-300">
+             <Package size={48} strokeWidth={1} />
+             <span className="text-[10px] font-bold uppercase tracking-tighter mt-2">Image indisponible</span>
+          </div>
+        ) : (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="object-contain p-4 mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+            onError={() => setImgError(true)}
+          />
+        )}
         <button
           onClick={handleAdd}
           className="absolute top-3 right-3 h-10 w-10 bg-white rounded-full shadow-md flex items-center justify-center text-brand-primary hover:bg-brand-primary hover:text-white transition-all active:scale-90"
