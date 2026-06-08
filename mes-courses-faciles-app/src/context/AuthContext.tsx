@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { setCookie, deleteCookie, getCookie } from 'cookies-next/client';
+import { logoutAction } from '@/actions/auth';
 
 interface User {
   id: string;
@@ -27,10 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const savedUser = getCookie('mcf_user_session');
+    // Keep user state in local storage since the secure JWT is http-only
+    const savedUser = localStorage.getItem('mcf_user_data');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser as string));
+        setUser(JSON.parse(savedUser));
       } catch (e) {
         console.error("Failed to parse user", e);
       }
@@ -40,12 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (userData: User) => {
     setUser(userData);
-    setCookie('mcf_user_session', JSON.stringify(userData), { maxAge: 60 * 60 * 24 * 7 }); // 1 week
+    localStorage.setItem('mcf_user_data', JSON.stringify(userData));
+    // Note: The secure mcf_jwt_session cookie is set by the server action / API
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    deleteCookie('mcf_user_session');
+    localStorage.removeItem('mcf_user_data');
+    await logoutAction();
     router.push('/');
   };
 

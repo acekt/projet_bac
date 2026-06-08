@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 import { userSchema } from '@/lib/validations/schemas';
 import { ZodError } from 'zod';
+import { signJWT } from '@/lib/jwt';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +34,21 @@ export async function POST(request: Request) {
     });
 
     const { password: _password, ...userWithoutPassword } = user;
+
+    const token = await signJWT({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    });
+
+    const cookieStore = await cookies();
+    cookieStore.set('mcf_jwt_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/',
+    });
 
     return NextResponse.json(userWithoutPassword, { status: 201 });
   } catch (error: any) {

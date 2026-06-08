@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifyJWT } from '@/lib/jwt';
 
-export function middleware(request: NextRequest) {
-  const user = request.cookies.get('mcf_user_session')?.value;
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('mcf_jwt_session')?.value;
   const { pathname } = request.nextUrl;
 
   const PROTECTED_ROUTES = [
@@ -21,21 +22,31 @@ export function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   const isAdminRoute = ADMIN_ROUTES.some(route => pathname.startsWith(route));
 
-  if (isProtectedRoute && !user) {
+  if (isProtectedRoute && !token) {
     const url = request.nextUrl.clone();
     url.pathname = '/auth/login';
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }
 
-  if (isAdminRoute && user) {
-    try {
-      const userData = JSON.parse(user);
-      if (userData.role !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/', request.url));
-      }
-    } catch (e) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
+  let decodedToken = null;
+  if (token) {
+      decodedToken = await verifyJWT(token);
+  }
+
+  if (isProtectedRoute && !decodedToken) {
+     const url = request.nextUrl.clone();
+     url.pathname = '/auth/login';
+     url.searchParams.set('callbackUrl', pathname);
+     // remove invalid cookie
+     const response = NextResponse.redirect(url);
+     response.cookies.delete('mcf_jwt_session');
+     return response;
+  }
+
+  if (isAdminRoute && decodedToken) {
+    if (decodedToken.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import { useAuth } from './AuthContext';
+import { syncCartAction, fetchUserCartAction } from '@/actions/ecommerce';
 
 export interface CartItem {
   id: string;
@@ -28,23 +30,64 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const { user } = useAuth();
+  const isInitialMount = useRef(true);
+  const isSyncingFromServer = useRef(false);
 
-  // Load cart from localStorage on mount
+  // Load cart from server if logged in, otherwise from localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem('mcf_cart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error("Failed to load cart", e);
+    const loadCart = async () => {
+      if (user) {
+        isSyncingFromServer.current = true;
+        const res = await fetchUserCartAction(user.id);
+        if (res.success && res.cart && res.cart.length > 0) {
+          setCart(res.cart as CartItem[]);
+          localStorage.setItem('mcf_cart', JSON.stringify(res.cart));
+        } else {
+           // If server cart is empty but local is not, we should probably sync local to server
+           const savedCart = localStorage.getItem('mcf_cart');
+           if (savedCart) {
+              const parsed = JSON.parse(savedCart);
+              setCart(parsed);
+              if (parsed.length > 0) {
+                 await syncCartAction(user.id, parsed);
+              }
+           }
+        }
+        setTimeout(() => { isSyncingFromServer.current = false; }, 100);
+      } else {
+        const savedCart = localStorage.getItem('mcf_cart');
+        if (savedCart) {
+          try {
+            setCart(JSON.parse(savedCart));
+          } catch (e) {
+            console.error("Failed to load cart", e);
+          }
+        }
       }
-    }
-  }, []);
+    };
 
-  // Save cart to localStorage whenever it changes
+    loadCart();
+  }, [user]);
+
+  // Sync to server and localStorage when cart changes
   useEffect(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+    }
+
+    if (isSyncingFromServer.current) {
+        return;
+    }
+
     localStorage.setItem('mcf_cart', JSON.stringify(cart));
-  }, [cart]);
+
+    if (user) {
+        // Debounce or directly sync
+        syncCartAction(user.id, cart).catch(e => console.error("Failed to sync cart", e));
+    }
+  }, [cart, user]);
 
   const addToCart = (product: Omit<CartItem, 'quantity'>) => {
     // Handling store conflict before state update to avoid window.confirm in state updater

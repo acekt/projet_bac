@@ -15,6 +15,15 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Mot de passe requis"),
 });
 
+export const storeSchema = z.object({
+  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  address: z.string().min(5, "L'adresse est requise"),
+  district: z.string().min(2, "Le quartier est requis"),
+  phone: z.string().regex(/^\+?[0-9\s-]{8,20}$/, "Format de téléphone invalide"),
+  description: z.string().optional(),
+  logo: z.string().url("URL d'image invalide").optional().or(z.literal('')),
+});
+
 export const productSchema = z.object({
   name: z.string().min(2, "Nom trop court"),
   price: z.coerce.number().positive("Le prix doit être positif"),
