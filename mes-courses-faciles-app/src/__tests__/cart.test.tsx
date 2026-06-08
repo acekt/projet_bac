@@ -1,7 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { CartProvider, useCart } from '../context/CartContext';
+import { AuthProvider } from '../context/AuthContext';
 import React from 'react';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -22,7 +31,9 @@ describe('CartContext', () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <CartProvider>{children}</CartProvider>
+    <AuthProvider>
+        <CartProvider>{children}</CartProvider>
+    </AuthProvider>
   );
 
   it('should start with an empty cart', () => {

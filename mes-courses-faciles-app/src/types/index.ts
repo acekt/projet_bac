@@ -1,3 +1,13 @@
+export interface User {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  role: 'CLIENT' | 'ADMIN';
+  createdAt: Date;
+}
+
 export interface Store {
   id: string;
   name: string;

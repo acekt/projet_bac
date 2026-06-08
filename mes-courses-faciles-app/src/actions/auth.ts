@@ -3,6 +3,8 @@
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { loginSchema, userSchema } from "@/lib/validations/schemas";
+import { signJWT } from "@/lib/jwt";
+import { cookies } from "next/headers";
 
 export async function loginAction(data: any) {
   try {
@@ -17,6 +19,24 @@ export async function loginAction(data: any) {
     if (!match) return { success: false, error: "Identifiants invalides" };
 
     const { password, ...userWithoutPassword } = user;
+
+    // Create JWT token
+    const token = await signJWT({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    });
+
+    // Set cookie
+    const cookieStore = await cookies();
+    cookieStore.set('mcf_jwt_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/',
+    });
+
     return { success: true, user: userWithoutPassword };
   } catch (e: any) {
     if (e.message?.includes("Can't reach database")) {
@@ -24,6 +44,16 @@ export async function loginAction(data: any) {
     }
     return { success: false, error: e.message };
   }
+}
+
+export async function logoutAction() {
+    try {
+        const cookieStore = await cookies();
+        cookieStore.delete('mcf_jwt_session');
+        return { success: true };
+    } catch (e: any) {
+        return { success: false, error: e.message };
+    }
 }
 
 export async function registerAction(data: any) {
@@ -46,6 +76,24 @@ export async function registerAction(data: any) {
     });
 
     const { password, ...userWithoutPassword } = user;
+
+    // Create JWT token
+    const token = await signJWT({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    });
+
+    // Set cookie
+    const cookieStore = await cookies();
+    cookieStore.set('mcf_jwt_session', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      path: '/',
+    });
+
     return { success: true, user: userWithoutPassword };
   } catch (e: any) {
     return { success: false, error: e.message };

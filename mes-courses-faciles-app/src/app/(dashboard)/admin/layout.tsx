@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Settings,
   BarChart3,
+  Store,
   Menu,
   X,
   LogOut,
@@ -19,6 +20,7 @@ import {
 
 const MENU_ITEMS = [
   { icon: LayoutDashboard, label: 'Vue d\'ensemble', href: '/admin' },
+  { icon: Store, label: 'Magasins', href: '/admin/stores' },
   { icon: Package, label: 'Catalogue', href: '/admin/products' },
   { icon: ShoppingBag, label: 'Commandes', href: '/admin/orders' },
   { icon: Users, label: 'Clients', href: '/admin/users' },
