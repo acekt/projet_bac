@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   MapPin,
   CreditCard,
@@ -121,7 +121,7 @@ export default function CheckoutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {step === 'delivery' && (
-              <Card className="p-8 animate-in" isHoverable={false}>
+              <Card className="p-8 animate-in">
                 <h2 className="text-2xl font-bold text-slate-800 mb-6">Adresse de livraison</h2>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -185,7 +185,7 @@ export default function CheckoutPage() {
 
             {step === 'payment' && (
               <div className="space-y-6 animate-in">
-                <Card className="p-8" isHoverable={false}>
+                <Card className="p-8">
                   <h2 className="text-2xl font-bold text-slate-800 mb-6">Mode de paiement</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
             )}
 
             {step === 'confirmation' && (
-              <Card className="p-12 text-center animate-in" isHoverable={false}>
+              <Card className="p-12 text-center animate-in">
                 <div className="w-24 h-24 bg-green-100 text-brand-primary rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle2 size={48} strokeWidth={3} />
                 </div>
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary (Sidebar) */}
           <div className="space-y-6">
-            <Card className="p-6 overflow-hidden" isHoverable={false}>
+            <Card className="p-6 overflow-hidden">
               <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-6">
                 <ShoppingBag size={20} /> Récapitulatif
               </h3>

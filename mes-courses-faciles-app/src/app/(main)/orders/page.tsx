@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { Package, Truck, CheckCircle2, Clock, ChevronRight, Loader2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { Order as OrderType } from '@/types';
@@ -39,7 +39,7 @@ export default function OrdersPage() {
         </div>
 
         {orders.length === 0 ? (
-          <Card className="p-12 text-center" isHoverable={false}>
+          <Card className="p-12 text-center">
             <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
               <ShoppingBag size={40} />
             </div>
@@ -54,7 +54,7 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <Card key={order.id} className="p-6" isHoverable={false}>
+              <Card key={order.id} className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-brand-primary/10 text-brand-primary rounded-xl flex items-center justify-center">

@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { User, Package, MapPin, Heart, Bell, Settings, LogOut, ChevronRight, ShoppingBag } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
@@ -38,18 +38,18 @@ export default function ProfilePage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <Card className="p-6 text-center" isHoverable={false}>
+          <Card className="p-6 text-center">
              <p className="text-2xl font-black text-slate-800">12</p>
              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Commandes</p>
           </Card>
-          <Card className="p-6 text-center" isHoverable={false}>
+          <Card className="p-6 text-center">
              <p className="text-2xl font-black text-slate-800">145k</p>
              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">CFA dépensés</p>
           </Card>
         </div>
 
         {/* Menu */}
-        <Card className="overflow-hidden p-0" isHoverable={false}>
+        <Card className="overflow-hidden p-0">
           <div className="divide-y divide-slate-100">
             {MENU_ITEMS.map((item, i) => (
               <Link key={i} href={item.href} className="flex items-center justify-between p-5 hover:bg-slate-50 transition-colors group">
@@ -66,7 +66,7 @@ export default function ProfilePage() {
         </Card>
 
         {/* Support Section */}
-        <Card className="p-8 bg-brand-secondary text-white relative overflow-hidden" isHoverable={false}>
+        <Card className="p-8 bg-brand-secondary text-white relative overflow-hidden">
            <div className="relative z-10 space-y-4">
              <h3 className="text-xl font-bold">Besoin d&apos;aide ?</h3>
              <p className="text-slate-400 text-sm">Notre équipe est disponible 7j/7 pour vous accompagner dans vos courses.</p>

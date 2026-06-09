@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useCart } from '@/context/CartContext';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -45,7 +45,7 @@ export default function CartPage() {
 
             <div className="space-y-4">
               {cart.map((item) => (
-                <Card key={item.id} className="p-4" isHoverable={false}>
+                <Card key={item.id} className="p-4">
                   <div className="flex gap-6">
                     <div className="relative w-24 h-24 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden flex-shrink-0">
                       <Image
@@ -106,7 +106,7 @@ export default function CartPage() {
           </div>
 
           <aside className="w-full lg:w-96 space-y-6">
-            <Card className="p-8 sticky top-24" isHoverable={false}>
+            <Card className="p-8 sticky top-24">
               <h2 className="text-xl font-black text-slate-800 mb-6">Résumé de la commande</h2>
 
               <div className="space-y-4 mb-8">
