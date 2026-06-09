@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { Heart, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { ProductCard } from '@/components/ui/ProductCard';
+import { Button } from '@/components/ui/button';
+import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import Link from 'next/link';
 
 const FAVORITES = [

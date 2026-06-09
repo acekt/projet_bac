@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import {
   TrendingUp,
   ShoppingBag,
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {STATS.map((stat, i) => (
-          <Card key={i} className="p-6" isHoverable={false}>
+          <Card key={i} className="p-6">
             <div className="flex justify-between items-start mb-4">
               <div className={`p-3 rounded-2xl ${stat.color}`}>
                 <stat.icon size={24} />
@@ -46,7 +46,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Orders */}
-        <Card className="lg:col-span-2 p-8" isHoverable={false}>
+        <Card className="lg:col-span-2 p-8">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-slate-800">Commandes récentes</h3>
             <button className="text-brand-primary text-sm font-bold hover:underline">Voir tout</button>
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Activity Feed */}
-        <Card className="p-8" isHoverable={false}>
+        <Card className="p-8">
           <h3 className="text-xl font-bold text-slate-800 mb-6">Activité</h3>
           <div className="space-y-6">
             {[1, 2, 3, 4, 5].map((i) => (
