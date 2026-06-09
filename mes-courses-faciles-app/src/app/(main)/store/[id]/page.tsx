@@ -2,13 +2,13 @@
 
 import React, { useState, use, useEffect } from 'react';
 import Image from 'next/image';
-import { ProductCard } from '@/components/ui/ProductCard';
-import { Button } from '@/components/ui/Button';
+import { ProductCard } from '@/components/blocks/catalog/ProductCard';
+import { Button } from '@/components/ui/button';
 import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal, Loader2, PackageX } from 'lucide-react';
 import { PageWrapper } from '@/components/common/PageWrapper';
 import { Product as ProductType } from '@/types';
 import { ProductSkeleton } from '@/components/common/Skeletons';
-import { Navbar } from '@/components/layout/Navbar';
+
 
 const CATEGORIES = [
   'Tous', 'Alimentaire', 'Nettoyage', 'Hygiène', 'Bébé', 'Boissons'

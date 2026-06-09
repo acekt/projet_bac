@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, Suspense } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Mail, Lock, ArrowRight, ShoppingCart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -53,7 +53,7 @@ function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md p-8 sm:p-10" isHoverable={false}>
+    <Card className="w-full max-w-md p-8 sm:p-10">
         <div className="text-center space-y-2 mb-8">
           <div className="w-16 h-16 bg-brand-primary/10 text-brand-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ShoppingCart size={32} />

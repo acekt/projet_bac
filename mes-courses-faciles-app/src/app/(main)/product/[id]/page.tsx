@@ -2,7 +2,7 @@
 
 import React, { useState, use, useEffect } from 'react';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw, Loader2 } from 'lucide-react';
 import Link from 'next/link';

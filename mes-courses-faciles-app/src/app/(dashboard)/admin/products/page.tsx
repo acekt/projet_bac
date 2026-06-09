@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Plus, Trash2, Edit2, Loader2, Package } from 'lucide-react';
 import { createProductAction } from '@/actions/ecommerce';
 import { Product as ProductType, Store as StoreType } from '@/types';
@@ -69,7 +69,7 @@ export default function AdminProductsPage() {
       </div>
 
       {showForm && (
-        <Card className="p-8 animate-in" isHoverable={false}>
+        <Card className="p-8 animate-in">
           <h2 className="text-xl font-bold mb-6 text-slate-800">Ajouter un produit</h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -125,7 +125,7 @@ export default function AdminProductsPage() {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>
       ) : (
-        <Card className="overflow-hidden p-0" isHoverable={false}>
+        <Card className="overflow-hidden p-0">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr className="text-slate-400 text-xs uppercase tracking-widest">

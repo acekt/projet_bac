@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Skeleton } from './Skeleton';
+import { Skeleton } from './skeleton';
 
 export const ImageWithLoader = ({ src, alt, className = '' }: { src: string, alt: string, className?: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);

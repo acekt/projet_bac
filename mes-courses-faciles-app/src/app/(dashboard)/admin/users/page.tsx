@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { Users, Loader2, Mail, Phone, Calendar, Search } from 'lucide-react';
 import { User as UserType } from '@/types';
 
@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      <Card className="p-4" isHoverable={false}>
+      <Card className="p-4">
           <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
               <input
@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>
       ) : (
-        <Card className="overflow-hidden p-0" isHoverable={false}>
+        <Card className="overflow-hidden p-0">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr className="text-slate-400 text-xs uppercase tracking-widest">

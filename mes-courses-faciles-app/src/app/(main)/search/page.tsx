@@ -3,9 +3,9 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search as SearchIcon, Filter, X, ShoppingCart, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { ProductCard } from '@/components/ui/ProductCard';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { ProductCard } from '@/components/blocks/catalog/ProductCard';
+import { Card } from '@/components/ui/card';
 
 const RECENT_SEARCHES = ['Riz 5kg', 'Lait', 'Huile', 'Savon'];
 import { Product as ProductType } from '@/types';

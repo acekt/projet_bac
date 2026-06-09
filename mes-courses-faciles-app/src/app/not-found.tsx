@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {

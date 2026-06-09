@@ -35,6 +35,16 @@ export const productSchema = z.object({
   image: z.string().url("URL d'image invalide"),
 });
 
+export const checkoutFormSchema = z.object({
+  name: z.string().min(2, "Le nom est requis"),
+  phone: z.string().min(8, "Numéro de téléphone invalide"),
+  district: z.string().min(2, "Le quartier est requis"),
+  indications: z.string().optional(),
+  paymentMethod: z.enum(['airtel', 'moov', 'cash', 'card'], {
+    message: "Veuillez sélectionner un moyen de paiement",
+  }),
+});
+
 export const orderSchema = z.object({
   userId: z.string(),
   storeId: z.string(),
