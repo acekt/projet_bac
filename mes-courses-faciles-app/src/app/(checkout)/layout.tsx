@@ -6,9 +6,9 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Minimal Header */}
       <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
-        <Link href="/" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors font-bold text-sm">
+        <Link href="/cart" className="flex items-center gap-2 text-slate-500 hover:text-brand-primary transition-colors font-bold text-sm">
           <ArrowLeft size={20} />
-          <span className="hidden sm:inline">Retourner aux achats</span>
+          <span className="hidden sm:inline">Retour au panier</span>
         </Link>
 
         <Link href="/" className="flex items-center gap-2">
