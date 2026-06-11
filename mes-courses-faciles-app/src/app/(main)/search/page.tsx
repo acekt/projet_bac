@@ -46,7 +46,7 @@ function SearchContent() {
       <div className="container mx-auto px-4 space-y-8">
         {/* Search Header */}
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl font-black text-slate-800">Rechercher</h1>
+          <h1 className="text-3xl font-black text-slate-800 hidden lg:block">Catalogue Produits</h1>
           <div className="relative">
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
