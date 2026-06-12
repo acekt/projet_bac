@@ -9,7 +9,7 @@ import { ShoppingBag, Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { Separator } from '@/components/ui/separator';
 
-export function CartDrawer() {
+export function CartDrawer({ isBottomTab = false }: { isBottomTab?: boolean }) {
   const { cart, removeFromCart, updateQuantity, totalItems, totalPrice, deliveryFee } = useCart();
   const [isOpen, setIsOpen] = React.useState(false);
 

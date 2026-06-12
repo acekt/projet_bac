@@ -11,7 +11,6 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3001',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
   },
   projects: [
     {
@@ -26,10 +25,6 @@ export default defineConfig({
       use: { 
         ...devices['iPhone 12'],
       },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
     },
   ],
   webServer: {
