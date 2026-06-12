@@ -21,7 +21,7 @@ export const BottomTabBar = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-lg border-t border-border/50 lg:hidden px-2 pb-safe supports-[backdrop-filter]:bg-background/60">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-t border-slate-100 lg:hidden px-2 pb-safe">
       <div className="flex justify-around items-center h-16">
         {navItems.map((item) => {
           if (item.isCart) {
@@ -43,10 +43,15 @@ export const BottomTabBar = () => {
               href={item.href}
               className="flex flex-col items-center justify-center flex-1 min-w-0 transition-colors"
             >
-              <div className={`relative p-1 rounded-xl transition-all ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'}`}>
+              <div className={`relative p-1 rounded-xl transition-colors ${isActive ? 'text-brand-primary' : 'text-slate-400'}`}>
                 <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-brand-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+                    {item.badge}
+                  </span>
+                )}
               </div>
-              <span className={`text-[10px] font-medium mt-0.5 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+              <span className={`text-[10px] font-medium mt-0.5 ${isActive ? 'text-brand-primary' : 'text-slate-500'}`}>
                 {item.label}
               </span>
             </Link>
