@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { cn } from "@/lib/utils";
+import { AuthModalWrapper } from "@/components/blocks/auth/AuthModalWrapper";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -34,6 +35,7 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               {children}
+              <AuthModalWrapper />
             </CartProvider>
           </AuthProvider>
         </ErrorBoundary>

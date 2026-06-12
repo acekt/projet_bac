@@ -8,6 +8,7 @@ import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, Rota
 import Link from 'next/link';
 import { PageWrapper } from '@/components/common/PageWrapper';
 import { Product as ProductType } from '@/types';
+import { BackButton } from '@/components/common/BackButton';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -34,20 +35,22 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>;
   if (!product) return <div className="min-h-screen flex items-center justify-center text-xl font-bold">Produit non trouvé</div>;
 
-  return (
-    <PageWrapper>
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
-        <Link href={`/store/${product.storeId}`} className="inline-flex items-center gap-2 text-slate-500 hover:text-brand-primary text-sm font-medium mb-8 group">
-          <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-          Retour au magasin {product.store?.name}
-        </Link>
+  return (    <PageWrapper>
+    <div className="min-h-screen bg-mesh bg-noise relative overflow-hidden">
+      {/* Visual background flares */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-brand-primary/5 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-safran/5 blur-[80px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Back Navigation */}
+        <div className="mb-8 flex items-center justify-between">
+          <BackButton href={`/store/${product.storeId}`} label={`Retour au magasin ${product.store?.name || ''}`} />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Product Gallery */}
-          <div className="space-y-4">
-            <div className="relative aspect-square bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100">
+          <div className="space-y-6">
+            <div className="relative aspect-square bg-white/40 dark:bg-slate-800/30 backdrop-blur-md rounded-[2.5rem] overflow-hidden border border-white/30 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow">
                <Image
                  src={(() => {
                    try {
@@ -62,7 +65,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                  priority
                  className="object-contain p-12"
                />
-               <button className="absolute top-6 right-6 h-12 w-12 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors">
+               <button className="absolute top-6 right-6 h-12 w-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white/20 rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors">
                  <Heart size={24} />
                </button>
             </div>
@@ -75,7 +78,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   return [product.images];
                 }
               })().map((img: string | null, i: number) => (
-                <div key={i} className={`relative aspect-square rounded-2xl bg-slate-50 border-2 transition-all cursor-pointer ${i === 0 ? 'border-brand-primary' : 'border-transparent hover:border-slate-200'}`}>
+                <div key={i} className={`relative aspect-square rounded-2xl bg-white/40 dark:bg-slate-800/30 backdrop-blur-md border-2 transition-all cursor-pointer ${i === 0 ? 'border-brand-primary' : 'border-transparent hover:border-white/50'}`}>
                   <Image src={img || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop'} alt="" fill className="object-contain p-2" />
                 </div>
               ))}

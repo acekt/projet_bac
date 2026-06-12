@@ -2,11 +2,17 @@ import React, { Suspense } from 'react';
 import Image from 'next/image';
 import { StoreCard } from '@/components/blocks/catalog/StoreCard';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Store, ShoppingCart, Truck, ShieldCheck, Star, Users, Flame, ArrowRight } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { StoreSkeleton } from '@/components/common/Skeletons';
 import { Footer } from '@/components/layout/Footer';
+import { HeroContent } from '@/components/blocks/home/HeroContent';
+import { cookies } from 'next/headers';
+import { verifyJWT } from '@/lib/jwt';
+import { SearchSuggestionsInput } from '@/components/blocks/search/SearchSuggestionsInput';
+import { ProductCard } from '@/components/blocks/catalog/ProductCard';
+import { PromoCarousel } from '@/components/blocks/home/PromoCarousel';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,11 +40,11 @@ async function BentoStoreList() {
 
     // Bento Grid Layout: 1 large card (takes 2 cols/rows on desktop), followed by smaller ones
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[250px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px]">
         {stores.map((store, index) => {
            const isFeatured = index === 0;
            return (
-               <div key={store.id} className={isFeatured ? "md:col-span-2 md:row-span-2 h-[524px]" : "h-[250px]"}>
+               <div key={store.id} className={isFeatured ? "md:col-span-2 md:row-span-2 h-[584px]" : "h-[280px]"}>
                   <StoreCard
                     id={store.id}
                     name={store.name}
@@ -47,6 +53,7 @@ async function BentoStoreList() {
                     rating={4.8}
                     deliveryTime="30-45 min"
                     categories={['Alimentation', 'Hygiène']}
+                    isFeatured={isFeatured}
                   />
                </div>
            );
@@ -64,66 +71,154 @@ async function BentoStoreList() {
 }
 
 export default async function HomePage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('mcf_jwt_session')?.value;
+  const sessionUser = token ? (await verifyJWT(token)) as any : null;
+
+  if (sessionUser) {
+    const stores = await prisma.store.findMany({
+      where: { isActive: true },
+      take: 6,
+    });
+
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      take: 8,
+    });
+
+    return (
+      <>
+        {/* Authenticated Dashboard View */}
+        <div className="max-w-7xl mx-auto px-4 py-12 space-y-20 animate-in fade-in duration-500">
+          {/* Welcome Carousel Banner */}
+          <PromoCarousel userName={sessionUser.name || 'Client'} />
+
+          {/* Stores Section (Uniform Grid) */}
+          <section className="space-y-8">
+            <div className="flex justify-between items-end border-b border-border/40 pb-6">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-foreground tracking-tight">Vos Magasins Partenaires</h2>
+                <p className="text-sm text-muted-foreground font-medium">Commandez directement dans les meilleurs supermarchés de Libreville.</p>
+              </div>
+              <Link href="/search" className="text-sm font-bold text-primary hover:text-primary-hover flex items-center gap-1 group transition-all">
+                Voir tout <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {stores.map(store => (
+                <div key={store.id} className="h-[280px]">
+                  <StoreCard
+                    id={store.id}
+                    name={store.name}
+                    image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
+                    location={store.address}
+                    rating={4.8}
+                    deliveryTime="30-45 min"
+                    categories={['Alimentation', 'Hygiène']}
+                    isFeatured={false}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Recommended Products Grid */}
+          <section className="space-y-8">
+            <div className="flex justify-between items-end border-b border-border/40 pb-6">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-foreground tracking-tight">Suggestions de Produits</h2>
+                <p className="text-sm text-muted-foreground font-medium">Sélectionnés pour vous selon la fraîcheur et la disponibilité.</p>
+              </div>
+              <Link href="/search" className="text-sm font-bold text-primary hover:text-primary-hover flex items-center gap-1 group transition-all">
+                Parcourir le catalogue <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+              {products.map(product => {
+                let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                try {
+                  const parsed = JSON.parse(product.images || '[]');
+                  if (parsed.length > 0) imgUrl = parsed[0];
+                } catch (e) {}
+
+                return (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    category={product.category}
+                    unit={product.unit || 'unité'}
+                    storeId={product.storeId}
+                    image={imgUrl}
+                  />
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Banner Promo */}
+          <section className="glass-card rounded-[2rem] p-8 border-luminous bg-brand-safran/5 flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div className="space-y-2 text-center sm:text-left">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2 justify-center sm:justify-start">
+                <Flame className="text-brand-safran" size={20} /> Livraison offerte dès 25 000 FCFA !
+              </h3>
+              <p className="text-sm text-muted-foreground font-medium">Profitez de frais de livraison gratuits pour remplir votre garde-manger ce week-end.</p>
+            </div>
+            <Link 
+              href="/search" 
+              className="bg-brand-safran hover:bg-brand-safran-hover text-white rounded-xl px-6 h-12 font-bold shadow-safran-btn shrink-0 flex items-center justify-center text-sm"
+            >
+              Faire mes courses
+            </Link>
+          </section>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       {/* Modern Hero Section (Typography & Abstraction First) */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-20 pb-32 overflow-hidden bg-background">
-        {/* Abstract Background Gradient Mesh */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-           <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-primary/20 blur-[120px] mix-blend-multiply animate-pulse opacity-70" />
-           <div className="absolute bottom-[-10%] left-[-10%] w-[800px] h-[800px] rounded-full bg-accent/20 blur-[150px] mix-blend-multiply opacity-60" />
+      <section className="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-48 overflow-hidden bg-background">
+        {/* Background Image using next/image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1920&auto=format&fit=crop"
+            alt="Marché de produits frais"
+            fill
+            priority
+            style={{ objectFit: 'cover' }}
+            sizes="100vw"
+            className="brightness-95 contrast-105"
+          />
+          {/* Overlay Gradient (fade from dark emerald & slate to page background) */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#022c22]/90 via-[#0f172a]/95 to-background z-10 pointer-events-none" />
         </div>
 
         <div className="container relative z-10 mx-auto px-4 text-center max-w-5xl">
-          <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-background/80 backdrop-blur-sm border border-border/50 rounded-full text-foreground font-semibold text-sm shadow-sm mx-auto">
-              <span className="flex h-2 w-2 rounded-full bg-primary animate-ping" />
-              Livraison ultra-rapide à Libreville
-            </div>
-
-            <h1 className="text-6xl sm:text-7xl lg:text-[5.5rem] font-black text-foreground tracking-tight leading-[1.05]">
-              Vos courses faciles <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
-                à Libreville.
-              </span>
-            </h1>
-
-            <p className="text-xl sm:text-2xl text-muted-foreground leading-relaxed max-w-2xl mx-auto font-medium">
-              Le meilleur des magasins locaux livré chez vous en toute sécurité. Payez par <strong className="text-foreground">Airtel Money</strong>, <strong className="text-foreground">Moov</strong> ou à la livraison.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center pt-8">
-              <Link href="/search" className="w-full sm:w-auto">
-                <Button size="lg" className="h-16 px-10 text-lg bg-accent hover:bg-accent/90 text-accent-foreground shadow-xl shadow-accent/25 rounded-2xl w-full hover:scale-105 transition-transform active:scale-95">
-                  Commencer mes achats
-                </Button>
-              </Link>
-              <Link href="#magasins" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="h-16 px-10 text-lg rounded-2xl w-full bg-background/50 backdrop-blur-sm border-border hover:bg-muted">
-                  Découvrir les magasins
-                </Button>
-              </Link>
-            </div>
-          </div>
+          <HeroContent />
         </div>
       </section>
 
       {/* Bento Grid: Stores Section */}
-      <section id="magasins" className="py-32 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section id="magasins" className="relative z-20 -mt-24 max-w-7xl mx-auto px-4 pb-32">
+        <div className="glass-card rounded-3xl p-8 sm:p-12 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-500">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
             <h2 className="text-4xl lg:text-5xl font-black text-foreground">Nos Partenaires</h2>
             <p className="text-xl text-muted-foreground">Une sélection des meilleurs supermarchés pour vous garantir qualité et fraîcheur.</p>
           </div>
 
           <Suspense fallback={
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[250px]">
-              <div className="md:col-span-2 md:row-span-2 h-[524px]"><StoreSkeleton /></div>
-              <div className="h-[250px]"><StoreSkeleton /></div>
-              <div className="h-[250px]"><StoreSkeleton /></div>
-              <div className="h-[250px]"><StoreSkeleton /></div>
-              <div className="h-[250px]"><StoreSkeleton /></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px]">
+              <div className="md:col-span-2 md:row-span-2 h-[584px]"><StoreSkeleton /></div>
+              <div className="h-[280px]"><StoreSkeleton /></div>
+              <div className="h-[280px]"><StoreSkeleton /></div>
+              <div className="h-[280px]"><StoreSkeleton /></div>
+              <div className="h-[280px]"><StoreSkeleton /></div>
             </div>
           }>
             <BentoStoreList />
@@ -135,6 +230,225 @@ export default async function HomePage() {
                    Voir tous nos magasins partenaires <ArrowUpRight className="ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" size={20} />
                 </Button>
              </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Comment ça marche */}
+      <section className="py-24 relative overflow-hidden bg-background/40">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
+            <span className="text-xs font-bold text-brand-safran uppercase tracking-widest bg-brand-safran/10 px-4 py-1.5 rounded-full">
+              Simplicité absolue
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-black text-foreground">Comment ça marche ?</h2>
+            <p className="text-lg text-muted-foreground font-medium">Faire ses courses en ligne à Libreville n&apos;a jamais été aussi simple.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+            {/* Step 1 */}
+            <div className="glass-card rounded-[2rem] p-10 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-500 flex flex-col justify-between group">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="w-16 h-16 bg-brand-safran/10 text-brand-safran rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Store size={32} />
+                  </div>
+                  <span className="text-5xl font-black text-brand-safran/20 select-none">01</span>
+                </div>
+                <h3 className="text-2xl font-bold text-foreground">Choisissez un magasin</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Sélectionnez votre supermarché préféré parmi nos partenaires locaux de confiance (Mbolo, Géant Casino, etc.).
+                </p>
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="glass-card rounded-[2rem] p-10 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-500 flex flex-col justify-between group">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="w-16 h-16 bg-brand-primary/10 text-brand-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <ShoppingCart size={32} />
+                  </div>
+                  <span className="text-5xl font-black text-brand-primary/20 select-none">02</span>
+                </div>
+                <h3 className="text-2xl font-bold text-foreground">Remplissez votre panier</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Ajoutez les articles de votre choix. Notre catalogue contient des milliers de références fraîches et de qualité.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="glass-card rounded-[2rem] p-10 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-500 flex flex-col justify-between group">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="w-16 h-16 bg-indigo-500/10 text-indigo-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Truck size={32} />
+                  </div>
+                  <span className="text-5xl font-black text-indigo-500/20 select-none">03</span>
+                </div>
+                <h3 className="text-2xl font-bold text-foreground">Livraison rapide</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Faites-vous livrer chez vous ou au bureau en moins de 45 minutes. Payez en toute sécurité à la livraison.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Nos Avantages */}
+      <section className="py-24 relative overflow-hidden bg-background">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            <div className="lg:col-span-5 space-y-6">
+              <span className="text-xs font-bold text-brand-primary uppercase tracking-widest bg-brand-primary/10 px-4 py-1.5 rounded-full">
+                Pourquoi nous choisir ?
+              </span>
+              <h2 className="text-4xl lg:text-5xl font-black text-foreground leading-tight">
+                L&apos;excellence dans chaque livraison.
+              </h2>
+              <p className="text-muted-foreground leading-relaxed font-medium">
+                Nous avons conçu MesAchats241 pour répondre aux exigences les plus strictes de nos clients à Libreville en termes de qualité, de rapidité et de sécurité.
+              </p>
+            </div>
+
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="glass-card rounded-[2rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300">
+                <ShieldCheck className="h-10 w-10 text-brand-primary mb-4" />
+                <h4 className="text-lg font-bold text-foreground mb-2">Sécurité Absolue</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Paiements sécurisés via Airtel Money, Moov Money ou règlement en espèces directement auprès du livreur.
+                </p>
+              </div>
+
+              <div className="glass-card rounded-[2rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300">
+                <Flame className="h-10 w-10 text-brand-safran mb-4" />
+                <h4 className="text-lg font-bold text-foreground mb-2">45 min chrono</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Notre flotte de livreurs partenaires sillonne Libreville pour vous livrer dans les plus brefs délais.
+                </p>
+              </div>
+
+              <div className="glass-card rounded-[2rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300">
+                <Star className="h-10 w-10 text-amber-500 mb-4" />
+                <h4 className="text-lg font-bold text-foreground mb-2">Fraîcheur Garantie</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Nos équipes sélectionnent avec rigueur vos fruits, légumes et viandes pour vous offrir le meilleur.
+                </p>
+              </div>
+
+              <div className="glass-card rounded-[2rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300">
+                <Users className="h-10 w-10 text-indigo-500 mb-4" />
+                <h4 className="text-lg font-bold text-foreground mb-2">Service Client dédié</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Une équipe locale est disponible 7j/7 pour vous assister et répondre à toutes vos questions.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Statistiques */}
+      <section className="py-20 relative overflow-hidden bg-slate-900 text-white dark:bg-slate-950">
+        <div className="absolute inset-0 bg-mesh opacity-20 pointer-events-none" />
+        <div className="container mx-auto px-4 max-w-7xl relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="space-y-2">
+              <div className="text-5xl md:text-6xl font-black text-brand-safran text-glow-safran">15+</div>
+              <p className="text-sm md:text-base text-slate-300 font-bold uppercase tracking-wider">Supermarchés</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-5xl md:text-6xl font-black text-brand-primary">5k+</div>
+              <p className="text-sm md:text-base text-slate-300 font-bold uppercase tracking-wider">Clients Livrés</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-5xl md:text-6xl font-black text-amber-400">45m</div>
+              <p className="text-sm md:text-base text-slate-300 font-bold uppercase tracking-wider">Livraison Moyenne</p>
+            </div>
+            <div className="space-y-2">
+              <div className="text-5xl md:text-6xl font-black text-emerald-400">99.8%</div>
+              <p className="text-sm md:text-base text-slate-300 font-bold uppercase tracking-wider">Satisfaction</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section: Témoignages */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
+            <span className="text-xs font-bold text-brand-safran uppercase tracking-widest bg-brand-safran/10 px-4 py-1.5 rounded-full">
+              Avis vérifiés
+            </span>
+            <h2 className="text-4xl lg:text-5xl font-black text-foreground">Ce que disent nos clients</h2>
+            <p className="text-lg text-muted-foreground font-medium">Découvrez les retours d&apos;expérience de nos clients à Libreville.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <div className="glass-card rounded-[2.5rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                  &quot;Un service exceptionnel ! Je fais mes courses chez Mbolo depuis mon canap&eacute; &agrave; Akanda et je suis livr&eacute;e en moins d&apos;une heure. Les produits frais sont parfaitement choisis.&quot;
+                </p>
+              </div>
+              <div className="flex items-center gap-3 pt-6 border-t border-border/40 mt-6">
+                <div className="w-10 h-10 rounded-full bg-brand-safran/20 text-brand-safran flex items-center justify-center font-bold text-sm">
+                  SA
+                </div>
+                <div>
+                  <h5 className="font-bold text-foreground text-sm">Sylvie Assoumou</h5>
+                  <p className="text-xs text-muted-foreground">Akanda, Libreville</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="glass-card rounded-[2.5rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                  &quot;J&apos;utilise Airtel Money pour payer et tout se passe de mani&egrave;re hyper fluide. C&apos;est s&eacute;curis&eacute;, transparent et le livreur m&apos;appelle d&egrave;s qu&apos;il est en route. Top !&quot;
+                </p>
+              </div>
+              <div className="flex items-center gap-3 pt-6 border-t border-border/40 mt-6">
+                <div className="w-10 h-10 rounded-full bg-brand-primary/20 text-brand-primary flex items-center justify-center font-bold text-sm">
+                  MO
+                </div>
+                <div>
+                  <h5 className="font-bold text-foreground text-sm">Marc Obame</h5>
+                  <p className="text-xs text-muted-foreground">Louis, Libreville</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="glass-card rounded-[2.5rem] p-8 border-luminous hover:shadow-glow hover:border-white/50 transition-all duration-300 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-amber-400 text-amber-400" />)}
+                </div>
+                <p className="text-slate-600 dark:text-slate-300 italic leading-relaxed">
+                  &quot;MesAchats241 m&apos;a fait gagner des heures chaque semaine. Plus besoin de subir les embouteillages pour aller au supermarch&eacute;. Je recommande &agrave; 100.&quot;
+                </p>
+              </div>
+              <div className="flex items-center gap-3 pt-6 border-t border-border/40 mt-6">
+                <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold text-sm">
+                  KN
+                </div>
+                <div>
+                  <h5 className="font-bold text-foreground text-sm">Karen Ndong</h5>
+                  <p className="text-xs text-muted-foreground">Sablière, Libreville</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

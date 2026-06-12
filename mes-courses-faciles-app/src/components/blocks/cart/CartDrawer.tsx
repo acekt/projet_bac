@@ -15,28 +15,34 @@ export function CartDrawer({ isBottomTab = false }: { isBottomTab?: boolean }) {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger>
-        {isBottomTab ? (
-          <button className="relative p-1 rounded-xl transition-all text-muted-foreground hover:text-primary outline-none">
-            <ShoppingBag size={24} strokeWidth={isOpen ? 2.5 : 2} className={isOpen ? 'text-primary' : ''} />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
-                {totalItems}
-              </span>
-            )}
-          </button>
-        ) : (
-          <Button variant="ghost" size="icon" className="relative hover:bg-accent/10 hover:text-accent transition-colors">
-            <ShoppingBag className="h-6 w-6" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
-                {totalItems}
-              </span>
-            )}
-            <span className="sr-only">Panier</span>
-          </Button>
-        )}
-      </SheetTrigger>
+      {isBottomTab ? (
+        <SheetTrigger
+          render={
+            <button className="relative p-1 rounded-xl transition-all text-muted-foreground hover:text-primary outline-none" />
+          }
+        >
+          <ShoppingBag size={24} strokeWidth={isOpen ? 2.5 : 2} className={isOpen ? 'text-primary' : ''} />
+          {totalItems > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
+              {totalItems}
+            </span>
+          )}
+        </SheetTrigger>
+      ) : (
+        <SheetTrigger
+          render={
+            <Button variant="ghost" size="icon" className="relative hover:bg-accent/10 hover:text-accent transition-colors" />
+          }
+        >
+          <ShoppingBag className="h-6 w-6" />
+          {totalItems > 0 && (
+            <span className="absolute -top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
+              {totalItems}
+            </span>
+          )}
+          <span className="sr-only">Panier</span>
+        </SheetTrigger>
+      )}
 
       <SheetContent className="w-full sm:max-w-md flex flex-col p-0">
         <SheetHeader className="p-6 pb-4 border-b">

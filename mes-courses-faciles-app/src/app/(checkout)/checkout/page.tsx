@@ -29,6 +29,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createOrderAction } from '@/actions/ecommerce';
+import { BackButton } from '@/components/common/BackButton';
 
 type CheckoutFormData = z.infer<typeof checkoutFormSchema>;
 
@@ -48,6 +49,7 @@ export default function CheckoutPage() {
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors, isValid }
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutFormSchema),
@@ -60,6 +62,15 @@ export default function CheckoutPage() {
       paymentMethod: undefined,
     }
   });
+
+  React.useEffect(() => {
+    if (user?.name) {
+      const currentName = getValues('name');
+      if (!currentName) {
+        setValue('name', user.name, { shouldValidate: true });
+      }
+    }
+  }, [user, setValue, getValues]);
 
   const selectedPaymentMethod = watch('paymentMethod');
 
@@ -139,8 +150,16 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-background pt-8 pb-24">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className="bg-mesh bg-noise relative overflow-hidden pt-8 pb-24 min-h-screen">
+      {/* Visual background flares */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-brand-primary/5 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-safran/5 blur-[80px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 max-w-6xl relative z-10 space-y-6">
+        <div className="flex justify-start">
+          <BackButton href="/" label="Retour à l'accueil" />
+        </div>
+
         <div className="mb-8">
            <h1 className="text-3xl font-black text-foreground tracking-tight">Finaliser la commande</h1>
         </div>

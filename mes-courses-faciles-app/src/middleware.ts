@@ -4,7 +4,7 @@ import { verifyJWT } from '@/lib/jwt';
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get('mcf_jwt_session')?.value;
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
   const PROTECTED_ROUTES = [
     '/profile',
@@ -12,7 +12,6 @@ export async function middleware(request: NextRequest) {
     '/favorites',
     '/admin',
     '/orders',
-    '/cart',
     '/store',
     '/product',
     '/search'
@@ -22,10 +21,13 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   const isAdminRoute = ADMIN_ROUTES.some(route => pathname.startsWith(route));
 
+  // Determine callback url with search query preserved
+  const callbackUrl = `${pathname}${search}`;
+
   if (isProtectedRoute && !token) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/auth/login';
-    url.searchParams.set('callbackUrl', pathname);
+    const url = new URL('/', request.url);
+    url.searchParams.set('auth', 'login');
+    url.searchParams.set('callbackUrl', callbackUrl);
     return NextResponse.redirect(url);
   }
 
@@ -35,9 +37,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isProtectedRoute && !decodedToken) {
-     const url = request.nextUrl.clone();
-     url.pathname = '/auth/login';
-     url.searchParams.set('callbackUrl', pathname);
+     const url = new URL('/', request.url);
+     url.searchParams.set('auth', 'login');
+     url.searchParams.set('callbackUrl', callbackUrl);
+     
      // remove invalid cookie
      const response = NextResponse.redirect(url);
      response.cookies.delete('mcf_jwt_session');
@@ -60,7 +63,6 @@ export const config = {
     '/favorites/:path*',
     '/admin/:path*',
     '/orders/:path*',
-    '/cart/:path*',
     '/store/:path*',
     '/product/:path*',
     '/search/:path*'

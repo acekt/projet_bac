@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { User, Package, MapPin, Heart, Bell, Settings, LogOut, ChevronRight, ShoppingBag, Truck, CheckCircle2, Clock } from 'lucide-react';
+import React, { useEffect, useState, Suspense } from 'react';
+import { User, Package, MapPin, Heart, Bell, Settings, LogOut, ChevronRight, ShoppingBag, Truck, CheckCircle2, Clock, XCircle, Calendar, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,16 +9,25 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { BackButton } from '@/components/common/BackButton';
 import { Order as OrderType } from '@/types';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function ProfilePage() {
-  const { user, logout } = useAuth();
+function ProfileContent() {
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'profile';
 
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/?auth=login');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -56,14 +65,34 @@ export default function ProfilePage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background py-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="container mx-auto px-4 max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="min-h-screen bg-mesh bg-noise relative overflow-hidden py-12">
+      {/* Visual background flares */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-brand-primary/5 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-safran/5 blur-[80px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
+        {/* Back Navigation */}
+        <div className="flex justify-start">
+          <BackButton href="/" label="Retour à l'accueil" />
+        </div>
 
         {/* Profile Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-8 rounded-3xl border border-border/50 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/40 dark:bg-slate-800/30 backdrop-blur-md p-8 rounded-3xl border border-white/30 dark:border-white/10 shadow-sm">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary text-3xl font-black border-4 border-background shadow-md">
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary text-3xl font-black border-4 border-background shadow-md animate-scale-in">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="space-y-1.5">
@@ -93,14 +122,14 @@ export default function ProfilePage() {
           <TabsContent value="profile" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
              {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
-              <Card className="p-6 text-center border-border/50 shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-6 text-center bg-white/40 dark:bg-slate-800/30 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
                  <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
                     <Package size={24} />
                  </div>
                  <p className="text-3xl font-black text-foreground">{orders.length}</p>
                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Commandes passées</p>
-              </Card>
-              <Card className="p-6 text-center border-border/50 shadow-sm hover:shadow-md transition-shadow">
+              </div>
+              <div className="p-6 text-center bg-white/40 dark:bg-slate-800/30 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
                  <div className="w-12 h-12 bg-accent/10 text-accent rounded-full flex items-center justify-center mx-auto mb-4">
                     <ShoppingBag size={24} />
                  </div>
@@ -108,7 +137,7 @@ export default function ProfilePage() {
                     {orders.reduce((acc, o) => acc + o.total, 0).toLocaleString()}
                  </p>
                  <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">CFA Dépensés</p>
-              </Card>
+              </div>
             </div>
 
             {/* Menu */}
@@ -209,4 +238,15 @@ export default function ProfilePage() {
   );
 }
 
-import { XCircle, Calendar, Mail } from 'lucide-react';
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background py-12 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <ProfileContent />
+    </Suspense>
+  );
+}
+

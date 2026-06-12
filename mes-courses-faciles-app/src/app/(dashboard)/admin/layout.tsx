@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
   Package,
@@ -31,6 +32,7 @@ const MENU_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -79,10 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-white/10">
              <button
-               onClick={() => {
-                 localStorage.removeItem('mcf_user');
-                 window.location.href = '/';
-               }}
+               onClick={logout}
                className="flex items-center gap-4 w-full px-4 py-3.5 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
              >
                <LogOut size={22} />

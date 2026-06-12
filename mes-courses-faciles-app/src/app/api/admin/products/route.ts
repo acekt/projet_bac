@@ -2,9 +2,32 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { productSchema } from '@/lib/validations/schemas';
 import { ZodError } from 'zod';
+import { verifyJWT } from '@/lib/jwt';
+import { cookies } from 'next/headers';
+
+async function checkAdminAccess() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('mcf_jwt_session')?.value;
+
+  if (!token) {
+    return { authorized: false, status: 401, error: 'Unauthorized' };
+  }
+
+  const decoded = await verifyJWT(token);
+  if (!decoded || decoded.role !== 'ADMIN') {
+    return { authorized: false, status: 403, error: 'Forbidden' };
+  }
+
+  return { authorized: true };
+}
 
 export async function POST(request: Request) {
   try {
+    const access = await checkAdminAccess();
+    if (!access.authorized) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
     const body = await request.json();
     const validatedData = productSchema.parse(body);
 
@@ -34,6 +57,11 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const access = await checkAdminAccess();
+    if (!access.authorized) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
+    }
+
     const products = await prisma.product.findMany({
       include: { store: true }
     });
@@ -42,3 +70,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

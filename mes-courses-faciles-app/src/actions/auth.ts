@@ -32,7 +32,7 @@ export async function loginAction(data: any) {
     const cookieStore = await cookies();
     cookieStore.set('mcf_jwt_session', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });
@@ -89,7 +89,7 @@ export async function registerAction(data: any) {
     const cookieStore = await cookies();
     cookieStore.set('mcf_jwt_session', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });

@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { Search, ShoppingBag, Menu, X, User } from 'lucide-react';
+import { Search, ShoppingBag, Menu, X, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CartDrawer } from '@/components/blocks/cart/CartDrawer';
+import { SearchSuggestionsInput } from '@/components/blocks/search/SearchSuggestionsInput';
+
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -55,12 +57,18 @@ export function Navbar() {
                   </>
                 ) : (
                   <div className="flex flex-col gap-3 mt-4">
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                       <Link href="/auth/login">Se connecter</Link>
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                       <Link href="/auth/register">Créer un compte</Link>
-                    </Button>
+                    <Link 
+                      href="?auth=login" 
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground inline-flex items-center justify-center rounded-lg h-9 px-4 text-sm font-medium transition-all"
+                    >
+                      Se connecter
+                    </Link>
+                    <Link 
+                      href="?auth=register" 
+                      className="w-full border border-border bg-background hover:bg-muted hover:text-foreground inline-flex items-center justify-center rounded-lg h-9 px-4 text-sm font-medium transition-all"
+                    >
+                      Créer un compte
+                    </Link>
                   </div>
                 )}
               </nav>
@@ -80,16 +88,10 @@ export function Navbar() {
         </Link>
 
         {/* Search Bar (Desktop) */}
-        <div className="hidden lg:flex flex-1 max-w-2xl mx-8 relative group">
-           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground group-focus-within:text-primary transition-colors">
-              <Search className="h-5 w-5" />
-           </div>
-           <Input
-             type="search"
-             placeholder="Rechercher un produit, un magasin..."
-             className="w-full pl-10 h-11 bg-muted/50 border-transparent hover:bg-muted focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all rounded-full shadow-sm"
-           />
-        </div>
+        <SearchSuggestionsInput
+          placeholder="Rechercher un produit, un magasin..."
+          className="hidden lg:flex flex-1 max-w-2xl mx-8"
+        />
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
@@ -102,10 +104,10 @@ export function Navbar() {
           {/* User Auth Desktop */}
           <div className="hidden lg:flex items-center gap-4">
              {isAuthenticated ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger>
-                        <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/10 hover:text-accent p-2 rounded-full ring-0 focus-visible:ring-0">
+                        <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/10 hover:text-accent p-2 rounded-full ring-0 focus-visible:ring-0 cursor-pointer">
                           <Avatar className="h-8 w-8 bg-primary/10 text-primary">
                             <AvatarFallback className="font-bold bg-transparent text-primary border border-primary/20">
                               {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
@@ -126,7 +128,7 @@ export function Navbar() {
                         <DropdownMenuItem>
                           <Link href="/favorites" className="cursor-pointer">Mes favoris</Link>
                         </DropdownMenuItem>
-
+ 
                         {user?.role === 'ADMIN' && (
                           <>
                             <DropdownMenuSeparator />
@@ -135,21 +137,33 @@ export function Navbar() {
                             </DropdownMenuItem>
                           </>
                         )}
-
+ 
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
                           Déconnexion
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={logout} 
+                      title="Se déconnecter" 
+                      className="text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-full h-8 w-8 p-0 cursor-pointer transition-colors"
+                    >
+                      <LogOut size={16} strokeWidth={2.5} />
+                    </Button>
                 </div>
              ) : (
-                <div className="flex items-center gap-3">
-                   <Link href="/auth/login" className="text-sm font-medium text-foreground hover:text-primary transition-colors">Connexion</Link>
-                   <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-5">
-                       <Link href="/auth/register">S&apos;inscrire</Link>
-                   </Button>
-                </div>
+                 <div className="flex items-center gap-3">
+                    <Link href="?auth=login" className="text-sm font-medium text-foreground hover:text-primary transition-colors">Connexion</Link>
+                    <Link 
+                      href="?auth=register" 
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-5 h-7 inline-flex items-center justify-center text-[0.8rem] font-medium transition-all"
+                    >
+                      S&apos;inscrire
+                    </Link>
+                 </div>
              )}
           </div>
 
@@ -161,17 +175,10 @@ export function Navbar() {
       {/* Mobile Search Bar Expansion */}
       {isSearchOpen && (
         <div className="lg:hidden border-t border-border/50 p-4 bg-background animate-in slide-in-from-top-2">
-          <div className="relative">
-             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                <Search className="h-5 w-5" />
-             </div>
-             <Input
-               type="search"
-               placeholder="Rechercher..."
-               className="w-full pl-10 h-11 bg-muted/50 border-transparent focus:bg-background focus:border-primary transition-all rounded-full"
-               autoFocus
-             />
-          </div>
+          <SearchSuggestionsInput
+            placeholder="Rechercher..."
+            className="w-full"
+          />
         </div>
       )}
     </header>
