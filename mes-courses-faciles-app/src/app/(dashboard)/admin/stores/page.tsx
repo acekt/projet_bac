@@ -1,20 +1,54 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Plus, Trash2, Edit2, Loader2, Store as StoreIcon, CheckCircle, XCircle, Image as ImageIcon } from 'lucide-react';
-import { createStoreAction, updateStoreStatusAction } from '@/actions/ecommerce';
+import { Plus, Trash2, Edit2, Loader2, Store as StoreIcon, CheckCircle, XCircle } from 'lucide-react';
+import { updateStoreStatusAction, deleteStoreAction } from '@/actions/ecommerce';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Store as StoreType } from '@/types';
+import { StoreCreateSheet } from '@/components/blocks/admin/StoreCreateSheet';
+import { StoreEditSheet } from '@/components/blocks/admin/StoreEditSheet';
+import { DataTable } from '@/components/common/DataTable';
+import { ColumnDef } from '@tanstack/react-table';
+import { useToast } from '@/context/ToastContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-export default function AdminStoresPage() {
+function AdminStoresContent() {
   const [stores, setStores] = useState<StoreType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [logoUrl, setLogoUrl] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const toast = useToast();
+
+  // Dialog States
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedStoreToEdit, setSelectedStoreToEdit] = useState<StoreType | null>(null);
+  
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [storeToDelete, setStoreToDelete] = useState<StoreType | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const isCreateOpen = searchParams.get('new') === 'store';
+
+  const setIsCreateOpen = (open: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (open) {
+      params.set('new', 'store');
+    } else {
+      params.delete('new');
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   useEffect(() => {
     fetchStores();
@@ -28,207 +62,233 @@ export default function AdminStoresPage() {
       setStores(data);
     } catch (e) {
       console.error(e);
+      toast.error("Impossible de récupérer les magasins.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingImage(true);
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('folder', 'mes-courses-faciles/stores');
-
+  const toggleStatus = async (storeId: string, currentStatus: boolean, storeName: string) => {
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setLogoUrl(data.url);
-      } else {
-        alert(data.error || 'Erreur lors du téléchargement de l\'image');
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Erreur lors du téléchargement de l\'image');
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-
-    if (logoUrl) {
-      data.logo = logoUrl;
-    }
-
-    try {
-      const res = await createStoreAction(data as any);
+      const res = await updateStoreStatusAction(storeId, !currentStatus);
       if (res.success) {
-        setShowForm(false);
-        setLogoUrl('');
+        toast.success(`Le magasin ${storeName} est maintenant ${!currentStatus ? 'actif' : 'inactif'}.`);
         fetchStores();
       } else {
-        alert(res.error);
+        toast.error(res.error || "Impossible de changer le statut.");
       }
     } catch (e: any) {
-      console.error(e);
-      alert(e.message);
-    } finally {
-      setSubmitting(false);
+      toast.error(e.message);
     }
   };
 
-  const toggleStatus = async (storeId: string, currentStatus: boolean) => {
-      try {
-          const res = await updateStoreStatusAction(storeId, !currentStatus);
-          if (res.success) {
-              fetchStores();
-          } else {
-              alert(res.error);
-          }
-      } catch (e: any) {
-          alert(e.message);
+  const handleDeleteConfirm = async () => {
+    if (!storeToDelete) return;
+    setDeleting(true);
+    try {
+      const res = await deleteStoreAction(storeToDelete.id);
+      if (res.success) {
+        toast.success(`Le magasin ${storeToDelete.name} a été supprimé.`);
+        fetchStores();
+      } else {
+        toast.error(res.error || "Erreur lors de la suppression.");
       }
-  }
+    } catch (err: any) {
+      toast.error("Une erreur est survenue lors de la suppression.");
+    } finally {
+      setDeleting(false);
+      setIsDeleteAlertOpen(false);
+      setStoreToDelete(null);
+    }
+  };
+
+  const handleSuccess = () => {
+    fetchStores();
+  };
+
+  // Define Columns for TanStack Table
+  const columns: ColumnDef<StoreType>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Magasin',
+      cell: ({ row }) => {
+        const store = row.original;
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 overflow-hidden flex-shrink-0">
+              {store.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={store.logo} alt={store.name} className="w-full h-full object-cover" />
+              ) : (
+                <StoreIcon size={20} />
+              )}
+            </div>
+            <span className="font-bold text-slate-800 dark:text-slate-200">{store.name}</span>
+          </div>
+        );
+      }
+    },
+    {
+      accessorKey: 'district',
+      header: 'Quartier',
+      cell: ({ row }) => (
+        <span className="text-slate-600 dark:text-slate-400 font-bold">{row.original.district}</span>
+      )
+    },
+    {
+      accessorKey: 'phone',
+      header: 'Téléphone',
+      cell: ({ row }) => (
+        <span className="text-slate-550 dark:text-slate-400 font-mono text-xs font-bold">{row.original.phone}</span>
+      )
+    },
+    {
+      accessorKey: 'isActive',
+      header: 'Statut',
+      cell: ({ row }) => {
+        const store = row.original;
+        return (
+          <button 
+            onClick={() => toggleStatus(store.id, store.isActive, store.name)} 
+            className="focus:outline-none cursor-pointer"
+            title="Cliquez pour changer le statut"
+          >
+            {store.isActive ? (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-250/30">
+                <CheckCircle size={12} /> Actif
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-250/30">
+                <XCircle size={12} /> Inactif
+              </span>
+            )}
+          </button>
+        );
+      }
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => {
+        const store = row.original;
+        return (
+          <div className="flex gap-1">
+            <button 
+              onClick={() => { setSelectedStoreToEdit(store); setIsEditOpen(true); }}
+              className="p-2 text-slate-400 hover:text-brand-primary dark:hover:text-brand-primary transition-colors cursor-pointer"
+              title="Modifier"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button 
+              onClick={() => { setStoreToDelete(store); setIsDeleteAlertOpen(true); }}
+              className="p-2 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+              title="Supprimer"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        );
+      }
+    }
+  ];
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="flex-1 flex flex-col min-h-0 space-y-8 animate-in relative overflow-hidden">
+      <div className="flex justify-between items-center flex-shrink-0">
         <div>
-          <h1 className="text-3xl font-black text-slate-800">Gestion des Magasins</h1>
-          <p className="text-slate-500">Ajoutez et gérez les magasins partenaires.</p>
+          <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1 mb-2">
+            <span>Admin</span>
+            <span>/</span>
+            <span className="text-slate-550 dark:text-slate-400 font-bold">Magasins</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
+            <StoreIcon className="text-brand-primary" size={28} /> Gestion des Magasins
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">Gérez, configurez et suivez vos magasins partenaires.</p>
         </div>
-        <Button onClick={() => { setShowForm(!showForm); setLogoUrl(''); }} className="gap-2">
+        <Button 
+          onClick={() => setIsCreateOpen(true)} 
+          className="gap-2 h-11 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer transition-all"
+        >
           <Plus size={20} /> Nouveau Magasin
         </Button>
       </div>
 
-      {showForm && (
-        <Card className="p-8 animate-in">
-          <h2 className="text-xl font-bold mb-6 text-slate-800">Ajouter un magasin</h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-500 uppercase">Nom du magasin</label>
-              <input name="name" className="input-field" required />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-500 uppercase">Quartier (District)</label>
-              <input name="district" className="input-field" required />
-            </div>
-            <div className="space-y-2 md:col-span-2">
-              <label className="text-sm font-bold text-slate-500 uppercase">Adresse complète</label>
-              <input name="address" className="input-field" required />
-            </div>
-             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-500 uppercase">Téléphone</label>
-              <input name="phone" className="input-field" required placeholder="+241 66 00 00 00" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-500 uppercase">Logo</label>
-              <div className="flex items-center gap-4">
-                 <Button type="button" variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()} disabled={uploadingImage}>
-                    {uploadingImage ? <Loader2 className="animate-spin" size={16}/> : <ImageIcon size={16} />}
-                    {uploadingImage ? 'Téléchargement...' : 'Choisir une image'}
-                 </Button>
-                 <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                 />
-                 {logoUrl && (
-                     <div className="w-10 h-10 rounded overflow-hidden border border-slate-200">
-                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                         <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
-                     </div>
-                 )}
-              </div>
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <label className="text-sm font-bold text-slate-500 uppercase">Description</label>
-              <textarea name="description" className="input-field h-32 resize-none" />
-            </div>
-            <div className="md:col-span-2 flex justify-end gap-4">
-              <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Annuler</Button>
-              <Button type="submit" disabled={submitting || uploadingImage}>
-                {submitting ? <Loader2 className="animate-spin" /> : 'Enregistrer le magasin'}
-              </Button>
-            </div>
-          </form>
-        </Card>
-      )}
-
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="animate-spin text-brand-primary" size={48} /></div>
+        <div className="flex justify-center py-24">
+          <Loader2 className="animate-spin text-brand-primary" size={48} />
+        </div>
       ) : (
-        <Card className="overflow-hidden p-0">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-100">
-              <tr className="text-slate-400 text-xs uppercase tracking-widest">
-                <th className="px-6 py-4 font-bold">Magasin</th>
-                <th className="px-6 py-4 font-bold">Quartier</th>
-                <th className="px-6 py-4 font-bold">Téléphone</th>
-                <th className="px-6 py-4 font-bold">Statut</th>
-                <th className="px-6 py-4 font-bold">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {stores.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 overflow-hidden">
-                          {s.logo ? (
-                               // eslint-disable-next-line @next/next/no-img-element
-                               <img src={s.logo} alt={s.name} className="w-full h-full object-cover" />
-                          ) : (
-                              <StoreIcon size={20} />
-                          )}
-                      </div>
-                      <span className="font-bold text-slate-800">{s.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-slate-600">{s.district}</td>
-                  <td className="px-6 py-4 text-slate-600">{s.phone}</td>
-                  <td className="px-6 py-4">
-                    <button onClick={() => toggleStatus(s.id, s.isActive)} className="focus:outline-none">
-                        {s.isActive ? (
-                            <span className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase bg-green-100 text-green-600">
-                                <CheckCircle size={12} /> Actif
-                            </span>
-                        ) : (
-                            <span className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase bg-red-100 text-red-600">
-                                <XCircle size={12} /> Inactif
-                            </span>
-                        )}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button className="p-2 text-slate-400 hover:text-brand-primary transition-colors"><Edit2 size={18} /></button>
-                      {/* TODO: Add soft delete or check if it has products before delete */}
-                      <button className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+        <DataTable 
+          columns={columns} 
+          data={stores} 
+          searchPlaceholder="Rechercher un magasin par nom, quartier..." 
+        />
       )}
+
+      {/* Slide-out creation Drawer (Sheet) */}
+      <StoreCreateSheet 
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        onSuccess={handleSuccess}
+      />
+
+      {/* Slide-out edition Drawer (Sheet) */}
+      <StoreEditSheet 
+        isOpen={isEditOpen}
+        onClose={() => { setIsEditOpen(false); setSelectedStoreToEdit(null); }}
+        onSuccess={handleSuccess}
+        store={selectedStoreToEdit}
+      />
+
+      {/* Soft Delete Confirmation Alert */}
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl max-w-md w-full">
+          <AlertDialogHeader className="space-y-3">
+            <AlertDialogTitle className="text-xl font-black text-slate-800 dark:text-white">
+              Supprimer le magasin partenaire ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed">
+              Êtes-vous sûr de vouloir supprimer <strong className="text-slate-700 dark:text-slate-200">{storeToDelete?.name}</strong> ? 
+              Cette action le retirera définitivement de l&apos;interface publique et masquera également tous les produits associés.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 flex justify-end gap-3">
+            <AlertDialogCancel 
+              onClick={() => { setIsDeleteAlertOpen(false); setStoreToDelete(null); }}
+              className="h-11 px-5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 cursor-pointer"
+            >
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConfirm}
+              disabled={deleting}
+              className="h-11 px-5 rounded-xl font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/10 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="animate-spin" size={16} /> Suppression...
+                </>
+              ) : (
+                'Supprimer'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+}
+
+export default function AdminStoresPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center py-24">
+        <Loader2 className="animate-spin text-brand-primary" size={48} />
+      </div>
+    }>
+      <AdminStoresContent />
+    </Suspense>
   );
 }

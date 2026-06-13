@@ -34,7 +34,7 @@ describe('Validation Schemas', () => {
         category: 'Alimentaire',
         unit: 'sac',
         storeId: 'store_123',
-        image: 'https://example.com/image.jpg'
+        images: ['https://example.com/image.jpg']
       };
       expect(productSchema.parse(validProduct)).toEqual(validProduct);
     });
@@ -47,7 +47,7 @@ describe('Validation Schemas', () => {
         category: 'Alimentaire',
         unit: 'sac',
         storeId: 'store_123',
-        image: 'https://example.com/image.jpg'
+        images: ['https://example.com/image.jpg']
       };
       expect(productSchema.safeParse(invalidProduct).success).toBe(false);
     });

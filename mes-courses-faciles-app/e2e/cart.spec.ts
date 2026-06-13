@@ -129,21 +129,18 @@ test.describe('Cart Flow and Store Conflicts', () => {
     await expect(page).toHaveURL(/\/store\/geant-casino/, { timeout: 30000 });
 
     // Click "Ajouter au panier" on Casino product
-    // Setup dialog listener to handle the store conflict confirmation dialog
-    let dialogMessage = '';
-    page.once('dialog', async dialog => {
-      dialogMessage = dialog.message();
-      // Dismiss to verify it stays or accept it
-      await dialog.accept();
-    });
-
     const casinoAddButtons = page.locator('button[aria-label="Ajouter au panier"]');
     await expect(casinoAddButtons.first()).toBeVisible({ timeout: 30000 });
     const casinoProductTitle = await page.locator('h4').first().innerText();
     await casinoAddButtons.first().click();
 
-    // Verify dialog was triggered
-    expect(dialogMessage).toContain('panier contient déjà des articles d\'un autre magasin');
+    // Verify DOM dialog was triggered (AlertDialog)
+    const alertDialog = page.locator('[role="alertdialog"]');
+    await expect(alertDialog).toBeVisible({ timeout: 10000 });
+    await expect(alertDialog).toContainText('Changer de magasin ?');
+    
+    // Click 'Vider et ajouter'
+    await page.locator('button:has-text("Vider et ajouter")').click();
 
     // Wait and open cart drawer again to verify it has been updated
     await cartButton.click();

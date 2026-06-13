@@ -26,6 +26,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
+    if (!user.isActive) {
+      return NextResponse.json({ error: 'Votre compte a été suspendu par un administrateur.' }, { status: 403 });
+    }
+
     const { password: _password, ...userWithoutPassword } = user;
 
     const token = await signJWT({

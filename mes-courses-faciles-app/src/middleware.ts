@@ -11,10 +11,7 @@ export async function middleware(request: NextRequest) {
     '/checkout',
     '/favorites',
     '/admin',
-    '/orders',
-    '/store',
-    '/product',
-    '/search'
+    '/orders'
   ];
   const ADMIN_ROUTES = ['/admin'];
 
@@ -53,18 +50,24 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Prevent logged-in admins from accessing client-facing/public store pages
+  if (decodedToken && decodedToken.role === 'ADMIN' && !isAdminRoute) {
+    return NextResponse.redirect(new URL('/admin', request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
+    '/',
+    '/search/:path*',
+    '/store/:path*',
+    '/product/:path*',
     '/profile/:path*',
     '/checkout/:path*',
     '/favorites/:path*',
     '/admin/:path*',
-    '/orders/:path*',
-    '/store/:path*',
-    '/product/:path*',
-    '/search/:path*'
+    '/orders/:path*'
   ],
 };

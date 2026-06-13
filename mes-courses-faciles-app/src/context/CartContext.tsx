@@ -3,6 +3,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { syncCartAction, fetchUserCartAction } from '@/actions/ecommerce';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export interface CartItem {
   id: string;
@@ -33,6 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const isInitialMount = useRef(true);
   const isSyncingFromServer = useRef(false);
+  const [conflictProduct, setConflictProduct] = useState<Omit<CartItem, 'quantity'> | null>(null);
 
   // Load cart from server if logged in, otherwise from localStorage
   useEffect(() => {
@@ -94,10 +105,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const isDifferentStore = cart.length > 0 && product.storeId && cart[0].storeId !== product.storeId;
 
     if (isDifferentStore) {
-      const shouldEmpty = window.confirm("Votre panier contient déjà des articles d'un autre magasin. Voulez-vous vider votre panier pour ajouter cet article ?");
-      if (!shouldEmpty) return;
-
-      setCart([{ ...product, quantity: 1 }]);
+      setConflictProduct(product);
       return;
     }
 
@@ -145,6 +153,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
       deliveryFee
     }}>
       {children}
+      <AlertDialog open={!!conflictProduct} onOpenChange={(open) => !open && setConflictProduct(null)}>
+        <AlertDialogContent className="rounded-[2rem] p-6 sm:p-8 border-white/20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white">
+              Changer de magasin ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">
+              Votre panier contient déjà des articles d&apos;un autre magasin. Vous ne pouvez commander que dans un seul magasin à la fois.
+              <br /><br />
+              Voulez-vous <strong>vider votre panier actuel</strong> pour ajouter cet article ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 sm:mt-10 gap-3 sm:gap-0 bg-transparent border-t-0 p-0 sm:flex-row-reverse flex-col">
+            <AlertDialogAction 
+              onClick={() => {
+                if (conflictProduct) {
+                  setCart([{ ...conflictProduct, quantity: 1 }]);
+                  setConflictProduct(null);
+                }
+              }}
+              className="rounded-2xl font-bold bg-brand-primary text-white hover:bg-brand-primary/90 h-14 sm:w-auto w-full px-8 shadow-lg shadow-brand-primary/20"
+            >
+              Vider et ajouter
+            </AlertDialogAction>
+            <AlertDialogCancel className="rounded-2xl font-bold border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800 h-14 sm:w-auto w-full px-8 sm:mr-3">
+              Annuler
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </CartContext.Provider>
   );
 }

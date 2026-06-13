@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createOrderAction } from '@/actions/ecommerce';
 import { BackButton } from '@/components/common/BackButton';
+import { useToast } from '@/context/ToastContext';
 
 type CheckoutFormData = z.infer<typeof checkoutFormSchema>;
 
@@ -37,6 +38,7 @@ export default function CheckoutPage() {
   const { cart, totalPrice, clearCart, deliveryFee } = useCart();
   const { user } = useAuth();
   const router = useRouter();
+  const toast = useToast();
 
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -113,11 +115,11 @@ export default function CheckoutPage() {
         clearCart();
         window.scrollTo(0, 0);
       } else {
-        alert(res.error || 'Erreur lors de la commande');
+        toast.error(res.error || 'Erreur lors de la commande');
       }
     } catch (error) {
       console.error(error);
-      alert('Une erreur est survenue');
+      toast.error('Une erreur est survenue');
     } finally {
       setLoading(false);
     }

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white pt-16 pb-24 lg:pb-12">
@@ -9,10 +11,20 @@ export const Footer = () => {
               La première plateforme e-commerce au Gabon qui vous connecte directement à vos magasins préférés.
             </p>
             <div className="flex gap-4">
-              {['FB', 'IG', 'TW'].map(s => (
-                <div key={s} className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-brand-primary transition-colors cursor-pointer">
-                  <span className="text-xs font-bold">{s}</span>
-                </div>
+              {[
+                { s: 'FB', href: 'https://facebook.com/mesachats241' },
+                { s: 'IG', href: 'https://instagram.com/mesachats241' },
+                { s: 'TW', href: 'https://twitter.com/mesachats241' }
+              ].map(item => (
+                <a 
+                  key={item.s} 
+                  href={item.href} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-brand-primary transition-colors cursor-pointer text-white decoration-none font-bold text-xs"
+                >
+                  {item.s}
+                </a>
               ))}
             </div>
           </div>
@@ -20,20 +32,52 @@ export const Footer = () => {
           <div>
             <h4 className="font-bold mb-6">Navigation</h4>
             <ul className="space-y-4 text-slate-400 text-sm">
-              <li className="hover:text-white cursor-pointer transition-colors">Tous les magasins</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Promotions</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Devenir partenaire</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Blog</li>
+              <li>
+                <Link href="/#magasins" className="hover:text-white transition-colors">
+                  Tous les magasins
+                </Link>
+              </li>
+              <li>
+                <Link href="/search" className="hover:text-white transition-colors">
+                  Promotions
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:partenaires@mesachats241.com?subject=Partenariat" className="hover:text-white transition-colors">
+                  Devenir partenaire
+                </a>
+              </li>
+              <li>
+                <Link href="/#blog" className="hover:text-white transition-colors">
+                  Blog
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-bold mb-6">Aide</h4>
             <ul className="space-y-4 text-slate-400 text-sm">
-              <li className="hover:text-white cursor-pointer transition-colors">Centre d&apos;aide</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Suivre ma commande</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Livraison & Retours</li>
-              <li className="hover:text-white cursor-pointer transition-colors">Contact</li>
+              <li>
+                <a href="mailto:support@mesachats241.com?subject=Centre%20d'aide" className="hover:text-white transition-colors">
+                  Centre d&apos;aide
+                </a>
+              </li>
+              <li>
+                <Link href="/profile?tab=orders" className="hover:text-white transition-colors">
+                  Suivre ma commande
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:support@mesachats241.com?subject=Livraison%20et%20Retours" className="hover:text-white transition-colors">
+                  Livraison & Retours
+                </a>
+              </li>
+              <li>
+                <a href="mailto:contact@mesachats241.com" className="hover:text-white transition-colors">
+                  Contact
+                </a>
+              </li>
             </ul>
           </div>
 

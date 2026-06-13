@@ -105,6 +105,9 @@ test.describe('Dashboard and Profile Tabs', () => {
 
     // Take screenshot of the orders timeline
     const prefix = isMobile ? 'mobile' : 'desktop';
-    await page.screenshot({ path: path.join(screenshotsDir, `${prefix}-05-profile-orders.png`), fullPage: true });
+    await page.screenshot({ 
+      path: path.join(screenshotsDir, `${prefix}-05-profile-orders.png`), 
+      fullPage: !isMobile 
+    });
   });
 });

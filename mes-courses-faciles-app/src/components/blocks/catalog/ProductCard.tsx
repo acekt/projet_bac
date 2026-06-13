@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card';
 import { Plus, ShoppingCart, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -22,6 +24,9 @@ interface ProductCardProps {
 
 export const ProductCard = ({ id, name, price, image, category, unit, storeId }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [imgError, setImgError] = useState(false);
 
   const fallbackImage = "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop";
@@ -29,6 +34,12 @@ export const ProductCard = ({ id, name, price, image, category, unit, storeId }:
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!user) {
+      router.push(`?auth=login&callbackUrl=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
     addToCart({ id, name, price, image, category, unit, storeId });
   };
 

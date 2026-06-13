@@ -18,7 +18,11 @@ export async function loginAction(data: any) {
     const match = await bcrypt.compare(validated.password, user.password);
     if (!match) return { success: false, error: "Identifiants invalides" };
 
-    const { password, ...userWithoutPassword } = user;
+    if (!user.isActive) {
+      return { success: false, error: "Votre compte a été suspendu par un administrateur." };
+    }
+
+    const { password: _password, ...userWithoutPassword } = user;
 
     // Create JWT token
     const token = await signJWT({

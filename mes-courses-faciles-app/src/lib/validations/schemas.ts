@@ -32,7 +32,7 @@ export const productSchema = z.object({
   unit: z.string().min(1, "Unité requise"),
   storeId: z.string().min(1, "Magasin requis"),
   description: z.string().optional(),
-  image: z.string().url("URL d'image invalide"),
+  images: z.array(z.string().url("URL d'image invalide")).min(1, "Au moins une image est requise"),
 });
 
 export const checkoutFormSchema = z.object({

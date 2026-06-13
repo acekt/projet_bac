@@ -18,6 +18,7 @@ export async function GET(request: Request) {
     }
 
     const stores = await prisma.store.findMany({
+      where: { isDeleted: false },
       orderBy: {
         createdAt: 'desc'
       }

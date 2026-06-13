@@ -31,6 +31,7 @@ model User {
   phone         String?
   address       String?
   role          Role      @default(CLIENT)
+  isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   orders        Order[]
@@ -45,6 +46,7 @@ model Store {
   logo        String?
   description String?   @db.Text
   isActive    Boolean   @default(true)
+  isDeleted   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   products    Product[]
@@ -61,11 +63,13 @@ model Product {
   unit        String?
   images      String?  @db.Text // JSON string of image URLs
   isActive    Boolean  @default(true)
+  isDeleted   Boolean  @default(false)
   storeId     String
   store       Store    @relation(fields: [storeId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   cartItems   CartItem[]
+  orderItems  OrderItem[]
 }
 
 model Order {
@@ -89,6 +93,7 @@ model OrderItem {
   orderId   String
   order     Order  @relation(fields: [orderId], references: [id])
   productId String
+  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
   price     Float
 }
@@ -104,4 +109,14 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, productId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // 'ORDER' | 'STOCK'
+  message   String
+  reference String   @unique // ID unique de l'entité concernée (orderId ou productId)
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

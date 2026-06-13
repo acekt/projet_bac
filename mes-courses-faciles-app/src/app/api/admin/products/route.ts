@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         category: validatedData.category,
         unit: validatedData.unit,
         stock: validatedData.stock,
-        images: JSON.stringify([validatedData.image]),
+        images: JSON.stringify(validatedData.images),
         storeId: validatedData.storeId,
       }
     });
@@ -63,6 +63,7 @@ export async function GET() {
     }
 
     const products = await prisma.product.findMany({
+      where: { isDeleted: false },
       include: { store: true }
     });
     return NextResponse.json(products);

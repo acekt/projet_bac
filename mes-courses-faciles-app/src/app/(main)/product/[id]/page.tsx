@@ -3,16 +3,21 @@
 import React, { useState, use, useEffect } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
 import { ShoppingCart, Heart, Minus, Plus, ChevronLeft, ShieldCheck, Truck, RotateCcw, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { PageWrapper } from '@/components/common/PageWrapper';
 import { Product as ProductType } from '@/types';
 import { BackButton } from '@/components/common/BackButton';
+import { useCart } from '@/context/CartContext';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -148,6 +153,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 <Button
                   onClick={() => {
                     if (!product) return;
+                    if (!user) {
+                      router.push(`?auth=login&callbackUrl=${encodeURIComponent(pathname)}`);
+                      return;
+                    }
                     for(let i=0; i<quantity; i++) addToCart({
                       id: product.id,
                       name: product.name,

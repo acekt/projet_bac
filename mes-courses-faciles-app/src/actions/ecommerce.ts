@@ -6,6 +6,7 @@ import { orderSchema, productSchema, storeSchema } from "@/lib/validations/schem
 import { z } from "zod";
 import { verifyJWT } from '@/lib/jwt';
 import { cookies } from 'next/headers';
+import { OrderStatus } from '@prisma/client';
 
 async function getAdminUser() {
   const cookieStore = await cookies();
@@ -170,7 +171,7 @@ export async function createProductAction(data: z.infer<typeof productSchema>) {
         category: validated.category,
         unit: validated.unit,
         stock: validated.stock,
-        images: JSON.stringify([validated.image]),
+        images: JSON.stringify(validated.images),
         storeId: validated.storeId,
       },
     });
@@ -181,3 +182,137 @@ export async function createProductAction(data: z.infer<typeof productSchema>) {
     return { success: false, error: e.message };
   }
 }
+
+export async function updateOrderStatusAction(orderId: string, status: OrderStatus) {
+  try {
+    const admin = await getAdminUser();
+    if (!admin) return { success: false, error: "Unauthorized" };
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+    });
+    revalidatePath("/admin/orders");
+    revalidatePath("/admin");
+    revalidatePath("/profile");
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
+export async function updateStoreAction(storeId: string, data: z.infer<typeof storeSchema>) {
+  try {
+    const admin = await getAdminUser();
+    if (!admin) return { success: false, error: "Unauthorized" };
+
+    const validated = storeSchema.parse(data);
+    const updatedStore = await prisma.store.update({
+      where: { id: storeId },
+      data: {
+        name: validated.name,
+        address: validated.address,
+        district: validated.district,
+        phone: validated.phone,
+        description: validated.description || null,
+        logo: validated.logo || null,
+      },
+    });
+
+    revalidatePath("/admin/stores");
+    revalidatePath("/");
+    return { success: true, id: updatedStore.id };
+  } catch (e: any) {
+    if (e instanceof z.ZodError) {
+      return { success: false, error: e.issues[0].message };
+    }
+    return { success: false, error: e.message };
+  }
+}
+
+export async function deleteStoreAction(storeId: string) {
+  try {
+    const admin = await getAdminUser();
+    if (!admin) return { success: false, error: "Unauthorized" };
+
+    // Soft delete store
+    await prisma.store.update({
+      where: { id: storeId },
+      data: { 
+        isDeleted: true,
+        isActive: false 
+      },
+    });
+
+    // Also soft delete all products associated with this store
+    await prisma.product.updateMany({
+      where: { storeId },
+      data: { 
+        isDeleted: true,
+        isActive: false 
+      },
+    });
+
+    revalidatePath("/admin/stores");
+    revalidatePath("/admin/products");
+    revalidatePath("/");
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
+export async function updateProductAction(productId: string, data: z.infer<typeof productSchema>) {
+  try {
+    const admin = await getAdminUser();
+    if (!admin) return { success: false, error: "Unauthorized" };
+
+    const validated = productSchema.parse(data);
+    const updatedProduct = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        name: validated.name,
+        description: validated.description || null,
+        price: validated.price,
+        category: validated.category,
+        unit: validated.unit,
+        stock: validated.stock,
+        images: JSON.stringify(validated.images),
+        storeId: validated.storeId,
+      },
+    });
+
+    revalidatePath("/admin/products");
+    revalidatePath(`/store/${validated.storeId}`);
+    revalidatePath(`/product/${productId}`);
+    return { success: true, id: updatedProduct.id };
+  } catch (e: any) {
+    if (e instanceof z.ZodError) {
+      return { success: false, error: e.issues[0].message };
+    }
+    return { success: false, error: e.message };
+  }
+}
+
+export async function deleteProductAction(productId: string) {
+  try {
+    const admin = await getAdminUser();
+    if (!admin) return { success: false, error: "Unauthorized" };
+
+    const product = await prisma.product.update({
+      where: { id: productId },
+      data: { 
+        isDeleted: true,
+        isActive: false 
+      },
+    });
+
+    revalidatePath("/admin/products");
+    revalidatePath(`/store/${product.storeId}`);
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
+

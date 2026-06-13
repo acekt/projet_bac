@@ -25,6 +25,7 @@ export async function GET(request: Request) {
         phone: true,
         address: true,
         role: true,
+        isActive: true,
         createdAt: true,
         _count: {
             select: { orders: true }
