@@ -25,12 +25,18 @@ import {
 } from 'lucide-react';
 
 // Custom Styled Tooltip for Recharts
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color?: string; fill?: string }>;
+  label?: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-slate-950/95 dark:bg-slate-900/95 backdrop-blur-md border border-white/10 p-4 rounded-2xl shadow-xl text-xs space-y-1">
         <p className="font-black text-white">{label}</p>
-        {payload.map((pld: any) => (
+        {payload.map((pld) => (
           <p key={pld.name} className="font-bold" style={{ color: pld.color || pld.fill }}>
             {pld.name} : {pld.value.toLocaleString()} {pld.name.includes('Revenu') ? 'CFA' : ''}
           </p>
@@ -220,8 +226,8 @@ export default function AdminAnalyticsPage() {
 
           {/* Legend and breakdown details */}
           <div className="space-y-3 mt-6">
-            {categoryData.map((cat, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
+            {categoryData.map((cat) => (
+              <div key={cat.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
                   <span className="font-bold text-slate-700 dark:text-slate-350">{cat.name}</span>

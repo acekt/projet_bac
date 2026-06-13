@@ -50,11 +50,7 @@ function AdminStoresContent() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  useEffect(() => {
-    fetchStores();
-  }, []);
-
-  const fetchStores = async () => {
+  const fetchStores = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/stores');
@@ -66,7 +62,11 @@ function AdminStoresContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchStores();
+  }, [fetchStores]);
 
   const toggleStatus = async (storeId: string, currentStatus: boolean, storeName: string) => {
     try {

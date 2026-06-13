@@ -75,7 +75,7 @@ export async function getAdminProfileAction() {
 }
 
 // Update admin details in database
-export async function updateAdminProfileAction(data: any) {
+export async function updateAdminProfileAction(data: z.infer<typeof updateProfileSchema>) {
   try {
     const adminSession = await getAdminUser();
     if (!adminSession) return { success: false, error: "Non autorisé" };
@@ -123,7 +123,7 @@ export async function updateAdminProfileAction(data: any) {
 }
 
 // Update admin password
-export async function updateAdminPasswordAction(data: any) {
+export async function updateAdminPasswordAction(data: z.infer<typeof updatePasswordSchema>) {
   try {
     const adminSession = await getAdminUser();
     if (!adminSession) return { success: false, error: "Non autorisé" };
@@ -194,7 +194,7 @@ export async function getPlatformPreferencesAction() {
 }
 
 // Update platform preferences (stored in JSON)
-export async function updatePlatformPreferencesAction(data: any) {
+export async function updatePlatformPreferencesAction(data: z.infer<typeof platformPreferencesSchema>) {
   try {
     const adminSession = await getAdminUser();
     if (!adminSession) return { success: false, error: "Non autorisé" };
@@ -228,7 +228,7 @@ const createUserSchema = z.object({
 });
 
 // Action to create user manually
-export async function createUserAction(data: any) {
+export async function createUserAction(data: z.infer<typeof createUserSchema>) {
   try {
     const admin = await getAdminUser();
     if (!admin) return { success: false, error: "Non autorisé" };

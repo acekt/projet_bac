@@ -349,7 +349,7 @@ export function ProductCreateSheet({ isOpen, onClose, onSuccess, defaultStoreId 
               {imageUrls.length > 0 && (
                 <div className="grid grid-cols-4 gap-3 mb-3">
                   {imageUrls.map((url, index) => (
-                    <div key={index} className="relative group/img aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md">
+                    <div key={url} className="relative group/img aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
                         src={url} 

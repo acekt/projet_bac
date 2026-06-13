@@ -5,8 +5,9 @@ import bcrypt from "bcrypt";
 import { loginSchema, userSchema } from "@/lib/validations/schemas";
 import { signJWT } from "@/lib/jwt";
 import { cookies } from "next/headers";
+import { z } from "zod";
 
-export async function loginAction(data: any) {
+export async function loginAction(data: z.infer<typeof loginSchema>) {
   try {
     const validated = loginSchema.parse(data);
     const user = await prisma.user.findUnique({
@@ -60,7 +61,7 @@ export async function logoutAction() {
     }
 }
 
-export async function registerAction(data: any) {
+export async function registerAction(data: z.infer<typeof userSchema>) {
   try {
     const validated = userSchema.parse(data);
     const existing = await prisma.user.findUnique({

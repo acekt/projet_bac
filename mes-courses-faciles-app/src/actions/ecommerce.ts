@@ -96,7 +96,13 @@ export async function updateStoreStatusAction(storeId: string, isActive: boolean
   }
 }
 
-export async function syncCartAction(userId: string, cartItems: any[]) {
+interface CartItemInput {
+  id: string;
+  quantity: number;
+  storeId?: string;
+}
+
+export async function syncCartAction(userId: string, cartItems: CartItemInput[]) {
   try {
     const user = await getAuthenticatedUser();
     if (!user || user.id !== userId) return { success: false, error: "Unauthorized" };
@@ -109,6 +115,9 @@ export async function syncCartAction(userId: string, cartItems: any[]) {
     // S'il y a des articles, on vérifie qu'ils sont tous du même magasin (règle métier)
     if (cartItems.length > 0) {
        const storeId = cartItems[0].storeId;
+       if (!storeId) {
+         return { success: false, error: "Identifiant du magasin introuvable" };
+       }
 
        const itemsToCreate = cartItems.map(item => ({
            userId,
@@ -120,9 +129,9 @@ export async function syncCartAction(userId: string, cartItems: any[]) {
        await prisma.cartItem.createMany({
            data: itemsToCreate
        });
-    }
+     }
 
-    return { success: true };
+     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };
   }
@@ -235,23 +244,23 @@ export async function deleteStoreAction(storeId: string) {
     const admin = await getAdminUser();
     if (!admin) return { success: false, error: "Unauthorized" };
 
-    // Soft delete store
-    await prisma.store.update({
-      where: { id: storeId },
-      data: { 
-        isDeleted: true,
-        isActive: false 
-      },
-    });
-
-    // Also soft delete all products associated with this store
-    await prisma.product.updateMany({
-      where: { storeId },
-      data: { 
-        isDeleted: true,
-        isActive: false 
-      },
-    });
+    // Soft delete store and its products atomically inside a transaction
+    await prisma.$transaction([
+      prisma.store.update({
+        where: { id: storeId },
+        data: { 
+          isDeleted: true,
+          isActive: false 
+        },
+      }),
+      prisma.product.updateMany({
+        where: { storeId },
+        data: { 
+          isDeleted: true,
+          isActive: false 
+        },
+      })
+    ]);
 
     revalidatePath("/admin/stores");
     revalidatePath("/admin/products");

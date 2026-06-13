@@ -234,8 +234,8 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {recentOrders.map((order, i) => (
-                  <tr key={i} className="border-b border-slate-100/50 dark:border-slate-800/50 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
+                {recentOrders.map((order) => (
+                  <tr key={order.id} className="border-b border-slate-100/50 dark:border-slate-800/50 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
                     <td className="py-4 font-bold text-slate-800 dark:text-white">
                       #{(order.id.length > 6 ? order.id.slice(-6).toUpperCase() : order.id)}
                     </td>
@@ -272,8 +272,8 @@ export default async function AdminDashboard() {
               { text: "Nouveau magasin 'Prix Import - Libreville' enregistré en ligne.", time: "Il y a 1 heure", icon: Store, color: "text-purple-500 bg-purple-500/10 border-purple-500/20" },
               { text: "Nouveau client inscrit : Marc Owono (marc@email.com).", time: "Il y a 3 heures", icon: Users, color: "text-amber-550 bg-amber-500/10 border-amber-500/20" },
               { text: "Nouveau produit 'Lait Entier 1L' rattaché au Géant Casino.", time: "Il y a 4 heures", icon: CreditCard, color: "text-pink-500 bg-pink-500/10 border-pink-500/20" }
-            ].map((activity, i) => (
-              <div key={i} className="flex gap-4">
+            ].map((activity) => (
+              <div key={activity.text} className="flex gap-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${activity.color}`}>
                   <activity.icon size={18} />
                 </div>

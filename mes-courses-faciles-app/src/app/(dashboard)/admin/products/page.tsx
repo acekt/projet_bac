@@ -50,11 +50,7 @@ function AdminProductsContent() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/products');
@@ -69,7 +65,11 @@ function AdminProductsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleDeleteConfirm = async () => {
     if (!productToDelete) return;

@@ -38,11 +38,7 @@ function AdminUsersContent() {
   const [userToToggle, setUserToToggle] = useState<UserWithCount | null>(null);
   const [toggling, setToggling] = useState(false);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/users');
@@ -58,7 +54,11 @@ function AdminUsersContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleToggleClick = (user: UserWithCount) => {
     setUserToToggle(user);
