@@ -29,8 +29,6 @@ export const ProductCard = ({ id, name, price, image, category, unit, storeId }:
   const pathname = usePathname();
   const [imgError, setImgError] = useState(false);
 
-  const fallbackImage = "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop";
-
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -47,9 +45,9 @@ export const ProductCard = ({ id, name, price, image, category, unit, storeId }:
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
       transition={{ type: "spring", stiffness: 250, damping: 18 }}
-      className="h-full"
+      className="h-full transform-gpu"
     >
-      <Card className={cn("group relative overflow-hidden transition-all duration-300 border-border/50 bg-card/45 backdrop-blur-md glass-card hover:shadow-glow hover:border-white/50 p-0 py-0 h-full flex flex-col")}>
+      <Card className={cn("group relative overflow-hidden transition-all duration-300 border-border/50 bg-card/45 backdrop-blur-md glass-card hover:shadow-glow hover:border-white/50 p-0 py-0 h-full flex flex-col transform-gpu")}>
         <div className="relative h-48 w-full bg-white dark:bg-slate-900/60 p-4 border-b border-slate-100/50 dark:border-white/5 overflow-hidden">
           <Link href={`/product/${id}`} className="absolute inset-0 block">
             {(!image || imgError) ? (
@@ -63,7 +61,7 @@ export const ProductCard = ({ id, name, price, image, category, unit, storeId }:
                 alt={name}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-contain p-4 mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-110"
+                className="object-contain p-4 mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-110 transform-gpu"
                 onError={() => setImgError(true)}
               />
             )}

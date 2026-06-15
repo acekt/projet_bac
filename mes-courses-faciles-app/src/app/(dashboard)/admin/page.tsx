@@ -123,6 +123,7 @@ export default async function AdminDashboard() {
       isUp: true,
       icon: TrendingUp,
       color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+      href: '/admin/orders',
       sparkline: (
         <svg className="w-24 h-8 text-emerald-500" viewBox="0 0 100 30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 25 L 20 22 L 35 24 L 50 12 L 65 14 L 80 5 L 95 8" />
@@ -136,6 +137,7 @@ export default async function AdminDashboard() {
       isUp: true,
       icon: ShoppingBag,
       color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20',
+      href: '/admin/orders',
       sparkline: (
         <svg className="w-24 h-8 text-indigo-500" viewBox="0 0 100 30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 22 L 20 25 L 35 15 L 50 18 L 65 8 L 80 12 L 95 5" />
@@ -149,6 +151,7 @@ export default async function AdminDashboard() {
       isUp: true,
       icon: Users,
       color: 'bg-amber-500/10 text-amber-550 border-amber-500/20',
+      href: '/admin/users',
       sparkline: (
         <svg className="w-24 h-8 text-amber-500" viewBox="0 0 100 30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 25 L 20 20 L 35 18 L 50 15 L 65 10 L 80 5 L 95 2" />
@@ -162,6 +165,7 @@ export default async function AdminDashboard() {
       isUp: true,
       icon: Store,
       color: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+      href: '/admin/stores',
       sparkline: (
         <svg className="w-24 h-8 text-purple-500" viewBox="0 0 100 30" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 15 L 20 15 L 35 15 L 50 15 L 65 15 L 80 15 L 95 15" />
@@ -180,31 +184,32 @@ export default async function AdminDashboard() {
 
       {/* Bento Grid KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpis.map((kpi, i) => (
-          <Card 
-            key={i} 
-            className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-300 flex flex-col justify-between h-48 relative overflow-hidden group"
-          >
-            <div className="flex justify-between items-start">
-              <div className={`p-3 rounded-2xl border ${kpi.color} group-hover:scale-105 transition-transform duration-300`}>
-                <kpi.icon size={22} />
+        {kpis.map((kpi) => (
+          <Link key={kpi.label} href={kpi.href} prefetch={true} className="block group">
+            <Card 
+              className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_0_rgba(0,0,0,0.03)] hover:shadow-md transition-all duration-300 flex flex-col justify-between h-48 relative overflow-hidden group cursor-pointer hover:border-brand-primary/30"
+            >
+              <div className="flex justify-between items-start">
+                <div className={`p-3 rounded-2xl border ${kpi.color} group-hover:scale-105 transition-transform duration-300`}>
+                  <kpi.icon size={22} />
+                </div>
+                <div className={`flex items-center gap-0.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/60 dark:bg-slate-850/60 shadow-sm border border-slate-100 dark:border-slate-800 ${kpi.isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-brand-safran'}`}>
+                  {kpi.change}
+                  {kpi.change !== 'Stable' && (kpi.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />)}
+                </div>
               </div>
-              <div className={`flex items-center gap-0.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/60 dark:bg-slate-850/60 shadow-sm border border-slate-100 dark:border-slate-800 ${kpi.isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-brand-safran'}`}>
-                {kpi.change}
-                {kpi.change !== 'Stable' && (kpi.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />)}
+
+              <div className="mt-4">
+                <p className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-widest">{kpi.label}</p>
+                <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{kpi.value}</p>
               </div>
-            </div>
 
-            <div className="mt-4">
-              <p className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-widest">{kpi.label}</p>
-              <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{kpi.value}</p>
-            </div>
-
-            {/* Sparkline placement */}
-            <div className="absolute bottom-2 right-4 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
-              {kpi.sparkline}
-            </div>
-          </Card>
+              {/* Sparkline placement */}
+              <div className="absolute bottom-2 right-4 opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                {kpi.sparkline}
+              </div>
+            </Card>
+          </Link>
         ))}
       </div>
 
@@ -237,7 +242,13 @@ export default async function AdminDashboard() {
                 {recentOrders.map((order) => (
                   <tr key={order.id} className="border-b border-slate-100/50 dark:border-slate-800/50 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
                     <td className="py-4 font-bold text-slate-800 dark:text-white">
-                      #{(order.id.length > 6 ? order.id.slice(-6).toUpperCase() : order.id)}
+                      <Link 
+                        href={`/admin/orders?orderId=${order.id}`}
+                        prefetch={true}
+                        className="hover:text-brand-primary hover:underline transition-all font-mono"
+                      >
+                        #{(order.id.length > 6 ? order.id.slice(-6).toUpperCase() : order.id)}
+                      </Link>
                     </td>
                     <td className="py-4">
                       <div>

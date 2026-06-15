@@ -2,11 +2,27 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { orderSchema } from '@/lib/validations/schemas';
 import { ZodError } from 'zod';
+import { verifyJWT } from '@/lib/jwt';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('mcf_jwt_session')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = await verifyJWT(token);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const validatedData = orderSchema.parse(body);
+
+    if (decoded.id !== validatedData.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const order = await prisma.order.create({
       data: {
@@ -45,6 +61,15 @@ export async function GET(request: Request) {
   }
 
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('mcf_jwt_session')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = await verifyJWT(token);
+    if (!decoded || (decoded.id !== userId && decoded.role !== 'ADMIN')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     const orders = await prisma.order.findMany({
       where: { userId },
       include: { orderItems: true, store: true },

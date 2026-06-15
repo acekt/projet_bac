@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { orderSchema, productSchema, storeSchema } from "@/lib/validations/schemas";
 import { z } from "zod";
 import { verifyJWT } from '@/lib/jwt';
@@ -26,8 +26,26 @@ async function getAuthenticatedUser() {
   return decoded;
 }
 
+export const getCachedActiveStores = unstable_cache(
+  async () => {
+    return prisma.store.findMany({
+      where: { isActive: true, isDeleted: false },
+      orderBy: { createdAt: "desc" }
+    });
+  },
+  ["stores-list"],
+  {
+    tags: ["stores"]
+  }
+);
+
 export async function createOrderAction(data: z.infer<typeof orderSchema>) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user || user.id !== data.userId) {
+      return { success: false, error: "Unauthorized" };
+    }
+
     const validated = orderSchema.parse(data);
     const order = await prisma.order.create({
       data: {
@@ -73,6 +91,7 @@ export async function createStoreAction(data: z.infer<typeof storeSchema>) {
     });
     revalidatePath("/admin/stores");
     revalidatePath("/");
+    revalidateTag("stores");
     return { success: true, id: store.id };
   } catch (e: any) {
     return { success: false, error: e.message };
@@ -90,6 +109,7 @@ export async function updateStoreStatusAction(storeId: string, isActive: boolean
     });
     revalidatePath("/admin/stores");
     revalidatePath("/");
+    revalidateTag("stores");
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };
@@ -230,6 +250,7 @@ export async function updateStoreAction(storeId: string, data: z.infer<typeof st
 
     revalidatePath("/admin/stores");
     revalidatePath("/");
+    revalidateTag("stores");
     return { success: true, id: updatedStore.id };
   } catch (e: any) {
     if (e instanceof z.ZodError) {
@@ -265,6 +286,7 @@ export async function deleteStoreAction(storeId: string) {
     revalidatePath("/admin/stores");
     revalidatePath("/admin/products");
     revalidatePath("/");
+    revalidateTag("stores");
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };

@@ -127,6 +127,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={true}
                   className={`
                     flex items-center gap-4 px-4 py-3 rounded-xl transition-all group
                     ${isActive ? 'bg-brand-primary text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}

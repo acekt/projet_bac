@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Geist } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -8,7 +8,11 @@ import { cn } from "@/lib/utils";
 import { AuthModalWrapper } from "@/components/blocks/auth/AuthModalWrapper";
 import { ToastProvider } from "@/context/ToastContext";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap'
+});
 
 export const metadata: Metadata = {
   title: "Mes Achats 241 | Le meilleur des magasins de Libreville à votre porte",

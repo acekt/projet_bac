@@ -25,10 +25,10 @@ export const StoreCard = ({ id, name, image, location, rating, deliveryTime, cat
       <motion.div
         whileHover={{ scale: 1.02, y: -5 }}
         transition={{ type: "spring", stiffness: 250, damping: 18 }}
-        className="h-full"
+        className="h-full transform-gpu"
       >
         <Link href={`/store/${id}`} className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-3xl">
-          <Card className="group relative h-full overflow-hidden border-border/50 bg-card/45 backdrop-blur-md glass-card hover:shadow-glow hover:border-white/50 transition-all duration-300 p-0 rounded-3xl">
+          <Card className="group relative h-full overflow-hidden border-border/50 bg-card/45 backdrop-blur-md glass-card hover:shadow-glow hover:border-white/50 transition-all duration-300 p-0 rounded-3xl transform-gpu">
             {/* Background Image */}
             <div className="absolute inset-0 z-0 bg-muted">
               <Image
@@ -36,7 +36,7 @@ export const StoreCard = ({ id, name, image, location, rating, deliveryTime, cat
                 alt={name}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 transform-gpu"
                 priority
               />
               {/* Full overlay with dark gradient */}
@@ -90,17 +90,17 @@ export const StoreCard = ({ id, name, image, location, rating, deliveryTime, cat
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
       transition={{ type: "spring", stiffness: 250, damping: 18 }}
-      className="h-full"
+      className="h-full transform-gpu"
     >
       <Link href={`/store/${id}`} className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
-        <Card className={cn("group h-full overflow-hidden border-border/50 bg-card/45 backdrop-blur-md glass-card hover:shadow-glow hover:border-white/50 transition-all duration-300 p-0 py-0")}>
+        <Card className={cn("group h-full overflow-hidden border-border/50 bg-card/45 backdrop-blur-md glass-card hover:shadow-glow hover:border-white/50 transition-all duration-300 p-0 py-0 transform-gpu")}>
           <div className="relative h-36 w-full overflow-hidden bg-muted">
             <Image
               src={image}
               alt={name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 transform-gpu"
             />
             {/* Gradient Overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />

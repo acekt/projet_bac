@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { verifyJWT } from "@/lib/jwt";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
 import fs from "fs";
 import path from "path";
@@ -159,19 +159,8 @@ export async function updateAdminPasswordAction(data: z.infer<typeof updatePassw
   }
 }
 
-// Fetch platform preferences (stored in JSON)
-export async function getPlatformPreferencesAction() {
-  try {
-    const adminSession = await getAdminUser();
-    if (!adminSession) return { success: false, error: "Non autorisé" };
-
-    // Ensure directory exists
-    const dir = path.dirname(PREFERENCES_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    // Default preferences
+const readPreferencesFileCached = unstable_cache(
+  async () => {
     const defaultPrefs = {
       platformName: "MesCoursesFaciles",
       defaultDeliveryFee: 1000,
@@ -181,12 +170,30 @@ export async function getPlatformPreferencesAction() {
     };
 
     if (!fs.existsSync(PREFERENCES_FILE_PATH)) {
+      const dir = path.dirname(PREFERENCES_FILE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
       fs.writeFileSync(PREFERENCES_FILE_PATH, JSON.stringify(defaultPrefs, null, 2));
-      return { success: true, preferences: defaultPrefs };
+      return defaultPrefs;
     }
 
     const rawData = fs.readFileSync(PREFERENCES_FILE_PATH, "utf-8");
-    const preferences = JSON.parse(rawData);
+    return JSON.parse(rawData);
+  },
+  ["platform-preferences"],
+  {
+    tags: ["preferences"]
+  }
+);
+
+// Fetch platform preferences (stored in JSON)
+export async function getPlatformPreferencesAction() {
+  try {
+    const adminSession = await getAdminUser();
+    if (!adminSession) return { success: false, error: "Non autorisé" };
+
+    const preferences = await readPreferencesFileCached();
     return { success: true, preferences };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -209,6 +216,7 @@ export async function updatePlatformPreferencesAction(data: z.infer<typeof platf
 
     fs.writeFileSync(PREFERENCES_FILE_PATH, JSON.stringify(validated, null, 2));
 
+    revalidateTag("preferences");
     revalidatePath("/admin/settings");
     return { success: true, preferences: validated };
   } catch (error: any) {

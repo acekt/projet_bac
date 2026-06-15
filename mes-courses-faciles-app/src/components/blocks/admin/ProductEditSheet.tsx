@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sheet, 
   SheetContent, 
@@ -52,7 +51,6 @@ export function ProductEditSheet({ isOpen, onClose, onSuccess, product }: Produc
     register, 
     handleSubmit, 
     reset,
-    setValue,
     formState: { errors, isSubmitting } 
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),

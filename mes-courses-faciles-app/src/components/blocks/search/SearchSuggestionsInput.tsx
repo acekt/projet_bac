@@ -12,10 +12,29 @@ interface SearchSuggestionsInputProps {
   isHero?: boolean;
 }
 
+interface StoreSuggestion {
+  id: string;
+  name: string;
+  logo: string | null;
+  address: string;
+}
+
+interface ProductSuggestion {
+  id: string;
+  name: string;
+  price: number;
+  images: string | null;
+  category: string;
+  storeId: string;
+  store: {
+    name: string;
+  };
+}
+
 export function SearchSuggestionsInput({ placeholder = "Rechercher...", className, isHero = false }: SearchSuggestionsInputProps) {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<{ stores: any[]; products: any[] }>({ stores: [], products: [] });
+  const [suggestions, setSuggestions] = useState<{ stores: StoreSuggestion[]; products: ProductSuggestion[] }>({ stores: [], products: [] });
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

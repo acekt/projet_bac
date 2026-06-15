@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search as SearchIcon, Filter, X, ShoppingCart, ArrowRight, Apple, Sprout, CupSoda, Sparkles, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, Filter, X, ArrowRight, Apple, Sprout, CupSoda, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import { Card } from '@/components/ui/card';
@@ -182,7 +182,7 @@ function SearchContent() {
                 <p className="text-slate-500 font-medium">
                   Résultats pour &quot;<span className="font-bold text-slate-800 dark:text-white">{query}</span>&quot;
                 </p>
-                <Badge variant="outline" className="px-3 py-1 font-bold rounded-full">
+                <Badge className="px-3 py-1 font-bold rounded-full">
                   {results.length} produit{results.length > 1 ? 's' : ''} trouvé{results.length > 1 ? 's' : ''}
                 </Badge>
               </div>
@@ -235,7 +235,7 @@ function SearchContent() {
 }
 
 // Badge Component Helper
-function Badge({ children, variant, className }: { children: React.ReactNode, variant?: string, className?: string }) {
+function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 ${className}`}>
       {children}

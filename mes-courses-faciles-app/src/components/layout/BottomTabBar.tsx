@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Home, ShoppingBag, Search, User, Heart } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
+
 import { CartDrawer } from '@/components/blocks/cart/CartDrawer';
 import { useAuth } from '@/context/AuthContext';
 

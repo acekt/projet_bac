@@ -4,30 +4,23 @@ import { StoreCard } from '@/components/blocks/catalog/StoreCard';
 import { Button } from '@/components/ui/button';
 import { ArrowUpRight, Store, ShoppingCart, Truck, ShieldCheck, Star, Users, Flame, ArrowRight } from 'lucide-react';
 import prisma from '@/lib/prisma';
+import { getCachedActiveStores } from '@/actions/ecommerce';
 import Link from 'next/link';
-import { StoreSkeleton } from '@/components/common/Skeletons';
+import { StoreSkeleton, ProductSkeleton } from '@/components/common/Skeletons';
 import { Footer } from '@/components/layout/Footer';
 import { HeroContent } from '@/components/blocks/home/HeroContent';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
-import { SearchSuggestionsInput } from '@/components/blocks/search/SearchSuggestionsInput';
 import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import { PromoCarousel } from '@/components/blocks/home/PromoCarousel';
+import { SessionUser } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 async function BentoStoreList() {
   try {
-    const stores = await prisma.store.findMany({
-      where: { isActive: true },
-      select: {
-        id: true,
-        name: true,
-        logo: true,
-        address: true,
-      },
-      take: 5,
-    });
+    const allStores = await getCachedActiveStores();
+    const stores = allStores.slice(0, 5);
 
     if (stores.length === 0) {
       return (
@@ -70,22 +63,100 @@ async function BentoStoreList() {
   }
 }
 
-export default async function HomePage() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('mcf_jwt_session')?.value;
-  const sessionUser = token ? (await verifyJWT(token)) as any : null;
+async function RecommendedStores() {
+  try {
+    const allStores = await getCachedActiveStores();
+    const stores = allStores.slice(0, 6);
 
-  if (sessionUser) {
-    const stores = await prisma.store.findMany({
-      where: { isActive: true },
-      take: 6,
-    });
+    if (stores.length === 0) {
+      return (
+        <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center">
+          <p className="text-muted-foreground font-semibold">Aucun magasin disponible.</p>
+        </div>
+      );
+    }
 
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {stores.map(store => (
+          <div key={store.id} className="h-[280px]">
+            <StoreCard
+              id={store.id}
+              name={store.name}
+              image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
+              location={store.address}
+              rating={4.8}
+              deliveryTime="30-45 min"
+              categories={['Alimentation', 'Hygiène']}
+              isFeatured={false}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="p-6 bg-destructive/10 text-destructive rounded-2xl text-center">
+        Impossible de charger les magasins pour le moment.
+      </div>
+    );
+  }
+}
+
+async function SuggestedProducts() {
+  try {
     const products = await prisma.product.findMany({
       where: { isActive: true },
       take: 8,
     });
 
+    if (products.length === 0) {
+      return (
+        <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center">
+          <p className="text-muted-foreground font-semibold">Aucun produit recommandé pour le moment.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+        {products.map(product => {
+          let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+          try {
+            const parsed = JSON.parse(product.images || '[]');
+            if (parsed.length > 0) imgUrl = parsed[0];
+          } catch (e) {}
+
+          return (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              price={product.price}
+              category={product.category}
+              unit={product.unit || 'unité'}
+              storeId={product.storeId}
+              image={imgUrl}
+            />
+          );
+        })}
+      </div>
+    );
+  } catch (error) {
+    return (
+      <div className="p-6 bg-destructive/10 text-destructive rounded-2xl text-center">
+        Impossible de charger les suggestions de produits pour le moment.
+      </div>
+    );
+  }
+}
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('mcf_jwt_session')?.value;
+  const sessionUser = token ? (await verifyJWT(token)) as unknown as SessionUser : null;
+
+  if (sessionUser) {
     return (
       <>
         {/* Authenticated Dashboard View */}
@@ -105,22 +176,15 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {stores.map(store => (
-                <div key={store.id} className="h-[280px]">
-                  <StoreCard
-                    id={store.id}
-                    name={store.name}
-                    image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
-                    location={store.address}
-                    rating={4.8}
-                    deliveryTime="30-45 min"
-                    categories={['Alimentation', 'Hygiène']}
-                    isFeatured={false}
-                  />
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-[280px]"><StoreSkeleton /></div>
+                ))}
+              </div>
+            }>
+              <RecommendedStores />
+            </Suspense>
           </section>
 
           {/* Recommended Products Grid */}
@@ -135,28 +199,15 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
-              {products.map(product => {
-                let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
-                try {
-                  const parsed = JSON.parse(product.images || '[]');
-                  if (parsed.length > 0) imgUrl = parsed[0];
-                } catch (e) {}
-
-                return (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    category={product.category}
-                    unit={product.unit || 'unité'}
-                    storeId={product.storeId}
-                    image={imgUrl}
-                  />
-                );
-              })}
-            </div>
+            <Suspense fallback={
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+                {[1, 2, 3, 4].map(i => (
+                  <ProductSkeleton key={i} />
+                ))}
+              </div>
+            }>
+              <SuggestedProducts />
+            </Suspense>
           </section>
 
           {/* Banner Promo */}

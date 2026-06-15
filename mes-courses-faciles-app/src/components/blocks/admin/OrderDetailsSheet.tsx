@@ -18,11 +18,8 @@ import {
   CreditCard, 
   Banknote, 
   Smartphone, 
-  CheckCircle, 
-  XCircle, 
   Package, 
-  AlertCircle,
-  FileText
+  AlertCircle
 } from 'lucide-react';
 import { OrderStatus } from '@prisma/client';
 import { updateOrderStatusAction } from '@/actions/ecommerce';

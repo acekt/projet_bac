@@ -1,169 +1,90 @@
-"use client";
+import React, { Suspense } from 'react';
+import prisma from "@/lib/prisma";
+import AdminOrdersClient from "@/components/blocks/admin/AdminOrdersClient";
+import { ShoppingBag } from 'lucide-react';
+import Loading from './loading';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { ShoppingBag, Loader2, CreditCard, Banknote, Smartphone } from 'lucide-react';
-import { OrderStatus } from '@prisma/client';
-import { DataTable } from '@/components/common/DataTable';
-import { OrderDetailsSheet } from '@/components/blocks/admin/OrderDetailsSheet';
-import { ColumnDef } from '@tanstack/react-table';
+// Force dynamic fetching from DB on each request
+export const dynamic = 'force-dynamic';
 
-function AdminOrdersContent() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/admin/orders');
-      if (res.ok) {
-        const data = await res.json();
-        setOrders(data);
+async function OrdersTableLoader() {
+  const dbOrders = await prisma.order.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          address: true,
+        }
+      },
+      store: {
+        select: {
+          id: true,
+          name: true,
+        }
+      },
+      orderItems: {
+        include: {
+          product: true
+        }
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+    },
+    orderBy: {
+      createdAt: 'desc'
     }
-  };
+  });
 
-  const handleStatusUpdated = () => {
-    fetchOrders();
-  };
+  // Map and serialize Prisma objects, transforming Dates to ISO strings
+  const initialOrders = dbOrders.map(order => ({
+    id: order.id,
+    userId: order.userId,
+    storeId: order.storeId,
+    total: order.total,
+    deliveryFee: order.deliveryFee,
+    status: order.status,
+    paymentMethod: order.paymentMethod,
+    deliveryAddress: order.deliveryAddress,
+    createdAt: order.createdAt.toISOString(),
+    updatedAt: order.updatedAt.toISOString(),
+    user: order.user ? {
+      id: order.user.id,
+      name: order.user.name,
+      email: order.user.email,
+      phone: order.user.phone,
+      address: order.user.address,
+    } : null,
+    store: order.store ? {
+      id: order.store.id,
+      name: order.store.name,
+    } : null,
+    orderItems: order.orderItems ? order.orderItems.map(item => ({
+      id: item.id,
+      orderId: item.orderId,
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.price,
+      product: item.product ? {
+        id: item.product.id,
+        name: item.product.name,
+        images: item.product.images,
+      } : null
+    })) : []
+  }));
 
-  const columns: ColumnDef<any>[] = [
-    {
-      accessorKey: 'id',
-      header: 'ID Commande',
-      cell: ({ row }) => (
-        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-          #{row.original.id.substring(0, 8).toUpperCase()}
-        </span>
-      )
-    },
-    {
-      accessorKey: 'user.name',
-      header: 'Client',
-      cell: ({ row }) => {
-        const order = row.original;
-        return (
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary font-bold text-xs flex-shrink-0">
-              {order.user?.name ? order.user.name.charAt(0).toUpperCase() : 'C'}
-            </div>
-            <div className="leading-none min-w-0">
-              <span className="font-bold text-slate-850 dark:text-slate-200 text-sm block truncate">{order.user?.name || 'Client anonyme'}</span>
-              <span className="text-xs text-slate-400 dark:text-slate-450 font-semibold truncate block mt-0.5">{order.user?.email}</span>
-            </div>
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: 'total',
-      header: 'Montant',
-      cell: ({ row }) => (
-        <span className="font-extrabold text-slate-800 dark:text-emerald-400">
-          {row.original.total.toLocaleString()} CFA
-        </span>
-      )
-    },
-    {
-      accessorKey: 'createdAt',
-      header: 'Date',
-      cell: ({ row }) => (
-        <span className="text-slate-550 dark:text-slate-400 font-semibold text-xs">
-          {new Date(row.original.createdAt).toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}
-        </span>
-      )
-    },
-    {
-      accessorKey: 'paymentMethod',
-      header: 'Paiement',
-      cell: ({ row }) => {
-        const method = row.original.paymentMethod;
-        const paymentDetails = (m: string) => {
-          switch (m.toLowerCase()) {
-            case 'airtel':
-              return { label: 'Airtel', icon: Smartphone, color: 'text-red-500 bg-red-50 dark:bg-red-950/20' };
-            case 'moov':
-              return { label: 'Moov', icon: Smartphone, color: 'text-blue-500 bg-blue-50 dark:bg-blue-950/20' };
-            case 'card':
-              return { label: 'Carte', icon: CreditCard, color: 'text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20' };
-            case 'cash':
-            default:
-              return { label: 'Espèces', icon: Banknote, color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' };
-          }
-        };
-        const p = paymentDetails(method);
-        return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-slate-200/50 dark:border-slate-800/80 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <p.icon size={12} className={p.color.split(' ')[0]} />
-            <span>{p.label}</span>
-          </div>
-        );
-      }
-    },
-    {
-      accessorKey: 'status',
-      header: 'Statut',
-      cell: ({ row }) => {
-        const status = row.original.status as OrderStatus;
-        const statusMap = (s: OrderStatus) => {
-          switch (s) {
-            case 'PENDING':
-              return { label: 'En attente', style: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40' };
-            case 'PAID':
-              return { label: 'Préparation', style: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/40' };
-            case 'SHIPPED':
-              return { label: 'En livraison', style: 'bg-sky-100 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-900/40' };
-            case 'DELIVERED':
-              return { label: 'Livrée', style: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40' };
-            case 'CANCELLED':
-              return { label: 'Annulée', style: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-900/40' };
-            default:
-              return { label: s, style: 'bg-slate-100 text-slate-700 border-slate-200' };
-          }
-        };
-        const st = statusMap(status);
-        return (
-          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${st.style}`}>
-            {st.label}
-          </span>
-        );
-      }
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <button
-          onClick={() => setSelectedOrder(row.original)}
-          className="text-xs font-bold text-brand-primary hover:text-brand-primary-hover hover:underline flex items-center gap-1 cursor-pointer"
-        >
-          Gérer
-        </button>
-      )
-    }
-  ];
+  return <AdminOrdersClient initialOrders={initialOrders} />;
+}
 
+export default function AdminOrdersPage() {
   return (
     <div className="flex-1 flex flex-col min-h-0 space-y-8 animate-in relative overflow-hidden">
+      {/* Page Header (instant 0ms render) */}
       <div className="flex-shrink-0">
         <div className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1 mb-2">
           <span>Admin</span>
           <span>/</span>
-          <span className="text-slate-550 dark:text-slate-450 font-bold">Commandes</span>
+          <span className="text-slate-500 dark:text-slate-400 font-bold">Commandes</span>
         </div>
         <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
           <ShoppingBag className="text-brand-primary" size={28} /> Gestion des Commandes
@@ -171,37 +92,10 @@ function AdminOrdersContent() {
         <p className="text-slate-500 dark:text-slate-400 font-medium">Gérez, préparez et suivez les commandes de vos clients en temps réel.</p>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-24">
-          <Loader2 className="animate-spin text-brand-primary" size={48} />
-        </div>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={orders} 
-          searchPlaceholder="Rechercher par ID, client, montant, statut..." 
-        />
-      )}
-
-      {/* Slide-out details Drawer (Sheet) */}
-      <OrderDetailsSheet 
-        isOpen={selectedOrder !== null}
-        onClose={() => setSelectedOrder(null)}
-        order={selectedOrder}
-        onStatusUpdated={handleStatusUpdated}
-      />
+      {/* Streaming the actual table and sheets inside Suspense */}
+      <Suspense fallback={<Loading />}>
+        <OrdersTableLoader />
+      </Suspense>
     </div>
-  );
-}
-
-export default function AdminOrdersPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex justify-center py-24">
-        <Loader2 className="animate-spin text-brand-primary" size={48} />
-      </div>
-    }>
-      <AdminOrdersContent />
-    </Suspense>
   );
 }

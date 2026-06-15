@@ -83,7 +83,11 @@ export function CartDrawer({ isBottomTab = false }: { isBottomTab?: boolean }) {
                         <h4 className="font-bold text-sm line-clamp-2 leading-tight pr-4">{item.name}</h4>
                         <p className="text-xs text-muted-foreground mt-1">{item.price} CFA / {item.unit}</p>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                      <button 
+                        onClick={() => removeFromCart(item.id)} 
+                        className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                        aria-label={`Supprimer ${item.name} du panier`}
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -93,6 +97,7 @@ export function CartDrawer({ isBottomTab = false }: { isBottomTab?: boolean }) {
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className="w-6 h-6 rounded-full bg-background flex items-center justify-center shadow-sm hover:text-primary transition-colors"
+                          aria-label={`Diminuer la quantité de ${item.name}`}
                         >
                           <Minus size={12} strokeWidth={3} />
                         </button>
@@ -100,6 +105,7 @@ export function CartDrawer({ isBottomTab = false }: { isBottomTab?: boolean }) {
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="w-6 h-6 rounded-full bg-background flex items-center justify-center shadow-sm hover:text-primary transition-colors"
+                          aria-label={`Augmenter la quantité de ${item.name}`}
                         >
                           <Plus size={12} strokeWidth={3} />
                         </button>

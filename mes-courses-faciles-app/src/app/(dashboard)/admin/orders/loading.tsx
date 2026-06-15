@@ -2,15 +2,9 @@ import React from 'react';
 
 export default function Loading() {
   return (
-    <div className="space-y-8 animate-pulse p-2">
-      <div>
-        <div className="h-3 w-24 bg-slate-200 dark:bg-slate-800 rounded mb-2" />
-        <div className="h-8 w-64 bg-slate-200 dark:bg-slate-800 rounded-lg" />
-        <div className="h-4 w-96 bg-slate-100 dark:bg-slate-900 rounded-lg mt-2" />
-      </div>
-      
+    <div className="space-y-6 animate-pulse w-full">
       {/* Search Input Skeleton */}
-      <div className="h-12 w-full sm:max-w-md bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+      <div className="h-12 w-full sm:max-w-md bg-slate-250 dark:bg-slate-800 rounded-2xl" />
 
       {/* Table Card Skeleton */}
       <div className="border border-slate-200 dark:border-slate-800 rounded-[2rem] bg-white dark:bg-slate-900 overflow-hidden shadow-sm">

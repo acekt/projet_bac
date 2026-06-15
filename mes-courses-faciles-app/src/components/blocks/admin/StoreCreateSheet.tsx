@@ -10,8 +10,7 @@ import {
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
-  SheetDescription,
-  SheetClose
+  SheetDescription
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Loader2, Upload, X, Store as StoreIcon } from 'lucide-react';
