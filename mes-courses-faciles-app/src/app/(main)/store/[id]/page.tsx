@@ -2,12 +2,13 @@ import React from 'react';
 import Image from 'next/image';
 import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, ChevronRight, LayoutGrid, List, SlidersHorizontal, PackageX } from 'lucide-react';
+import { Search, ChevronRight, PackageX, Phone, MapPin } from 'lucide-react';
 import { PageWrapper } from '@/components/common/PageWrapper';
 import { BackButton } from '@/components/common/BackButton';
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
 const CATEGORIES = [
   'Tous', 'Alimentaire', 'Nettoyage', 'Hygiène', 'Bébé', 'Boissons'
@@ -17,10 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const store = await prisma.store.findUnique({
     where: { id },
-    select: { name: true, description: true }
+    select: { name: true, description: true, isActive: true, isDeleted: true }
   });
   return {
-    title: store ? `${store.name} | MesAchats241` : 'Magasin | MesAchats241',
+    title: store && store.isActive && !store.isDeleted ? `${store.name} | MesAchats241` : 'Magasin | MesAchats241',
     description: store?.description || 'Découvrez nos magasins partenaires sur MesAchats241.',
   };
 }
@@ -43,8 +44,12 @@ export default async function StorePage({
     where: { id: resolvedParams.id }
   });
 
-  const storeName = store ? store.name : resolvedParams.id.replace('-', ' ');
-  const storeLogo = store?.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=100&auto=format&fit=crop";
+  if (!store || !store.isActive || store.isDeleted) {
+    notFound();
+  }
+
+  const storeName = store.name;
+  const storeLogo = store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=100&auto=format&fit=crop";
 
   // Get Products from DB
   const products = await prisma.product.findMany({
@@ -99,6 +104,19 @@ export default async function StorePage({
                     <span className="font-bold text-brand-primary uppercase">{resolvedParams.id}</span>
                   </nav>
                   <h1 className="text-2xl font-extrabold text-slate-800 dark:text-white capitalize">{storeName}</h1>
+                  {store.description && (
+                    <p className="text-sm text-slate-550 dark:text-slate-400 mt-1 max-w-xl font-semibold leading-snug">{store.description}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-slate-400 dark:text-slate-500 mt-2 font-bold">
+                    <span className="flex items-center gap-1">
+                      <MapPin size={12} className="text-brand-primary" />
+                      {store.district}, Libreville ({store.address})
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Phone size={12} className="text-brand-safran" />
+                      Tél : {store.phone}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -114,9 +132,6 @@ export default async function StorePage({
                     />
                     {activeCategory !== 'Tous' && <input type="hidden" name="category" value={activeCategory} />}
                  </form>
-                 <Button variant="outline" size="sm" className="h-10 w-10 p-0 rounded-xl md:hidden">
-                   <SlidersHorizontal size={18} />
-                 </Button>
               </div>
             </div>
           </div>
@@ -156,45 +171,12 @@ export default async function StorePage({
 
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Filters (Desktop) */}
-            <aside className="hidden lg:block w-64 space-y-8 flex-shrink-0">
-              <div className="glass-card rounded-[2rem] p-6 border-luminous shadow-sm space-y-6 bg-white/40 dark:bg-slate-800/30 backdrop-blur-md">
-                <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Filter size={18} /> Filtres
-                </h3>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400 block">Prix</label>
-                  <input type="range" className="w-full h-2 bg-slate-200/50 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-primary" />
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400">
-                    <span>0 CFA</span>
-                    <span>50.000 CFA</span>
-                  </div>
-                </div>
-                <div className="h-px bg-slate-200/50 dark:bg-white/5" />
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-slate-500 dark:text-slate-400 block">Disponibilité</label>
-                  <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" className="rounded text-brand-primary border-slate-350 dark:border-white/10" />
-                    <span>En stock</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-                    <input type="checkbox" className="rounded text-brand-primary border-slate-350 dark:border-white/10" />
-                    <span>Promotions</span>
-                  </div>
-                </div>
-              </div>
-            </aside>
-
             {/* Product Grid */}
             <main className="flex-1 space-y-6">
               <div className="flex justify-between items-center">
                 <p className="text-slate-500 text-sm font-medium">
                   <span className="text-slate-850 dark:text-white font-bold">{products.length}</span> produits trouvés
                 </p>
-                <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg p-1">
-                  <button className="p-1.5 rounded bg-slate-105 dark:bg-slate-700 text-brand-primary"><LayoutGrid size={18} /></button>
-                  <button className="p-1.5 rounded text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-750"><List size={18} /></button>
-                </div>
               </div>
 
               {products.length === 0 ? (
@@ -236,11 +218,7 @@ export default async function StorePage({
                 </div>
               )}
 
-              <div className="flex justify-center pt-8 pb-12">
-                <Button variant="outline" className="px-12 border-slate-300 dark:border-white/20">
-                  Charger plus de produits
-                </Button>
-              </div>
+
             </main>
           </div>
         </div>

@@ -39,7 +39,7 @@ export const BottomTabBar = () => {
 
           return (
             <Link
-              key={item.href}
+              key={item.label}
               href={item.href}
               className="flex flex-col items-center justify-center flex-1 min-w-0 transition-colors"
             >

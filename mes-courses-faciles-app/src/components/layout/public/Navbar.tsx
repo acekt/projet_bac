@@ -24,11 +24,13 @@ export function Navbar() {
         {/* Mobile Menu & Logo */}
         <div className="flex items-center gap-4 lg:hidden">
           <Sheet>
-            <SheetTrigger>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
+            <SheetTrigger
+              render={
+                <Button variant="ghost" size="icon" className="shrink-0" />
+              }
+            >
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle menu</span>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
@@ -38,8 +40,6 @@ export function Navbar() {
               </SheetHeader>
               <nav className="flex flex-col gap-4 mt-8">
                 <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">Accueil</Link>
-                <Link href="/categories" className="text-lg font-medium hover:text-primary transition-colors">Catégories</Link>
-                <Link href="/stores" className="text-lg font-medium hover:text-primary transition-colors">Magasins</Link>
 
                 <div className="h-px bg-border my-4" />
 
@@ -106,15 +106,17 @@ export function Navbar() {
              {isAuthenticated ? (
                 <div className="flex items-center gap-2">
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/10 hover:text-accent p-2 rounded-full ring-0 focus-visible:ring-0 cursor-pointer">
-                          <Avatar className="h-8 w-8 bg-primary/10 text-primary">
-                            <AvatarFallback className="font-bold bg-transparent text-primary border border-primary/20">
-                              {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="max-w-[100px] truncate font-medium">{user?.name || 'Compte'}</span>
-                        </Button>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/10 hover:text-accent p-2 rounded-full ring-0 focus-visible:ring-0 cursor-pointer" />
+                        }
+                      >
+                        <Avatar className="h-8 w-8 bg-primary/10 text-primary">
+                          <AvatarFallback className="font-bold bg-transparent text-primary border border-primary/20">
+                            {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="max-w-[100px] truncate font-medium">{user?.name || 'Compte'}</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>

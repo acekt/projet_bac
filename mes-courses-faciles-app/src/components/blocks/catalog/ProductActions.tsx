@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Minus, Plus } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Heart, Check } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface ProductActionsProps {
   id: string;
@@ -20,9 +22,39 @@ interface ProductActionsProps {
 export function ProductActions({ id, name, price, category, unit, images, storeId }: ProductActionsProps) {
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const router = useRouter();
   const pathname = usePathname();
   const [quantity, setQuantity] = useState(1);
+  const [isAdded, setIsAdded] = useState(false);
+
+  const isFav = isFavorite(id);
+
+  const handleToggleFavorite = () => {
+    if (!user) {
+      router.push(`?auth=login&callbackUrl=${encodeURIComponent(pathname)}`);
+      return;
+    }
+
+    const firstImage = (() => {
+      try {
+        const parsed = JSON.parse(images || '[]');
+        return parsed[0] || '';
+      } catch {
+        return images || '';
+      }
+    })();
+
+    toggleFavorite({
+      id,
+      name,
+      price,
+      category,
+      unit: unit || 'unité',
+      image: firstImage,
+      storeId,
+    });
+  };
 
   const handleAddToCart = () => {
     if (!user) {
@@ -34,7 +66,7 @@ export function ProductActions({ id, name, price, category, unit, images, storeI
       try {
         const parsed = JSON.parse(images || '[]');
         return parsed[0] || '';
-      } catch (e) {
+      } catch {
         return images || '';
       }
     })();
@@ -50,14 +82,17 @@ export function ProductActions({ id, name, price, category, unit, images, storeI
         storeId,
       });
     }
+
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 1000);
   };
 
   return (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-4">
       <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-2xl p-1">
         <button
           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-          className="h-12 w-12 flex items-center justify-center text-slate-600 dark:text-slate-350 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all"
+          className="h-12 w-12 flex items-center justify-center text-slate-600 dark:text-slate-350 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all cursor-pointer"
           aria-label="Diminuer la quantité"
         >
           <Minus size={20} />
@@ -65,7 +100,7 @@ export function ProductActions({ id, name, price, category, unit, images, storeI
         <span className="w-12 text-center font-extrabold text-xl text-slate-800 dark:text-white">{quantity}</span>
         <button
           onClick={() => setQuantity(quantity + 1)}
-          className="h-12 w-12 flex items-center justify-center text-slate-600 dark:text-slate-350 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all"
+          className="h-12 w-12 flex items-center justify-center text-slate-600 dark:text-slate-350 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded-xl transition-all cursor-pointer"
           aria-label="Augmenter la quantité"
         >
           <Plus size={20} />
@@ -74,10 +109,33 @@ export function ProductActions({ id, name, price, category, unit, images, storeI
       <Button
         onClick={handleAddToCart}
         size="lg"
-        className="flex-1 h-14 rounded-2xl shadow-xl shadow-brand-primary/30"
+        className={cn(
+          "flex-1 h-14 rounded-2xl shadow-xl transition-all cursor-pointer",
+          isAdded 
+            ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-550/20" 
+            : "bg-brand-primary hover:bg-brand-primary/90 text-white shadow-brand-primary/30"
+        )}
       >
-        <ShoppingCart className="mr-2" size={24} />
-        Ajouter au panier
+        {isAdded ? (
+          <>
+            <Check className="mr-2 animate-scale-in" size={24} strokeWidth={2.5} />
+            Ajouté !
+          </>
+        ) : (
+          <>
+            <ShoppingCart className="mr-2" size={24} />
+            Ajouter au panier
+          </>
+        )}
+      </Button>
+      <Button
+        onClick={handleToggleFavorite}
+        variant="outline"
+        size="icon"
+        className="h-14 w-14 rounded-2xl border-slate-200 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:text-red-500 transition-all flex-shrink-0 cursor-pointer"
+        aria-label="Ajouter aux favoris"
+      >
+        <Heart className={cn("h-6 w-6 transition-all duration-300", isFav ? "fill-red-500 text-red-500 scale-110" : "text-slate-500")} />
       </Button>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -8,38 +8,88 @@ import { Button } from '@/components/ui/button';
 import { ShoppingBag, Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { Separator } from '@/components/ui/separator';
+import { motion } from 'framer-motion';
 
-export function CartDrawer({ isBottomTab = false }: { isBottomTab?: boolean }) {
+export function CartDrawer({ isBottomTab = false, isFloating = false }: { isBottomTab?: boolean; isFloating?: boolean }) {
   const { cart, removeFromCart, updateQuantity, totalItems, totalPrice, deliveryFee } = useCart();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isBouncing, setIsBouncing] = useState(false);
+  const prevTotalItems = useRef(totalItems);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (totalItems > prevTotalItems.current) {
+      setIsBouncing(true);
+      timer = setTimeout(() => setIsBouncing(false), 500);
+    }
+    prevTotalItems.current = totalItems;
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [totalItems]);
+
+  if (isFloating && totalItems === 0) return null;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      {isBottomTab ? (
+      {isFloating ? (
+        <div className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50">
+          <SheetTrigger
+            render={
+              <button className="relative h-14 w-14 rounded-full bg-brand-primary hover:bg-brand-primary/95 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-xl shadow-brand-primary/35 border border-white/10 cursor-pointer outline-none" />
+            }
+          >
+            <motion.div
+              animate={isBouncing ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="relative flex items-center justify-center"
+            >
+              <ShoppingBag className="h-6 w-6" strokeWidth={2.5} />
+              {totalItems > 0 && (
+                <span className="absolute -top-3.5 -right-3.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-extrabold text-white border-2 border-white animate-scale-in">
+                  {totalItems}
+                </span>
+              )}
+            </motion.div>
+          </SheetTrigger>
+        </div>
+      ) : isBottomTab ? (
         <SheetTrigger
           render={
             <button className="relative p-1 rounded-xl transition-all text-muted-foreground hover:text-primary outline-none" />
           }
         >
-          <ShoppingBag size={24} strokeWidth={isOpen ? 2.5 : 2} className={isOpen ? 'text-primary' : ''} />
-          {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
-              {totalItems}
-            </span>
-          )}
+          <motion.div
+            animate={isBouncing ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="relative flex items-center justify-center"
+          >
+            <ShoppingBag size={24} strokeWidth={isOpen ? 2.5 : 2} className={isOpen ? 'text-primary' : ''} />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
+                {totalItems}
+              </span>
+            )}
+          </motion.div>
         </SheetTrigger>
       ) : (
         <SheetTrigger
           render={
-            <Button variant="ghost" size="icon" className="relative hover:bg-accent/10 hover:text-accent transition-colors" />
+            <Button variant="ghost" size="icon" className="relative hover:bg-accent/10 hover:text-accent transition-colors cursor-pointer" />
           }
         >
-          <ShoppingBag className="h-6 w-6" />
-          {totalItems > 0 && (
-            <span className="absolute -top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
-              {totalItems}
-            </span>
-          )}
+          <motion.div
+            animate={isBouncing ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="relative flex items-center justify-center"
+          >
+            <ShoppingBag className="h-6 w-6" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-foreground border-2 border-background">
+                {totalItems}
+              </span>
+            )}
+          </motion.div>
           <span className="sr-only">Panier</span>
         </SheetTrigger>
       )}

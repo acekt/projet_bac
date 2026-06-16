@@ -18,137 +18,127 @@ import { SessionUser } from '@/types';
 export const dynamic = 'force-dynamic';
 
 async function BentoStoreList() {
+  let stores: any[] = [];
   try {
     const allStores = await getCachedActiveStores();
-    const stores = allStores.slice(0, 5);
-
-    if (stores.length === 0) {
-      return (
-        <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center space-y-4">
-          <h3 className="text-xl font-bold text-muted-foreground">Aucun magasin partenaire</h3>
-          <p className="max-w-md mx-auto">Revenez très bientôt pour découvrir nos partenaires.</p>
-        </div>
-      );
-    }
-
-    // Bento Grid Layout: 1 large card (takes 2 cols/rows on desktop), followed by smaller ones
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px]">
-        {stores.map((store, index) => {
-           const isFeatured = index === 0;
-           return (
-               <div key={store.id} className={isFeatured ? "md:col-span-2 md:row-span-2 h-[584px]" : "h-[280px]"}>
-                  <StoreCard
-                    id={store.id}
-                    name={store.name}
-                    image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
-                    location={store.address}
-                    rating={4.8}
-                    deliveryTime="30-45 min"
-                    categories={['Alimentation', 'Hygiène']}
-                    isFeatured={isFeatured}
-                  />
-               </div>
-           );
-        })}
-      </div>
-    );
+    stores = allStores.slice(0, 5);
   } catch (error) {
+    console.error("BentoStoreList load error (silent):", error);
+  }
+
+  if (stores.length === 0) {
     return (
-      <div className="col-span-full p-12 bg-destructive/10 border-2 border-destructive/20 rounded-3xl text-center space-y-4">
-        <h3 className="text-xl font-bold text-destructive">Erreur de connexion</h3>
-        <p className="text-destructive max-w-md mx-auto">Impossible de charger les magasins pour le moment.</p>
+      <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center space-y-4">
+        <h3 className="text-xl font-bold text-muted-foreground">Aucun magasin partenaire</h3>
+        <p className="max-w-md mx-auto">Revenez très bientôt pour découvrir nos partenaires.</p>
       </div>
     );
   }
+
+  // Bento Grid Layout: 1 large card (takes 2 cols/rows on desktop), followed by smaller ones
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[280px]">
+      {stores.map((store, index) => {
+         const isFeatured = index === 0;
+         return (
+             <div key={store.id} className={isFeatured ? "md:col-span-2 md:row-span-2 h-[584px]" : "h-[280px]"}>
+                <StoreCard
+                  id={store.id}
+                  name={store.name}
+                  image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
+                  location={store.address}
+                  rating={4.8}
+                  deliveryTime="30-45 min"
+                  categories={['Alimentation', 'Hygiène']}
+                  isFeatured={isFeatured}
+                />
+             </div>
+         );
+      })}
+    </div>
+  );
 }
 
 async function RecommendedStores() {
+  let stores: any[] = [];
   try {
     const allStores = await getCachedActiveStores();
-    const stores = allStores.slice(0, 6);
-
-    if (stores.length === 0) {
-      return (
-        <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center">
-          <p className="text-muted-foreground font-semibold">Aucun magasin disponible.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {stores.map(store => (
-          <div key={store.id} className="h-[280px]">
-            <StoreCard
-              id={store.id}
-              name={store.name}
-              image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
-              location={store.address}
-              rating={4.8}
-              deliveryTime="30-45 min"
-              categories={['Alimentation', 'Hygiène']}
-              isFeatured={false}
-            />
-          </div>
-        ))}
-      </div>
-    );
+    stores = allStores.slice(0, 6);
   } catch (error) {
+    console.error("RecommendedStores load error (silent):", error);
+  }
+
+  if (stores.length === 0) {
     return (
-      <div className="p-6 bg-destructive/10 text-destructive rounded-2xl text-center">
-        Impossible de charger les magasins pour le moment.
+      <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center">
+        <p className="text-muted-foreground font-semibold">Aucun magasin disponible.</p>
       </div>
     );
   }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {stores.map(store => (
+        <div key={store.id} className="h-[280px]">
+          <StoreCard
+            id={store.id}
+            name={store.name}
+            image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
+            location={store.address}
+            rating={4.8}
+            deliveryTime="30-45 min"
+            categories={['Alimentation', 'Hygiène']}
+            isFeatured={false}
+          />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 async function SuggestedProducts() {
+  let products: any[] = [];
   try {
-    const products = await prisma.product.findMany({
+    products = await prisma.product.findMany({
       where: { isActive: true },
       take: 8,
     });
-
-    if (products.length === 0) {
-      return (
-        <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center">
-          <p className="text-muted-foreground font-semibold">Aucun produit recommandé pour le moment.</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map(product => {
-          let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
-          try {
-            const parsed = JSON.parse(product.images || '[]');
-            if (parsed.length > 0) imgUrl = parsed[0];
-          } catch (e) {}
-
-          return (
-            <ProductCard
-              key={product.id}
-              id={product.id}
-              name={product.name}
-              price={product.price}
-              category={product.category}
-              unit={product.unit || 'unité'}
-              storeId={product.storeId}
-              image={imgUrl}
-            />
-          );
-        })}
-      </div>
-    );
   } catch (error) {
+    console.error("SuggestedProducts load error (silent):", error);
+  }
+
+  if (products.length === 0) {
     return (
-      <div className="p-6 bg-destructive/10 text-destructive rounded-2xl text-center">
-        Impossible de charger les suggestions de produits pour le moment.
+      <div className="col-span-full p-12 bg-muted border-2 border-dashed border-border rounded-3xl text-center">
+        <p className="text-muted-foreground font-semibold">Aucun produit recommandé pour le moment.</p>
       </div>
     );
   }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+      {products.map(product => {
+        let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+        try {
+          const parsed = JSON.parse(product.images || '[]');
+          if (parsed.length > 0) imgUrl = parsed[0];
+        } catch (e) {}
+
+        return (
+          <ProductCard
+            key={product.id}
+            id={product.id}
+            name={product.name}
+            price={product.price}
+            category={product.category}
+            unit={product.unit || 'unité'}
+            storeId={product.storeId}
+            image={imgUrl}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 export default async function HomePage() {

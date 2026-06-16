@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search as SearchIcon, Filter, X, ArrowRight, Apple, Sprout, CupSoda, Sparkles, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search as SearchIcon, X, ArrowRight, Apple, Sprout, CupSoda, Sparkles, Loader2 } from 'lucide-react';
+
 import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import { Card } from '@/components/ui/card';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
@@ -99,17 +99,7 @@ function SearchContent() {
           </div>
         </motion.div>
 
-        {/* Filters */}
-        <motion.div variants={itemVariants} className="flex gap-2.5 overflow-x-auto no-scrollbar pb-2">
-           <Button variant="outline" size="sm" className="rounded-full gap-2 border-white/20 bg-white/40 dark:bg-slate-800/30 backdrop-blur-md shadow-sm hover:bg-white/60 active:scale-95 transition-all text-xs font-bold text-foreground cursor-pointer">
-             <Filter size={14} /> Filtres
-           </Button>
-           {['Boutiques', 'Produits', 'Promotions'].map(cat => (
-             <Button key={cat} variant="ghost" size="sm" className="rounded-full border border-white/10 bg-white/25 dark:bg-slate-800/20 backdrop-blur-md shadow-sm hover:bg-white/55 active:scale-95 transition-all text-xs font-bold text-muted-foreground hover:text-foreground cursor-pointer">
-               {cat}
-             </Button>
-           ))}
-        </motion.div>
+
 
         <AnimatePresence mode="wait">
           {!query ? (

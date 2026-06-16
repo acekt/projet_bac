@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Package, MapPin, Heart, Bell, Settings, LogOut, ChevronRight, ShoppingBag, Truck, CheckCircle2, Clock, XCircle, Calendar, Mail } from 'lucide-react';
+import { Package, Heart, LogOut, ChevronRight, ShoppingBag, Truck, CheckCircle2, Clock, XCircle, Calendar, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { BackButton } from '@/components/common/BackButton';
 import { Order as OrderType } from '@/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { logoutAction } from '@/actions/auth';
+import { OrderDetailsSheet } from './OrderDetailsSheet';
 
 interface ProfileClientProps {
   initialUser: {
@@ -29,6 +30,8 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
   const defaultTab = searchParams.get('tab') || 'profile';
 
   const [orders] = useState<OrderType[]>(initialOrders);
+  const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
     localStorage.removeItem('mcf_user_data');
@@ -39,9 +42,6 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
 
   const MENU_ITEMS = [
     { icon: Heart, label: 'Mes Favoris', href: '/favorites', color: 'text-red-500 bg-red-50' },
-    { icon: MapPin, label: 'Adresses enregistrées', href: '/addresses', color: 'text-green-500 bg-green-50' },
-    { icon: Bell, label: 'Notifications', href: '/notifications', color: 'text-orange-500 bg-orange-50' },
-    { icon: Settings, label: 'Paramètres', href: '/settings', color: 'text-slate-500 bg-slate-50' },
   ];
 
   const getStatusDisplay = (status: string) => {
@@ -135,18 +135,7 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
               </div>
             </Card>
 
-            {/* Support Section */}
-            <Card className="p-8 bg-foreground text-background relative overflow-hidden rounded-3xl border-none">
-               <div className="relative z-10 space-y-4 max-w-sm">
-                 <h3 className="text-2xl font-black">Besoin d&apos;aide ?</h3>
-                 <p className="text-muted text-sm leading-relaxed">Notre équipe est disponible 7j/7 pour vous accompagner dans vos courses et le suivi de vos livraisons.</p>
-                 <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border-none shadow-lg shadow-primary/20 rounded-xl font-bold mt-2">
-                   Contacter le support
-                 </Button>
-               </div>
-               <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
-               <ShoppingBag size={140} className="absolute -bottom-8 -right-8 text-background/10 rotate-12" />
-            </Card>
+
           </TabsContent>
 
           <TabsContent value="orders" className="space-y-6 focus-visible:outline-none focus-visible:ring-0">
@@ -168,7 +157,11 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
                   const StatusIcon = status.icon;
 
                   return (
-                    <Card key={order.id} className="p-6 border-border/50 hover:shadow-md transition-all duration-300 rounded-3xl overflow-hidden relative">
+                    <Card 
+                      key={order.id} 
+                      onClick={() => { setSelectedOrder(order); setIsSheetOpen(true); }}
+                      className="p-6 border-border/50 hover:border-brand-primary/40 hover:shadow-md transition-all duration-300 rounded-3xl overflow-hidden relative cursor-pointer group"
+                    >
                       {/* Timeline Visual */}
                       <div className="absolute top-0 left-0 w-1.5 h-full bg-muted">
                           <div className={`w-full ${order.status === 'DELIVERED' ? 'h-full bg-green-500' : order.status === 'SHIPPED' ? 'h-2/3 bg-purple-500' : order.status === 'CANCELLED' ? 'h-full bg-red-500' : 'h-1/3 bg-yellow-500'}`} />
@@ -194,7 +187,7 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
                               <p className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{order.total.toLocaleString()} <span className="text-sm font-bold text-muted-foreground">CFA</span></p>
                             </div>
                             <Separator orientation="vertical" className="h-10 hidden md:block" />
-                            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted text-muted-foreground hover:text-foreground">
+                            <Button variant="ghost" size="icon" className="rounded-full hover:bg-muted text-muted-foreground group-hover:text-brand-primary group-hover:translate-x-1 transition-all">
                               <ChevronRight size={24} />
                             </Button>
                           </div>
@@ -208,6 +201,12 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
           </TabsContent>
         </Tabs>
       </div>
+
+      <OrderDetailsSheet 
+        isOpen={isSheetOpen} 
+        onClose={() => setIsSheetOpen(false)} 
+        order={selectedOrder} 
+      />
     </div>
   );
 }

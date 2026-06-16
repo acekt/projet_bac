@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { AuthModalWrapper } from "@/components/blocks/auth/AuthModalWrapper";
 import { ToastProvider } from "@/context/ToastContext";
+import { FloatingCartButton } from "@/components/blocks/cart/FloatingCartButton";
 
 const geist = Geist({
   subsets: ['latin'],
@@ -42,6 +43,7 @@ export default function RootLayout({
               <ToastProvider>
                 {children}
                 <AuthModalWrapper />
+                <FloatingCartButton />
               </ToastProvider>
             </CartProvider>
           </AuthProvider>

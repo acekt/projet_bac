@@ -7,15 +7,28 @@ import { BackButton } from '@/components/common/BackButton';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const product = await prisma.product.findUnique({
     where: { id },
-    select: { name: true, description: true }
+    select: { 
+      name: true, 
+      description: true,
+      isActive: true,
+      isDeleted: true,
+      store: {
+        select: {
+          isActive: true,
+          isDeleted: true
+        }
+      }
+    }
   });
+  const isAvailable = product && product.isActive && !product.isDeleted && product.store && product.store.isActive && !product.store.isDeleted;
   return {
-    title: product ? `${product.name} | MesAchats241` : 'Produit | MesAchats241',
+    title: isAvailable ? `${product.name} | MesAchats241` : 'Produit | MesAchats241',
     description: product?.description || 'Achetez vos produits en ligne à Libreville.',
   };
 }
@@ -26,17 +39,43 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await prisma.product.findUnique({
     where: { id },
     include: {
-      store: {
-        select: {
-          name: true,
-        }
-      }
+      store: true
     }
   });
 
-  if (!product) {
+  if (!product || !product.isActive || product.isDeleted || !product.store || !product.store.isActive || product.store.isDeleted) {
     notFound();
   }
+
+  // Get up to 4 other active products from the same store
+  const recommendedProducts = await prisma.product.findMany({
+    where: {
+      storeId: product.storeId,
+      id: { not: product.id },
+      isActive: true,
+      isDeleted: false,
+    },
+    take: 4,
+  });
+
+  const formattedRecommended = recommendedProducts.map((p) => {
+    let img = '';
+    try {
+      const parsed = JSON.parse(p.images || '[]');
+      img = parsed[0] || '';
+    } catch (e) {
+      img = p.images || '';
+    }
+    return {
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      image: img,
+      category: p.category,
+      unit: p.unit || 'unité',
+      storeId: p.storeId,
+    };
+  });
 
   return (
     <PageWrapper>
@@ -121,6 +160,21 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
           </div>
+
+          {/* Recommended Products */}
+          {formattedRecommended.length > 0 && (
+            <div className="mt-20 pt-12 border-t border-slate-100 dark:border-white/5 space-y-8">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-slate-800 dark:text-white">Produits recommandés</h2>
+                <p className="text-slate-500 font-semibold text-sm">Découvrez d&apos;autres articles disponibles dans la boutique {product.store?.name}</p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {formattedRecommended.map((p) => (
+                  <ProductCard key={p.id} {...p} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </PageWrapper>

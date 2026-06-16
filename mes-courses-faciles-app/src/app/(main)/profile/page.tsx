@@ -37,7 +37,11 @@ export default async function ProfilePage() {
   const orders = await prisma.order.findMany({
     where: { userId: user.id },
     include: {
-      orderItems: true,
+      orderItems: {
+        include: {
+          product: true,
+        }
+      },
       store: true,
     },
     orderBy: { createdAt: 'desc' },
@@ -63,7 +67,26 @@ export default async function ProfilePage() {
       logo: order.store.logo,
       description: order.store.description,
       isActive: order.store.isActive,
-    } : undefined
+    } : undefined,
+    orderItems: order.orderItems.map(item => ({
+      id: item.id,
+      orderId: item.orderId,
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.price,
+      product: item.product ? {
+        id: item.product.id,
+        name: item.product.name,
+        description: item.product.description,
+        price: item.product.price,
+        category: item.product.category,
+        stock: item.product.stock,
+        unit: item.product.unit,
+        images: item.product.images,
+        isActive: item.product.isActive,
+        storeId: item.product.storeId,
+      } : undefined
+    }))
   }));
 
   // Map user to match the props structure expected

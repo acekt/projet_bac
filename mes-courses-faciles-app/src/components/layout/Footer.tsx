@@ -47,11 +47,7 @@ export const Footer = () => {
                   Devenir partenaire
                 </a>
               </li>
-              <li>
-                <Link href="/#blog" className="hover:text-white transition-colors">
-                  Blog
-                </Link>
-              </li>
+
             </ul>
           </div>
 
@@ -98,11 +94,7 @@ export const Footer = () => {
 
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-xs font-medium">
           <p>© {new Date().getFullYear()} Mes Courses Faciles - Fait avec passion à Libreville.</p>
-          <div className="flex gap-6">
-             <span className="hover:text-white cursor-pointer">Mentions Légales</span>
-             <span className="hover:text-white cursor-pointer">Confidentialité</span>
-             <span className="hover:text-white cursor-pointer">CGV</span>
-          </div>
+
         </div>
       </div>
     </footer>
