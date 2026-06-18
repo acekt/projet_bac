@@ -2,26 +2,16 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { cookies } from "next/headers";
-import { verifyJWT } from "@/lib/jwt";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
 import fs from "fs";
 import path from "path";
+import { requireAdminAuth, AuthError } from "@/lib/auth-guard";
 
 const PREFERENCES_FILE_PATH = path.join(process.cwd(), "src/data/preferences.json");
 
-// Helper to verify the admin session
-async function getAdminUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("mcf_jwt_session")?.value;
-  if (!token) return null;
-  const decoded = await verifyJWT(token);
-  if (!decoded || decoded.role !== "ADMIN") return null;
-  return decoded;
-}
+// ─── Zod Schemas ───────────────────────────────────────────────────────────────
 
-// Zod schemas for validation
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   email: z.string().email("Format d'email invalide"),
@@ -48,14 +38,25 @@ const platformPreferencesSchema = z.object({
   supportContact: z.string().min(5, "Contact de support invalide"),
 });
 
-// Fetch current admin details from database
+const createUserSchema = z.object({
+  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  email: z.string().email("Format d'email invalide"),
+  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+  role: z.enum(["CLIENT", "ADMIN"]),  // Doit correspondre à l'enum Role Prisma
+});
+
+// ─── Admin Profile ─────────────────────────────────────────────────────────────
+
+/**
+ * Récupère le profil de l'admin connecté.
+ * Zero-Trust : userId extrait de la session — jamais du client.
+ */
 export async function getAdminProfileAction() {
   try {
-    const adminSession = await getAdminUser();
-    if (!adminSession) return { success: false, error: "Non autorisé" };
+    const session = await requireAdminAuth();
 
     const admin = await prisma.user.findUnique({
-      where: { id: adminSession.id as string },
+      where: { id: session.id },          // ← session serveur
       select: {
         id: true,
         name: true,
@@ -69,24 +70,27 @@ export async function getAdminProfileAction() {
 
     if (!admin) return { success: false, error: "Administrateur non trouvé" };
     return { success: true, admin };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
-// Update admin details in database
+/**
+ * Met à jour le profil de l'admin connecté.
+ * Zero-Trust : `where: { id: session.id }` — impossible de modifier un autre compte.
+ */
 export async function updateAdminProfileAction(data: z.infer<typeof updateProfileSchema>) {
   try {
-    const adminSession = await getAdminUser();
-    if (!adminSession) return { success: false, error: "Non autorisé" };
+    const session = await requireAdminAuth();
 
     const validated = updateProfileSchema.parse(data);
 
-    // Check if email is already taken by another user
+    // Vérifier si l'email est déjà pris par un AUTRE utilisateur
     const existing = await prisma.user.findFirst({
       where: {
         email: validated.email,
-        NOT: { id: adminSession.id as string },
+        NOT: { id: session.id },           // ← session.id, jamais du client
       },
     });
 
@@ -95,69 +99,61 @@ export async function updateAdminProfileAction(data: z.infer<typeof updateProfil
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: adminSession.id as string },
+      where: { id: session.id },          // ← Zero-Trust : verrouillé sur session
       data: {
-        name: validated.name,
-        email: validated.email,
-        phone: validated.phone || null,
+        name:    validated.name,
+        email:   validated.email,
+        phone:   validated.phone || null,
         address: validated.address || null,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        role: true,
-      },
+      select: { id: true, name: true, email: true, phone: true, address: true, role: true },
     });
 
     revalidatePath("/admin/settings");
     return { success: true, user: updatedUser };
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    if (e instanceof z.ZodError) return { success: false, error: e.issues[0].message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
-// Update admin password
+/**
+ * Met à jour le mot de passe de l'admin connecté.
+ * Zero-Trust : `where: { id: session.id }` — impossible de changer le mdp d'un autre.
+ */
 export async function updateAdminPasswordAction(data: z.infer<typeof updatePasswordSchema>) {
   try {
-    const adminSession = await getAdminUser();
-    if (!adminSession) return { success: false, error: "Non autorisé" };
+    const session = await requireAdminAuth();
 
     const validated = updatePasswordSchema.parse(data);
 
-    // Fetch user including password
+    // Récupère le hash actuel depuis la session sécurisée uniquement
     const user = await prisma.user.findUnique({
-      where: { id: adminSession.id as string },
+      where: { id: session.id },          // ← Zero-Trust
     });
 
     if (!user) return { success: false, error: "Utilisateur introuvable" };
 
-    // Verify current password
     const match = await bcrypt.compare(validated.currentPassword, user.password);
     if (!match) return { success: false, error: "Mot de passe actuel incorrect" };
 
-    // Hash new password
     const hashedPassword = await bcrypt.hash(validated.newPassword, 10);
 
-    // Update in database
     await prisma.user.update({
-      where: { id: adminSession.id as string },
+      where: { id: session.id },          // ← Zero-Trust
       data: { password: hashedPassword },
     });
 
     return { success: true };
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    if (e instanceof z.ZodError) return { success: false, error: e.issues[0].message };
+    return { success: false, error: (e as Error).message };
   }
 }
+
+// ─── Platform Preferences ─────────────────────────────────────────────────────
 
 const readPreferencesFileCached = unstable_cache(
   async () => {
@@ -178,72 +174,71 @@ const readPreferencesFileCached = unstable_cache(
       return defaultPrefs;
     }
 
-    const rawData = fs.readFileSync(PREFERENCES_FILE_PATH, "utf-8");
-    return JSON.parse(rawData);
+    const content = fs.readFileSync(PREFERENCES_FILE_PATH, "utf-8");
+    return { ...defaultPrefs, ...JSON.parse(content) };
   },
   ["platform-preferences"],
-  {
-    tags: ["preferences"]
-  }
+  { tags: ["preferences"] }
 );
 
-// Fetch platform preferences (stored in JSON)
 export async function getPlatformPreferencesAction() {
   try {
-    const adminSession = await getAdminUser();
-    if (!adminSession) return { success: false, error: "Non autorisé" };
-
-    const preferences = await readPreferencesFileCached();
-    return { success: true, preferences };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+    await requireAdminAuth();
+    const prefs = await readPreferencesFileCached();
+    return { success: true, preferences: prefs };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
-// Update platform preferences (stored in JSON)
 export async function updatePlatformPreferencesAction(data: z.infer<typeof platformPreferencesSchema>) {
   try {
-    const adminSession = await getAdminUser();
-    if (!adminSession) return { success: false, error: "Non autorisé" };
+    await requireAdminAuth();
 
     const validated = platformPreferencesSchema.parse(data);
 
-    // Ensure directory exists
     const dir = path.dirname(PREFERENCES_FILE_PATH);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-
     fs.writeFileSync(PREFERENCES_FILE_PATH, JSON.stringify(validated, null, 2));
 
     revalidateTag("preferences");
     revalidatePath("/admin/settings");
-    return { success: true, preferences: validated };
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return { success: false, error: error.message };
+    return { success: true };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    if (e instanceof z.ZodError) return { success: false, error: e.issues[0].message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
-// Schema for manual user creation by admin
-const createUserSchema = z.object({
-  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  email: z.string().email("Format d'email invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  role: z.enum(["CLIENT", "ADMIN"]),
-});
+// ─── User Management (Admin only) ─────────────────────────────────────────────
 
-// Action to create user manually
+export async function getAdminDashboardStatsAction() {
+  try {
+    await requireAdminAuth();
+
+    const [totalOrders, totalUsers, activeStores] = await Promise.all([
+      prisma.order.count(),
+      prisma.user.count({ where: { role: "CLIENT" } }),  // Enum Prisma = CLIENT
+      prisma.store.count({ where: { isActive: true, isDeleted: false } }),
+    ]);
+
+    return { success: true, stats: { totalOrders, totalUsers, activeStores } };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
+  }
+}
+
 export async function createUserAction(data: z.infer<typeof createUserSchema>) {
   try {
-    const admin = await getAdminUser();
-    if (!admin) return { success: false, error: "Non autorisé" };
+    await requireAdminAuth();
 
     const validated = createUserSchema.parse(data);
 
-    // Check if email is already taken
     const existing = await prisma.user.findUnique({
       where: { email: validated.email },
     });
@@ -256,32 +251,35 @@ export async function createUserAction(data: z.infer<typeof createUserSchema>) {
 
     const newUser = await prisma.user.create({
       data: {
-        name: validated.name,
-        email: validated.email,
+        name:     validated.name,
+        email:    validated.email,
         password: hashedPassword,
-        role: validated.role,
+        role:     validated.role,
         isActive: true,
       },
     });
 
     revalidatePath("/admin/users");
     return { success: true, user: { id: newUser.id, name: newUser.name, email: newUser.email } };
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
-    }
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    if (e instanceof z.ZodError) return { success: false, error: e.issues[0].message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
-// Action to enable/suspend user account access
+/**
+ * Active ou suspend un compte utilisateur.
+ * Garde-fou : Un admin ne peut pas suspendre son propre compte.
+ * IDOR-safe : la cible est `userId` (ID d'un autre user), validée côté serveur.
+ *             L'admin qui agit est identifié par `session.id`, jamais par le client.
+ */
 export async function updateUserStatusAction(userId: string, isActive: boolean) {
   try {
-    const admin = await getAdminUser();
-    if (!admin) return { success: false, error: "Non autorisé" };
+    const session = await requireAdminAuth();
 
-    // Prevent admin from suspending their own account
-    if (userId === admin.id) {
+    // Garde-fou anti-suicide : l'admin ne peut pas se suspendre lui-même
+    if (userId === session.id) {
       return { success: false, error: "Vous ne pouvez pas suspendre votre propre compte" };
     }
 
@@ -292,15 +290,17 @@ export async function updateUserStatusAction(userId: string, isActive: boolean) 
 
     revalidatePath("/admin/users");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
+// ─── Notifications ─────────────────────────────────────────────────────────────
+
 export async function markNotificationAsReadAction(id: string) {
   try {
-    const admin = await getAdminUser();
-    if (!admin) return { success: false, error: "Non autorisé" };
+    await requireAdminAuth();
 
     await prisma.notification.update({
       where: { id },
@@ -310,15 +310,15 @@ export async function markNotificationAsReadAction(id: string) {
     revalidatePath("/admin");
     revalidatePath("/admin/notifications");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
 export async function markAllNotificationsAsReadAction() {
   try {
-    const admin = await getAdminUser();
-    if (!admin) return { success: false, error: "Non autorisé" };
+    await requireAdminAuth();
 
     await prisma.notification.updateMany({
       where: { isRead: false },
@@ -328,15 +328,15 @@ export async function markAllNotificationsAsReadAction() {
     revalidatePath("/admin");
     revalidatePath("/admin/notifications");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }
 
 export async function deleteNotificationAction(id: string) {
   try {
-    const admin = await getAdminUser();
-    if (!admin) return { success: false, error: "Non autorisé" };
+    await requireAdminAuth();
 
     await prisma.notification.delete({
       where: { id },
@@ -345,7 +345,8 @@ export async function deleteNotificationAction(id: string) {
     revalidatePath("/admin");
     revalidatePath("/admin/notifications");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }

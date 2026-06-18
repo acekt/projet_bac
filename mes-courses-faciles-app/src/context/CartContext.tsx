@@ -43,6 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const isInitialMount = useRef(true);
   const isSyncingFromServer = useRef(false);
+  const prevUserRef = useRef(user);
   const [conflictProduct, setConflictProduct] = useState<Omit<CartItem, 'quantity'> | null>(null);
 
   // Load cart from server if logged in, otherwise from localStorage
@@ -50,32 +51,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const loadCart = async () => {
       if (user) {
         isSyncingFromServer.current = true;
-        const res = await fetchUserCartAction(user.id);
-        if (res.success && res.cart && res.cart.length > 0) {
-          setCart(res.cart as CartItem[]);
-          localStorage.setItem('mcf_cart', JSON.stringify(res.cart));
-        } else {
-           // If server cart is empty but local is not, we should probably sync local to server
-           const savedCart = localStorage.getItem('mcf_cart');
-           if (savedCart) {
-              const parsed = JSON.parse(savedCart);
-              setCart(parsed);
-              if (parsed.length > 0) {
-                 await syncCartAction(user.id, parsed);
-              }
-           }
+        try {
+          // Zero-Trust : le userId est extrait de la session côté serveur
+          const res = await fetchUserCartAction();
+          if (res.success && res.cart) {
+            setCart(res.cart as CartItem[]);
+            localStorage.setItem('mcf_cart', JSON.stringify(res.cart));
+          } else {
+            // Server cart is empty/unavailable, override local cart to empty
+            setCart([]);
+            localStorage.removeItem('mcf_cart');
+          }
+        } catch (e) {
+          console.error("Failed to load user cart", e);
+          setCart([]);
+          localStorage.removeItem('mcf_cart');
         }
         setTimeout(() => { isSyncingFromServer.current = false; }, 100);
       } else {
-        const savedCart = localStorage.getItem('mcf_cart');
-        if (savedCart) {
-          try {
-            setCart(JSON.parse(savedCart));
-          } catch (e) {
-            console.error("Failed to load cart", e);
+        // Detect logout transition: previous user was logged in, current user is guest
+        const isLogoutTransition = prevUserRef.current !== null;
+        if (isLogoutTransition) {
+          setCart([]);
+          localStorage.removeItem('mcf_cart');
+        } else {
+          // Normal guest cart loading
+          const savedCart = localStorage.getItem('mcf_cart');
+          if (savedCart) {
+            try {
+              setCart(JSON.parse(savedCart));
+            } catch (e) {
+              console.error("Failed to load guest cart", e);
+              setCart([]);
+            }
+          } else {
+            setCart([]);
           }
         }
       }
+      // Update previous user ref
+      prevUserRef.current = user;
     };
 
     loadCart();
@@ -92,11 +107,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return;
     }
 
+    // Detect login transition: previous was guest, current is user
+    const isLoginTransition = !prevUserRef.current && user;
+    if (isLoginTransition) {
+        return;
+    }
+
     localStorage.setItem('mcf_cart', JSON.stringify(cart));
 
     if (user) {
-        // Debounce or directly sync
-        syncCartAction(user.id, cart).catch(e => console.error("Failed to sync cart", e));
+        // Zero-Trust : userId injecté depuis la session serveur dans syncCartAction
+        syncCartAction(cart).catch(e => console.error("Failed to sync cart", e));
     }
   }, [cart, user]);
 

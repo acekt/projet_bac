@@ -48,8 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     setUser(null);
     localStorage.removeItem('mcf_user_data');
+    localStorage.removeItem('mcf_cart');
     await logoutAction();
     router.push('/');
+    router.refresh();
   };
 
   return (

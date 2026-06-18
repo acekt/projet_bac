@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import prisma from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { CheckoutClientForm } from '@/components/blocks/cart/CheckoutClientForm';
+import { CheckoutWizard } from '@/components/blocks/cart/CheckoutWizard';
 import { SessionUser } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -33,5 +33,5 @@ export default async function CheckoutPage() {
     redirect('/?auth=login&callbackUrl=/checkout');
   }
 
-  return <CheckoutClientForm initialUser={user} />;
+  return <CheckoutWizard initialUser={user} />;
 }

@@ -13,6 +13,7 @@ import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/jwt';
 import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import { PromoCarousel } from '@/components/blocks/home/PromoCarousel';
+import { ActiveOrderTracker } from '@/components/blocks/home/ActiveOrderTracker';
 import { SessionUser } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -153,6 +154,15 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 py-12 space-y-20 animate-in fade-in duration-500">
           {/* Welcome Carousel Banner */}
           <PromoCarousel userName={sessionUser.name || 'Client'} />
+
+          {/* Active Order Tracker Widget */}
+          <Suspense
+            fallback={
+              <div className="h-36 rounded-[2rem] bg-white/40 dark:bg-slate-800/20 border border-slate-200/50 dark:border-white/5 animate-pulse" />
+            }
+          >
+            <ActiveOrderTracker userId={sessionUser.id} userName={sessionUser.name || 'Client'} />
+          </Suspense>
 
           {/* Stores Section (Uniform Grid) */}
           <section className="space-y-8">

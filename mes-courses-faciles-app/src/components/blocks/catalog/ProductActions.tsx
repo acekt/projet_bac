@@ -110,9 +110,9 @@ export function ProductActions({ id, name, price, category, unit, images, storeI
         onClick={handleAddToCart}
         size="lg"
         className={cn(
-          "flex-1 h-14 rounded-2xl shadow-xl transition-all cursor-pointer",
+          "flex-1 h-14 rounded-2xl shadow-xl transition-all duration-200 cursor-pointer active:scale-95 transform-gpu",
           isAdded 
-            ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-550/20" 
+            ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20" 
             : "bg-brand-primary hover:bg-brand-primary/90 text-white shadow-brand-primary/30"
         )}
       >

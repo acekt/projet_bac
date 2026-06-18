@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ProductCard } from '@/components/blocks/catalog/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Search, ChevronRight, PackageX, Phone, MapPin } from 'lucide-react';
-import { PageWrapper } from '@/components/common/PageWrapper';
+import { PageLayout } from '@/components/common/PageLayout';
 import { BackButton } from '@/components/common/BackButton';
 import Link from 'next/link';
 import prisma from '@/lib/prisma';
@@ -75,13 +75,7 @@ export default async function StorePage({
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-mesh bg-noise relative overflow-hidden">
-      {/* Background visual flares */}
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-brand-primary/5 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-safran/5 blur-[80px] pointer-events-none" />
-
-      <PageWrapper>
-      <div className="flex-grow relative z-10">
+    <PageLayout withPadding={false}>
         {/* Store Header */}
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 sticky top-16 md:top-20 z-30">
           <div className="container mx-auto px-4 py-6">
@@ -222,8 +216,6 @@ export default async function StorePage({
             </main>
           </div>
         </div>
-      </div>
-      </PageWrapper>
-    </div>
+    </PageLayout>
   );
 }

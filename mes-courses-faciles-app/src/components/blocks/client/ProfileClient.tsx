@@ -8,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Link from 'next/link';
-import { BackButton } from '@/components/common/BackButton';
+import { PageLayout } from '@/components/common/PageLayout';
+import { PageHeader } from '@/components/common/PageHeader';
 import { Order as OrderType } from '@/types';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { logoutAction } from '@/actions/auth';
+import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import { OrderDetailsSheet } from './OrderDetailsSheet';
 
 interface ProfileClientProps {
@@ -25,19 +26,17 @@ interface ProfileClientProps {
 }
 
 export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps) {
-  const router = useRouter();
+
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'profile';
+  const { logout } = useAuth();
 
   const [orders] = useState<OrderType[]>(initialOrders);
   const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const handleLogout = async () => {
-    localStorage.removeItem('mcf_user_data');
-    await logoutAction();
-    router.push('/');
-    router.refresh();
+    await logout();
   };
 
   const MENU_ITEMS = [
@@ -56,38 +55,41 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
   };
 
   return (
-    <div className="min-h-screen bg-mesh bg-noise relative overflow-hidden py-12">
-      {/* Visual background flares */}
-      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-brand-primary/5 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-safran/5 blur-[80px] pointer-events-none" />
+    <PageLayout withPadding>
+      <div className="container mx-auto px-4 max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* En-tête standardisé avec bouton de déconnexion dans la zone children */}
+        <PageHeader
+          backHref="/"
+          backLabel="Accueil"
+          title={initialUser.name || 'Mon Profil'}
+          subtitle={initialUser.email}
+        >
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive gap-2 font-bold rounded-xl"
+          >
+            <LogOut size={18} /> Déconnexion
+          </Button>
+        </PageHeader>
 
-      <div className="container mx-auto px-4 max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
-        {/* Back Navigation */}
-        <div className="flex justify-start">
-          <BackButton href="/" label="Retour à l'accueil" />
-        </div>
-
-        {/* Profile Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/40 dark:bg-slate-800/30 backdrop-blur-md p-8 rounded-3xl border border-white/30 dark:border-white/10 shadow-sm">
+        {/* Profile Header Card */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-6 bg-white/40 dark:bg-slate-800/30 backdrop-blur-md p-8 rounded-3xl border border-white/30 dark:border-white/10 shadow-sm">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center text-3xl font-black border-4 border-background shadow-md animate-scale-in">
               {initialUser.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="space-y-1.5">
-              <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">{initialUser.name}</h1>
               <p className="text-muted-foreground font-medium flex items-center gap-2">
                 <Mail size={16} /> {initialUser.email}
               </p>
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-2 pt-1">
                 <Badge variant={initialUser.role === 'ADMIN' ? 'default' : 'secondary'} className="rounded-md px-2 py-0.5">
                   {initialUser.role === 'ADMIN' ? 'Administrateur' : 'Client Privilège'}
                 </Badge>
               </div>
             </div>
           </div>
-          <Button onClick={handleLogout} variant="outline" className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive gap-2 font-bold md:w-auto w-full rounded-xl">
-            <LogOut size={18} /> Déconnexion
-          </Button>
         </div>
 
         {/* Dashboard Tabs */}
@@ -207,6 +209,6 @@ export function ProfileClient({ initialUser, initialOrders }: ProfileClientProps
         onClose={() => setIsSheetOpen(false)} 
         order={selectedOrder} 
       />
-    </div>
+    </PageLayout>
   );
 }

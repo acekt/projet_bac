@@ -1,6 +1,6 @@
 {
   "platformName": "MesCoursesFaciles",
-  "defaultDeliveryFee": 1000,
+  "defaultDeliveryFee": 3000,
   "maintenanceMode": false,
   "enableEmailNotifications": true,
   "supportContact": "+241 07 00 00 00"

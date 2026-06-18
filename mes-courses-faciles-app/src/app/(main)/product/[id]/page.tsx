@@ -2,8 +2,8 @@ import React from 'react';
 import { ProductGallery } from '@/components/blocks/catalog/ProductGallery';
 import { ProductActions } from '@/components/blocks/catalog/ProductActions';
 import { ShieldCheck, Truck, RotateCcw } from 'lucide-react';
-import { PageWrapper } from '@/components/common/PageWrapper';
-import { BackButton } from '@/components/common/BackButton';
+import { PageLayout } from '@/components/common/PageLayout';
+import { PageHeader } from '@/components/common/PageHeader';
 import prisma from '@/lib/prisma';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -78,17 +78,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   });
 
   return (
-    <PageWrapper>
-      <div className="min-h-screen bg-mesh bg-noise relative overflow-hidden">
-        {/* Visual background flares */}
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-brand-primary/5 blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-brand-safran/5 blur-[80px] pointer-events-none" />
-
-        <div className="container mx-auto px-4 py-8 relative z-10">
-          {/* Back Navigation */}
-          <div className="mb-8 flex items-center justify-between">
-            <BackButton href={`/store/${product.storeId}`} label={`Retour au magasin ${product.store?.name || ''}`} />
-          </div>
+    <PageLayout withPadding={false}>
+      <div className="container mx-auto px-4 py-8">
+        {/* En-tête standardisé */}
+        <div className="mb-8">
+          <PageHeader
+            backHref={`/store/${product.storeId}`}
+            backLabel={`Retour à ${product.store?.name || 'la boutique'}`}
+          />
+        </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
             {/* Product Gallery */}
@@ -176,7 +174,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </div>
           )}
         </div>
-      </div>
-    </PageWrapper>
+    </PageLayout>
   );
 }
