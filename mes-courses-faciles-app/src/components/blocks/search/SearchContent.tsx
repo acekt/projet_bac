@@ -244,7 +244,7 @@ export function SearchContent({ discoverySlot }: SearchContentProps) {
               ) : results.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
                   {results.map((p) => {
-                    let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                    let imgUrl = '/images/product-placeholder.svg';
                     try {
                       const imgs = JSON.parse(p.images || '[]');
                       if (imgs.length > 0) imgUrl = imgs[0];

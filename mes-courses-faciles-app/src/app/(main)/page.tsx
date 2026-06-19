@@ -46,7 +46,7 @@ async function BentoStoreList() {
                 <StoreCard
                   id={store.id}
                   name={store.name}
-                  image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
+                  image={store.logo || "/images/store-placeholder.svg"}
                   location={store.address}
                   rating={4.8}
                   deliveryTime="30-45 min"
@@ -84,7 +84,7 @@ async function RecommendedStores() {
           <StoreCard
             id={store.id}
             name={store.name}
-            image={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop"}
+            image={store.logo || "/images/store-placeholder.svg"}
             location={store.address}
             rating={4.8}
             deliveryTime="30-45 min"
@@ -119,7 +119,7 @@ async function SuggestedProducts() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
       {products.map(product => {
-        let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+        let imgUrl = '/images/product-placeholder.svg';
         try {
           const parsed = JSON.parse(product.images || '[]');
           if (parsed.length > 0) imgUrl = parsed[0];

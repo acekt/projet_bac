@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={cn("font-sans", geist.variable)}>
+    <html lang="fr" className={cn("font-sans", geist.variable)} data-scroll-behavior="smooth">
       <body className={`${geist.variable} font-sans min-h-screen flex flex-col`}>
         <ErrorBoundary>
           <AuthProvider>

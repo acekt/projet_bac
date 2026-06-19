@@ -283,7 +283,7 @@ export function CheckoutClientForm({ initialUser }: CheckoutClientFormProps) {
                     <div key={item.id} className="flex gap-4 group">
                       <div className="w-16 h-16 bg-muted/50 rounded-xl border border-border/50 flex-shrink-0 relative overflow-hidden">
                         <Image
-                          src={item.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop"}
+                          src={item.image || "/images/product-placeholder.svg"}
                           fill
                           className="object-contain p-2 mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
                           alt={item.name}

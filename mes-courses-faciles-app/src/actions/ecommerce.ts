@@ -75,7 +75,7 @@ export async function createStoreAction(data: z.infer<typeof storeSchema>) {
     });
     revalidatePath("/admin/stores");
     revalidatePath("/");
-    revalidateTag("stores");
+    revalidateTag("stores", "max");
     return { success: true, id: store.id };
   } catch (e: any) {
     return { success: false, error: e.message };
@@ -93,7 +93,7 @@ export async function updateStoreStatusAction(storeId: string, isActive: boolean
     });
     revalidatePath("/admin/stores");
     revalidatePath("/");
-    revalidateTag("stores");
+    revalidateTag("stores", "max");
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };
@@ -237,7 +237,7 @@ export async function updateStoreAction(storeId: string, data: z.infer<typeof st
 
     revalidatePath("/admin/stores");
     revalidatePath("/");
-    revalidateTag("stores");
+    revalidateTag("stores", "max");
     return { success: true, id: updatedStore.id };
   } catch (e: any) {
     if (e instanceof z.ZodError) {
@@ -272,7 +272,7 @@ export async function deleteStoreAction(storeId: string) {
     revalidatePath("/admin/stores");
     revalidatePath("/admin/products");
     revalidatePath("/");
-    revalidateTag("stores");
+    revalidateTag("stores", "max");
     return { success: true };
   } catch (e: any) {
     return { success: false, error: e.message };

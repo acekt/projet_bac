@@ -49,7 +49,7 @@ export default async function StorePage({
   }
 
   const storeName = store.name;
-  const storeLogo = store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=100&auto=format&fit=crop";
+  const storeLogo = store.logo || "/images/store-placeholder.svg";
 
   // Get Products from DB
   const products = await prisma.product.findMany({
@@ -202,9 +202,9 @@ export default async function StorePage({
                       image={(() => {
                         try {
                           const imgs = JSON.parse(product.images || '[]');
-                          return imgs[0] || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                          return imgs[0] || '/images/product-placeholder.svg';
                         } catch(e) {
-                          return product.images || 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+                          return product.images || '/images/product-placeholder.svg';
                         }
                       })()}
                     />

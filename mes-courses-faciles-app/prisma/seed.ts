@@ -1,15 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role, OrderStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('--- DEBUT DU SEEDING DE STRESS-TEST ---');
+  console.log('=== DEBUT DE L\'ENRICHISSEMENT DE LA BASE DE DONNEES ===');
 
-  // ==========================================
-  // ÉTAPE 1 : Nettoyage Sécurisé (Teardown)
-  // ==========================================
-  console.log('1. Nettoyage des tables de la base de données...');
+  // ========================================================
+  // ÉTAPE 1 : Nettoyage Complet et Ordonné (Teardown)
+  // ========================================================
+  console.log('1. Nettoyage de la base de données (Zero-Trust)...');
   await prisma.orderItem.deleteMany({});
   await prisma.order.deleteMany({});
   await prisma.cartItem.deleteMany({});
@@ -17,165 +17,236 @@ async function main() {
   await prisma.store.deleteMany({});
   await prisma.notification.deleteMany({});
   await prisma.user.deleteMany({});
-  console.log('Tables nettoyées.');
+  console.log('✓ Tables nettoyées avec succès.');
 
-  // ==========================================
-  // ÉTAPE 2 : Seeding des Utilisateurs (Users)
-  // ==========================================
-  console.log('2. Génération des utilisateurs...');
+  // ========================================================
+  // ÉTAPE 2 : Seeding des Comptes Utilisateurs (Users)
+  // ========================================================
+  console.log('2. Génération des utilisateurs (Admins & Clients)...');
   
-  // Garde-fou 1 : Hachage unique réutilisable pour optimiser le temps d'exécution
+  // Hachage unique pour accélérer l'exécution du script
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  // Super Admin
-  await prisma.user.create({
-    data: {
-      name: 'Christ APINDA',
-      email: 'admin@mcf.com',
-      password: hashedPassword,
-      phone: '+241066000000',
-      role: 'ADMIN',
-    },
-  });
-
-  // 20 clients distincts avec numéros gabonais
-  const clientNames = [
-    'Marie Mba', 'Paul Obiang', 'Jean-Pierre Ndong', 'Christian Nguema',
-    'Sophie Bongo', 'Marc Koumba', 'Sylvie Mombo', 'Alain Moussavou',
-    'Patricia Makaya', 'Charles Boulingui', 'Florence Kombila', 'Eric Bekale',
-    'Valerie Angoue', 'Patrick Meyo', 'Sandrine Ntsame', 'David Obame',
-    'Chantal Ogoula', 'Antoine Ovono', 'Beatrice Essono', 'Georges Agaya'
+  // Génération de 3 Administrateurs
+  const adminsData = [
+    { name: 'Christ APINDA', email: 'admin@mcf.com', password: hashedPassword, role: Role.ADMIN, phone: '+241066000000' },
+    { name: 'Jules Nguema', email: 'jules@mcf.com', password: hashedPassword, role: Role.ADMIN, phone: '+241066112233' },
+    { name: 'Sarah Bongo', email: 'sarah@mcf.com', password: hashedPassword, role: Role.ADMIN, phone: '+241077112233' }
   ];
 
-  const clients = [];
-  for (let i = 0; i < clientNames.length; i++) {
-    const name = clientNames[i];
-    const email = `client${i + 1}@mcf.com`;
-    // Format Gabon (+241 06... ou +241 07...)
-    const phonePrefix = i % 2 === 0 ? '+24106' : '+24107';
-    const phoneDigits = String(100000 + i * 137).padStart(6, '0');
-    const formattedPhone = `${phonePrefix}${phoneDigits}`;
-    
-    const client = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        phone: formattedPhone,
-        role: 'CLIENT',
-        address: `Libreville, ${['Glass', 'Louis', 'Oloumi', 'Nzeng-Ayong', 'Angondjé', 'Akébé', 'Charbonnages'][i % 7]}`,
-      },
-    });
-    clients.push(client);
+  for (const admin of adminsData) {
+    await prisma.user.create({ data: admin });
   }
+  console.log('✓ 3 Administrateurs insérés.');
 
-  console.log(`Utilisateurs créés : 1 Admin et ${clients.length} Clients.`);
+  // Génération de 15 Clients Réalistes
+  const clientsData = [
+    // Emma (Compte test requis obligatoirement)
+    { name: 'Emma', email: 'client@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066554433', address: 'Libreville, Louis' },
+    
+    // Autres clients
+    { name: 'Marie Mba', email: 'marie@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077112244', address: 'Libreville, Glass' },
+    { name: 'Paul Obiang', email: 'paul@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077223355', address: 'Libreville, Nzeng-Ayong' },
+    { name: 'Jean-Pierre Ndong', email: 'jean-pierre@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077334466', address: 'Libreville, Oloumi' },
+    { name: 'Christian Nguema', email: 'christian@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066778899', address: 'Libreville, Angondjé' },
+    { name: 'Sophie Bongo', email: 'sophie@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066889900', address: 'Libreville, Akébé' },
+    { name: 'Marc Koumba', email: 'marc@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066223344', address: 'Libreville, Charbonnages' },
+    { name: 'Sylvie Mombo', email: 'sylvie@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066334455', address: 'Libreville, Louis' },
+    { name: 'Alain Moussavou', email: 'alain@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066445566', address: 'Libreville, Oloumi' },
+    { name: 'Patricia Makaya', email: 'patricia@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077445577', address: 'Libreville, Lalala' },
+    { name: 'Charles Boulingui', email: 'charles@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077556688', address: 'Libreville, Glass' },
+    { name: 'Florence Kombila', email: 'florence@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077667799', address: 'Libreville, Nzeng-Ayong' },
+    { name: 'Eric Bekale', email: 'eric@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066998877', address: 'Libreville, Angondjé' },
+    { name: 'Valerie Angoue', email: 'valerie@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066887766', address: 'Libreville, Akébé' },
+    { name: 'Sandrine Ntsame', email: 'sandrine@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077889911', address: 'Libreville, Charbonnages' }
+  ];
 
-  // ==========================================
+  const createdClients = [];
+  let emmaUser: any = null;
+
+  for (const clientData of clientsData) {
+    const user = await prisma.user.create({ data: clientData });
+    createdClients.push(user);
+    if (user.email === 'client@mcf.com') {
+      emmaUser = user;
+    }
+  }
+  console.log(`✓ ${createdClients.length} Clients insérés (dont Emma).`);
+
+  // ========================================================
   // ÉTAPE 3 : Seeding des Magasins (Stores)
-  // ==========================================
-  console.log('3. Génération des 20 magasins (17 actifs, 3 inactifs/supprimés)...');
+  // ========================================================
+  console.log('3. Génération des magasins partenaires (10 magasins)...');
   
   const storeDefinitions = [
-    // 17 Magasins Actifs
-    { name: 'Mbolo Supermarché', address: 'Boulevard Triomphal, Libreville', district: 'Mbolo', phone: '+24111740001', logo: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=200&auto=format&fit=crop', description: 'Le plus grand supermarché historique de Libreville.', isActive: true, isDeleted: false },
-    { name: 'Géant Casino', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760002', logo: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?q=80&w=200&auto=format&fit=crop', description: 'Produits importés et locaux de qualité supérieure.', isActive: true, isDeleted: false },
-    { name: 'Prix Import Oloumi', address: 'Zone Industrielle d\'Oloumi, Libreville', district: 'Oloumi', phone: '+24111720003', logo: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop', description: 'Vos courses au meilleur prix de gros et détail.', isActive: true, isDeleted: false },
-    { name: 'Supergros Oloumi', address: 'Avenue des Mines, Libreville', district: 'Oloumi', phone: '+24111750004', logo: 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?q=80&w=200&auto=format&fit=crop', description: 'Alimentation générale de gros et demi-gros.', isActive: true, isDeleted: false },
-    { name: 'Pharmacie de la Poste', address: 'Place de l\'Indépendance, Libreville', district: 'Centre-ville', phone: '+24111710005', logo: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=200&auto=format&fit=crop', description: 'Votre santé est notre priorité. Ouverte 24h/24.', isActive: true, isDeleted: false },
-    { name: 'Pharmacie d\'Oloumi', address: 'Carrefour Oloumi, Libreville', district: 'Oloumi', phone: '+24111720006', logo: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?q=80&w=200&auto=format&fit=crop', description: 'Médicaments, parapharmacie et conseils médicaux.', isActive: true, isDeleted: false },
-    { name: 'Pharmacie des Charbonnages', address: 'Rond-point des Charbonnages, Libreville', district: 'Charbonnages', phone: '+24111730007', logo: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?q=80&w=200&auto=format&fit=crop', description: 'Grande pharmacie desservant le nord de Libreville.', isActive: true, isDeleted: false },
-    { name: 'Épicerie du Rond-point', address: 'Rond-point de Nzeng-Ayong, Libreville', district: 'Nzeng-Ayong', phone: '+24111770008', logo: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=200&auto=format&fit=crop', description: 'Fruits, légumes frais et épicerie fine au cœur de Nzeng-Ayong.', isActive: true, isDeleted: false },
-    { name: 'Alimentation Générale Louis', address: 'Quartier Louis, Libreville', district: 'Louis', phone: '+24111780009', logo: 'https://images.unsplash.com/photo-1601599561233-608357f7df08?q=80&w=200&auto=format&fit=crop', description: 'Épicerie de quartier, boissons fraîches et conserves.', isActive: true, isDeleted: false },
-    { name: 'Mini Prix Akébé', address: 'Carrefour Akébé, Libreville', district: 'Akébé', phone: '+24111790010', logo: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&auto=format&fit=crop', description: 'Produits ménagers et de consommation courante à bas prix.', isActive: true, isDeleted: false },
-    { name: 'Supermarché CKG Angondjé', address: 'Voie Express Angondjé, Libreville', district: 'Angondjé', phone: '+24111700011', logo: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=200&auto=format&fit=crop', description: 'Large sélection de produits locaux et cosmétiques.', isActive: true, isDeleted: false },
-    { name: 'Pharmacie de Glass', address: 'Boulevard de l\'Impératrice, Libreville', district: 'Glass', phone: '+24111760012', logo: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbab9?q=80&w=200&auto=format&fit=crop', description: 'Tous vos médicaments et produits de santé à Glass.', isActive: true, isDeleted: false },
-    { name: 'Boulangerie l\'Épi d\'Or', address: 'Rue Principale de Louis, Libreville', district: 'Louis', phone: '+24111780013', logo: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=200&auto=format&fit=crop', description: 'Pain chaud croustillant, viennoiseries et pâtisseries locales.', isActive: true, isDeleted: false },
-    { name: 'La Cave de Libreville', address: 'Montée de Louis, Libreville', district: 'Louis', phone: '+24111780014', logo: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=200&auto=format&fit=crop', description: 'Vins fins, champagnes et spiritueux de prestige.', isActive: true, isDeleted: false },
-    { name: 'Marché aux Fruits Oloumi', address: 'Avenue de la Nation, Libreville', district: 'Oloumi', phone: '+24111720015', logo: 'https://images.unsplash.com/photo-1610397613090-a9c6c8632fbe?q=80&w=200&auto=format&fit=crop', description: 'Fruits exotiques frais et légumes de saison du Gabon.', isActive: true, isDeleted: false },
-    { name: 'Pharmacie d\'Angondjé', address: 'Carrefour Château, Libreville', district: 'Angondjé', phone: '+24111700016', logo: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?q=80&w=200&auto=format&fit=crop', description: 'Pharmacie moderne avec des conseils spécialisés.', isActive: true, isDeleted: false },
-    { name: 'Alimentation du Port', address: 'Zone Portuaire, Libreville', district: 'Glass', phone: '+24111760017', logo: 'https://images.unsplash.com/photo-1601599561233-608357f7df08?q=80&w=200&auto=format&fit=crop', description: 'Produits d\'épicerie générale et maritimes.', isActive: true, isDeleted: false },
-    
-    // 3 Magasins Inactifs ou Supprimés
-    { name: 'Boutique de Lalala', address: 'Quartier Lalala, Libreville', district: 'Lalala', phone: '+24111710018', logo: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=200&auto=format&fit=crop', description: 'Boutique de vêtements fermée temporairement pour travaux.', isActive: false, isDeleted: false },
-    { name: 'Pharmacie de Louis (Ancienne)', address: 'Carrefour Louis, Libreville', district: 'Louis', phone: '+24111780019', logo: 'https://images.unsplash.com/photo-1587854692152-cbe660dbbab9?q=80&w=200&auto=format&fit=crop', description: 'Établissement fermé définitivement.', isActive: false, isDeleted: false },
-    { name: 'Épicerie Disparue', address: 'Carrefour Nzeng-Ayong, Libreville', district: 'Nzeng-Ayong', phone: '+24111770020', logo: 'https://images.unsplash.com/photo-1601599561233-608357f7df08?q=80&w=200&auto=format&fit=crop', description: 'Magasin supprimé de la base de données.', isActive: false, isDeleted: true },
+    { name: 'Mbolo Supermarché', address: 'Boulevard Triomphal, Libreville', district: 'Mbolo', phone: '+24111740001', logo: '/images/store-placeholder.svg', description: 'Le plus grand supermarché historique de Libreville. Alimentation générale, fruits et légumes.', isActive: true, isDeleted: false, category: 'Alimentation' },
+    { name: 'Géant Casino', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760002', logo: '/images/store-placeholder.svg', description: 'Produits frais, épicerie fine et importations de qualité supérieure.', isActive: true, isDeleted: false, category: 'Alimentation' },
+    { name: 'TiDB Tech Store', address: 'Zone Industrielle Oloumi, Libreville', district: 'Oloumi', phone: '+24111720022', logo: '/images/store-placeholder.svg', description: 'Ordinateurs, téléphones, accessoires informatiques et composants high-tech.', isActive: true, isDeleted: false, category: 'Électronique' },
+    { name: 'Gaza Électroménager', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760021', logo: '/images/store-placeholder.svg', description: 'Le spécialiste de l\'électroménager et des Smart TV de Libreville.', isActive: true, isDeleted: false, category: 'Électronique' },
+    { name: 'Boutique Bio-Glow', address: 'Carrefour Angondjé, Libreville', district: 'Angondjé', phone: '+24111700024', logo: '/images/store-placeholder.svg', description: 'Savons bio locaux, soins capillaires, huiles végétales et bien-être.', isActive: true, isDeleted: false, category: 'Beauté' },
+    { name: 'Or & Parfums', address: 'Carrefour Louis, Libreville', district: 'Louis', phone: '+24111780023', logo: '/images/store-placeholder.svg', description: 'Gamme complète de parfums importés authentiques et maquillage de marque.', isActive: true, isDeleted: false, category: 'Beauté' },
+    { name: 'Shoes & Style', address: 'Avenue des Mines, Libreville', district: 'Oloumi', phone: '+24111750026', logo: '/images/store-placeholder.svg', description: 'Chaussures de créateurs, sacs à main, ceintures et maroquinerie fine.', isActive: true, isDeleted: false, category: 'Mode' },
+    { name: 'Gabon Chic & Mode', address: 'Centre-ville, Libreville', district: 'Centre-ville', phone: '+24111710025', logo: '/images/store-placeholder.svg', description: 'Prêt-à-porter, chemises, costumes et vêtements stylés pour tous.', isActive: true, isDeleted: false, category: 'Mode' },
+    { name: 'Libreville Ameublement', address: 'Rond-point des Charbonnages, Libreville', district: 'Charbonnages', phone: '+24111730027', logo: '/images/store-placeholder.svg', description: 'Meubles design, canapés confortables et agencement de salon.', isActive: true, isDeleted: false, category: 'Maison' },
+    { name: 'Brico-Déco Gabon', address: 'Carrefour Akébé, Libreville', district: 'Akébé', phone: '+24111790028', logo: '/images/store-placeholder.svg', description: 'Outils de bricolage, rideaux, décoration murale et petits accessoires maison.', isActive: true, isDeleted: false, category: 'Maison' }
   ];
 
-  const stores = [];
+  const createdStores = [];
   for (const sDef of storeDefinitions) {
-    const store = await prisma.store.create({ data: sDef });
-    stores.push(store);
+    const { category, ...storeData } = sDef;
+    const store = await prisma.store.create({ data: storeData });
+    createdStores.push({ ...store, category });
   }
+  console.log(`✓ ${createdStores.length} Magasins insérés dans 5 catégories distinctes.`);
 
-  console.log(`Magasins créés : ${stores.length} magasins.`);
-
-  // ==========================================
-  // ÉTAPE 4 : Seeding du Catalogue (Products)
-  // ==========================================
-  console.log('4. Génération des produits (entre 3 et 5 par magasin actif)...');
+  // ========================================================
+  // ÉTAPE 4 : Seeding du Catalogue Produits (Product)
+  // ========================================================
+  console.log('4. Génération du catalogue produits (15 à 20 produits par magasin)...');
   
-  const activeStores = stores.filter(s => s.isActive && !s.isDeleted);
   const allProducts: any[] = [];
 
-  for (const store of activeStores) {
-    let productsToCreate: any[] = [];
-    
-    if (store.name.includes('Pharmacie')) {
-      productsToCreate = [
-        { name: 'Paracétamol 500mg', description: 'Boîte de 20 comprimés pour soulager la douleur et la fièvre.', price: 1500, category: 'Santé', stock: 180, unit: 'boîte', images: JSON.stringify(['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=400']) },
-        { name: 'Ibuprofène 400mg', description: 'Anti-inflammatoire pour soulager les maux de tête et courbatures.', price: 2500, category: 'Santé', stock: 120, unit: 'boîte', images: JSON.stringify(['https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=400']) },
-        { name: 'Vitamine C 1000mg', description: 'Comprimés effervescents pour stimuler le système immunitaire.', price: 3000, category: 'Santé', stock: 90, unit: 'tube', images: JSON.stringify(['https://images.unsplash.com/photo-1616679911721-fe6eec10f0cd?q=80&w=400']) },
-        { name: 'Thermomètre Digital', description: 'Mesure rapide et précise de la température corporelle.', price: 4500, category: 'Santé', stock: 45, unit: 'pièce', images: JSON.stringify(['https://images.unsplash.com/photo-1584017911766-d451b3d0e843?q=80&w=400']) },
-      ];
-    } else if (store.name.includes('Boulangerie')) {
-      productsToCreate = [
-        { name: 'Baguette Traditionnelle', description: 'Pain frais cuit sur place chaque matin.', price: 150, category: 'Alimentaire', stock: 250, unit: 'pièce', images: JSON.stringify(['https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=400']) },
-        { name: 'Croissant pur Beurre', description: 'Viennoiserie feuilletée croustillante.', price: 500, category: 'Alimentaire', stock: 80, unit: 'pièce', images: JSON.stringify(['https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=400']) },
-        { name: 'Pain au Chocolat', description: 'Viennoiserie feuilletée fourrée au chocolat.', price: 600, category: 'Alimentaire', stock: 80, unit: 'pièce', images: JSON.stringify(['https://images.unsplash.com/photo-1608198093002-ad4e005484ec?q=80&w=400']) },
-      ];
-    } else if (store.name.includes('Cave')) {
-      productsToCreate = [
-        { name: 'Bordeaux Rouge AOC', description: 'Vin rouge équilibré, parfait pour accompagner vos viandes.', price: 8500, category: 'Boissons', stock: 65, unit: 'bouteille', images: JSON.stringify(['https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=400']) },
-        { name: 'Champagne Brut Sélection', description: 'Champagne de prestige pour vos célébrations.', price: 25000, category: 'Boissons', stock: 35, unit: 'bouteille', images: JSON.stringify(['https://images.unsplash.com/photo-1594487540886-4a65c8101790?q=80&w=400']) },
-        { name: 'Bière Régab 65cl', description: 'Bière blonde locale gabonaise rafraîchissante.', price: 1000, category: 'Boissons', stock: 400, unit: 'bouteille', images: JSON.stringify(['https://images.unsplash.com/photo-1608270176050-12ec057de178?q=80&w=400']) },
-      ];
-    } else if (store.name.includes('Fruits')) {
-      productsToCreate = [
-        { name: 'Régime de Bananes Plantains', description: 'Bananes vertes à cuire, récoltées localement.', price: 2500, category: 'Alimentaire', stock: 50, unit: 'régime', images: JSON.stringify(['https://images.unsplash.com/photo-1566393028639-d108a42c46a7?q=80&w=400']) },
-        { name: 'Ananas Victoria', description: 'Ananas sucré et juteux du Gabon.', price: 1200, category: 'Alimentaire', stock: 75, unit: 'pièce', images: JSON.stringify(['https://images.unsplash.com/photo-1550258987-190a2d41a8ba?q=80&w=400']) },
-        { name: 'Avocats du Gabon 1kg', description: 'Avocats crémeux récoltés localement.', price: 2000, category: 'Alimentaire', stock: 40, unit: 'kg', images: JSON.stringify(['https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?q=80&w=400']) },
-      ];
-    } else {
-      // Supermarchés et Épiceries standards
-      productsToCreate = [
-        { name: 'Riz Long Grain 5kg', description: 'Riz blanc de qualité supérieure.', price: 4500, category: 'Alimentaire', stock: 150, unit: 'sac', images: JSON.stringify(['https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400']) },
-        { name: 'Lait Demi-Écrémé 1L', description: 'Lait de vache UHT demi-écrémé.', price: 850, category: 'Alimentaire', stock: 350, unit: 'brique', images: JSON.stringify(['https://images.unsplash.com/photo-1563636619-e9143da7973b?q=80&w=400']) },
-        { name: 'Huile de Tournesol 1L', description: 'Huile végétale pour friture et assaisonnement.', price: 1200, category: 'Alimentaire', stock: 120, unit: 'bouteille', images: JSON.stringify(['https://images.unsplash.com/photo-1590779033100-9f60a05a013d?q=80&w=400']) },
-        { name: 'Eau Minérale 1.5L', description: 'Eau minérale naturelle locale en bouteille.', price: 400, category: 'Boissons', stock: 600, unit: 'bouteille', images: JSON.stringify(['https://images.unsplash.com/photo-1523362628745-0c100150b504?q=80&w=400']) },
-        { name: 'Café Arabica 250g', description: 'Café moulu pur arabica de qualité.', price: 2400, category: 'Alimentaire', stock: 100, unit: 'paquet', images: JSON.stringify(['https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=400']) },
-      ];
-    }
+  const productTemplates: Record<string, { name: string; description: string; basePrice: number; unit: string }[]> = {
+    'Alimentation': [
+      { name: 'Riz Parfumé Premium 5kg', description: 'Riz blanc long grain parfumé de qualité supérieure.', basePrice: 4800, unit: 'sac' },
+      { name: 'Huile de Tournesol 1L', description: 'Huile végétale pour friture saine et assaisonnement.', basePrice: 1250, unit: 'bouteille' },
+      { name: 'Lait Demi-Écrémé UHT 1L', description: 'Lait de vache demi-écrémé stérilisé.', basePrice: 850, unit: 'brique' },
+      { name: 'Spaghetti blé dur 500g', description: 'Pâtes de qualité supérieure, cuisson 8 minutes.', basePrice: 600, unit: 'paquet' },
+      { name: 'Café Arabica Pur 250g', description: 'Café moulu arômes intenses de caféiers de montagne.', basePrice: 2400, unit: 'paquet' },
+      { name: 'Thé Vert Menthe (25 s.)', description: 'Boîte de 25 sachets de thé vert parfumé à la menthe.', basePrice: 1500, unit: 'boîte' },
+      { name: 'Farine de Blé T55 1kg', description: 'Farine de blé fine idéale pour gâteaux et pain.', basePrice: 750, unit: 'paquet' },
+      { name: 'Sucre Blanc Morceaux 1kg', description: 'Sucre de canne raffiné en morceaux réguliers.', basePrice: 1100, unit: 'boîte' },
+      { name: 'Beurre Doux 250g', description: 'Beurre fin de table, goût riche et onctueux.', basePrice: 1750, unit: 'pièce' },
+      { name: 'Confiture de Fraise 370g', description: 'Préparée avec 50% de fruits mûrs sélectionnés.', basePrice: 1650, unit: 'pot' },
+      { name: 'Jus d\'Orange Pur 1L', description: 'Jus de fruits fraîchement pressés, sans sucres ajoutés.', basePrice: 1300, unit: 'brique' },
+      { name: 'Eau Minérale Locale 1.5L', description: 'Eau de source naturelle purifiée en bouteille.', basePrice: 400, unit: 'bouteille' },
+      { name: 'Chips Artisanales Salées', description: 'Chips de pommes de terre croustillantes salées.', basePrice: 1100, unit: 'paquet' },
+      { name: 'Chocolat Noir 70% 100g', description: 'Tablette de chocolat noir intense d\'Afrique équatoriale.', basePrice: 1200, unit: 'tablette' },
+      { name: 'Sardines Pimentées (boîte)', description: 'Sardines entières à l\'huile avec une pointe de piment.', basePrice: 750, unit: 'boîte' },
+      { name: 'Poulet Surgelé Entier 1.3kg', description: 'Poulet prêt à cuire élevé en plein air.', basePrice: 3500, unit: 'pièce' },
+      { name: 'Œufs Frais du Gabon (x30)', description: 'Plateau de 30 œufs de ferme calibre moyen.', basePrice: 3200, unit: 'plateau' },
+      { name: 'Sel Fin de Table 1kg', description: 'Sel marin fin enrichi en iode pour la cuisine.', basePrice: 350, unit: 'paquet' },
+      { name: 'Biscuits Sablés Beurre', description: 'Sablés traditionnels fondants et croustillants.', basePrice: 950, unit: 'paquet' },
+      { name: 'Yaourts aux Fruits (x4)', description: 'Assortiment de 4 yaourts crémeux aux fruits.', basePrice: 1400, unit: 'pack' }
+    ],
+    'Électronique': [
+      { name: 'Smart TV LED 43" 4K', description: 'Téléviseur connecté avec résolution UHD et HDR intégrée.', basePrice: 189000, unit: 'pièce' },
+      { name: 'Smartphone Pro 128Go', description: 'Double SIM, appareil photo 48MP, grand écran fluide.', basePrice: 135000, unit: 'pièce' },
+      { name: 'Écouteurs Sans Fil Pro', description: 'Son stéréo HD, réduction de bruit passive et micro intégré.', basePrice: 22000, unit: 'paire' },
+      { name: 'Enceinte Bluetooth Étanche', description: 'Son puissant, autonomie 12h, résistance aux éclaboussures.', basePrice: 38000, unit: 'pièce' },
+      { name: 'Batterie Externe 20k mAh', description: 'Powerbank haute capacité avec affichage LED de charge.', basePrice: 19000, unit: 'pièce' },
+      { name: 'Souris Optique Sans Fil', description: 'Forme ergonomique, récepteur USB ultra-compact.', basePrice: 9500, unit: 'pièce' },
+      { name: 'Clavier Gaming Rétroéclairé', description: 'Clavier à membrane robuste avec lumières LED RGB.', basePrice: 24000, unit: 'pièce' },
+      { name: 'Chargeur Mural 20W Rapide', description: 'Bloc de charge rapide double port USB-A et USB-C.', basePrice: 12000, unit: 'pièce' },
+      { name: 'Câble USB-C Tressé 2m', description: 'Câble haute résistance pour transfert rapide et recharge.', basePrice: 4500, unit: 'pièce' },
+      { name: 'Clé USB 3.0 de 64Go', description: 'Transferts rapides pour tous vos fichiers importants.', basePrice: 8500, unit: 'pièce' },
+      { name: 'Blender Mixeur Pro 1.5L', description: 'Blender puissant avec bol en verre gradué résistant.', basePrice: 29500, unit: 'pièce' },
+      { name: 'Bouilloire Électrique Inox', description: 'Capacité 1.8L avec chauffe rapide et arrêt automatique.', basePrice: 15000, unit: 'pièce' },
+      { name: 'Machine à Café Filtre', description: 'Cafetière 10-12 tasses avec système anti-gouttes.', basePrice: 26000, unit: 'pièce' },
+      { name: 'Fer à Repasser Vapeur', description: 'Semelle antiadhésive, réservoir d\'eau 300ml.', basePrice: 18000, unit: 'pièce' },
+      { name: 'Ventilateur Sur Pied Oscillant', description: 'Hauteur réglable, 3 vitesses avec grille de protection.', basePrice: 27000, unit: 'pièce' },
+      { name: 'Casque Audio Stéréo', description: 'Casque filaire avec arceau rembourré et basses profondes.', basePrice: 16500, unit: 'pièce' }
+    ],
+    'Beauté': [
+      { name: 'Rouge à Lèvres Rouge Velours', description: 'Fini mat intense, texture crémeuse longue tenue.', basePrice: 7500, unit: 'pièce' },
+      { name: 'Crème Hydratante Visage 50ml', description: 'Soin hydratant protecteur quotidien, texture légère.', basePrice: 11500, unit: 'pot' },
+      { name: 'Huile de Coco Vierge 250ml', description: 'Huile de coco pure pour soins capillaires et corporels.', basePrice: 4800, unit: 'flacon' },
+      { name: 'Shampoing Doux Aloe Vera', description: 'Nourrit et apporte brillance aux cheveux normaux.', basePrice: 3800, unit: 'flacon' },
+      { name: 'Gel Douche Hydratant 400ml', description: 'Parfum frais et vivifiant pour un réveil énergique.', basePrice: 2900, unit: 'flacon' },
+      { name: 'Masque Purifiant Argile', description: 'Masque visage pour désincruster les pores et purifier.', basePrice: 6500, unit: 'tube' },
+      { name: 'Parfum Patchouli & Vanille', description: 'Eau de parfum sensuelle avec notes épicées.', basePrice: 39500, unit: 'bouteille' },
+      { name: 'Vernis à Ongles Brillant', description: 'Vernis longue tenue couleur nude élégante.', basePrice: 2500, unit: 'flacon' },
+      { name: 'Lait Corporel Karité 250ml', description: 'Nourrit intensément les peaux sèches et déshydratées.', basePrice: 5500, unit: 'flacon' },
+      { name: 'Crème Mains Réparatrice', description: 'Soin concentré pour mains sèches et abîmées.', basePrice: 3200, unit: 'tube' },
+      { name: 'Eyeliner Noir Précision', description: 'Feutre traceur noir mat résistant à l\'eau.', basePrice: 5800, unit: 'pièce' },
+      { name: 'Mascara Volume Intense', description: 'Brosse volumatrice pour des cils allongés et denses.', basePrice: 8500, unit: 'pièce' },
+      { name: 'Gommage Corps Sucre & Café', description: 'Exfoliant naturel pour une peau lisse et satinée.', basePrice: 7900, unit: 'pot' },
+      { name: 'Palette d\'Ombres à Paupières', description: 'Palette de 10 fards aux teintes chaudes et dorées.', basePrice: 15000, unit: 'boîte' },
+      { name: 'Crème Solaire Visage SPF50', description: 'Haute protection UV non grasse pour le visage.', basePrice: 9800, unit: 'tube' }
+    ],
+    'Mode': [
+      { name: 'Jean Coupe Droite Denim', description: 'Jean classique en coton épais confortable.', basePrice: 19500, unit: 'pièce' },
+      { name: 'T-Shirt Blanc Coton Bio', description: 'Coupe classique, col rond, coton très doux.', basePrice: 5500, unit: 'pièce' },
+      { name: 'Chemise en Lin Cintrée', description: 'Chemise légère et élégante, couleur beige naturel.', basePrice: 18000, unit: 'pièce' },
+      { name: 'Robe d\'Été Imprimée', description: 'Robe fluide à fleurs avec bretelles ajustables.', basePrice: 23000, unit: 'pièce' },
+      { name: 'Baskets Sportives Homme', description: 'Baskets respirantes avec semelle amortissante.', basePrice: 35000, unit: 'paire' },
+      { name: 'Chaussures Cuir Classiques', description: 'Chaussures habillées noires, confortables.', basePrice: 49000, unit: 'paire' },
+      { name: 'Veste Légère Casual', description: 'Veste mi-saison en toile de coton avec poches.', basePrice: 28000, unit: 'pièce' },
+      { name: 'Sac Bandoulière Cuir', description: 'Petit sac élégant avec bandoulière réglable.', basePrice: 27000, unit: 'pièce' },
+      { name: 'Lunettes de Soleil UV400', description: 'Style vintage avec verres polarisés protecteurs.', basePrice: 11500, unit: 'pièce' },
+      { name: 'Ceinture Noire en Cuir', description: 'Ceinture classique en cuir véritable avec boucle métal.', basePrice: 7000, unit: 'pièce' },
+      { name: 'Short Chino Classique', description: 'Short en coton stretch confortable pour l\'été.', basePrice: 13500, unit: 'pièce' },
+      { name: 'Polo Homme Sport Chic', description: 'Polo en piqué de coton, col boutonné classique.', basePrice: 11000, unit: 'pièce' },
+      { name: 'Chapeau de Paille Élégant', description: 'Chapeau respirant idéal pour le soleil tropical.', basePrice: 6500, unit: 'pièce' },
+      { name: 'Lot de 3 Chaussettes Coton', description: 'Chaussettes de sport confortables anti-frottements.', basePrice: 4200, unit: 'lot' },
+      { name: 'Sweat à Capuche Molletonné', description: 'Sweat chaud et confortable, coloris gris chiné.', basePrice: 19000, unit: 'pièce' }
+    ],
+    'Maison': [
+      { name: 'Lampe de Chevet Design', description: 'Pied en bois clair et abat-jour blanc épuré.', basePrice: 16500, unit: 'pièce' },
+      { name: 'Coussin Velours Décoratif', description: 'Coussin moelleux pour canapé ou lit (45x45 cm).', basePrice: 5800, unit: 'pièce' },
+      { name: 'Tapis de Salon Graphique', description: 'Tapis tissé à motifs scandinaves noirs et blancs.', basePrice: 59000, unit: 'pièce' },
+      { name: 'Horloge Murale Vintage', description: 'Grande horloge silencieuse en métal et bois.', basePrice: 14500, unit: 'pièce' },
+      { name: 'Table Basse Design', description: 'Table avec double plateau bois et pieds en épingle.', basePrice: 69000, unit: 'pièce' },
+      { name: 'Miroir Rond Cadre Métal', description: 'Miroir mural décoratif diamètre 50cm coloris laiton.', basePrice: 22000, unit: 'pièce' },
+      { name: 'Plante Artificielle Verte', description: 'Faux monstera en pot plastique noir réaliste.', basePrice: 13500, unit: 'pièce' },
+      { name: 'Bougie Parfumée Lavande', description: 'Cire végétale naturelle parfumée aux huiles essentielles.', basePrice: 4900, unit: 'pièce' },
+      { name: 'Housse de Couette Coton', description: 'Parure de lit double 240x220 cm avec 2 taies.', basePrice: 28000, unit: 'set' },
+      { name: 'Paire de Rideaux Occultants', description: 'Rideaux isolants bloquant la lumière du soleil.', basePrice: 24500, unit: 'paire' },
+      { name: 'Vase en Céramique Blanche', description: 'Vase moderne au design géométrique pour fleurs.', basePrice: 9500, unit: 'pièce' },
+      { name: 'Poubelle Inox à Pédale 30L', description: 'Finition mate anti-traces, fermeture silencieuse.', basePrice: 21000, unit: 'pièce' },
+      { name: 'Organisateur de Tiroirs (x4)', description: 'Ensemble de compartiments de rangement pliables.', basePrice: 7500, unit: 'lot' },
+      { name: 'Cadre Photo Bois Exotique', description: 'Cadre mural ou à poser format 15x20 cm.', basePrice: 4500, unit: 'pièce' },
+      { name: 'Diffuseur de Parfum Rotin', description: 'Flacon diffuseur d\'ambiance aux tiges de rotin.', basePrice: 8500, unit: 'pièce' }
+    ]
+  };
 
-    for (const pData of productsToCreate) {
-      const product = await prisma.product.create({
-        data: {
-          ...pData,
-          storeId: store.id,
-        },
+  const productsToCreate: any[] = [];
+
+  for (const store of createdStores) {
+    const templates = productTemplates[store.category] || productTemplates['Alimentation'];
+    
+    for (const temp of templates) {
+      // Variation de prix (+/- 12%)
+      const priceVariation = 0.88 + Math.random() * 0.24;
+      const finalPrice = Math.round((temp.basePrice * priceVariation) / 50) * 50; // arrondi à 50 FCFA
+      
+      // Stock : 15% de chance de rupture de stock (0), sinon entre 10 et 200 unités
+      const isOutOfStock = Math.random() < 0.15;
+      const stock = isOutOfStock ? 0 : Math.floor(10 + Math.random() * 190);
+
+      productsToCreate.push({
+        name: temp.name,
+        description: temp.description,
+        price: finalPrice,
+        stock: stock,
+        unit: temp.unit,
+        category: store.category,
+        // Placeholder local strict pour éviter les erreurs réseau 404
+        images: JSON.stringify(['/images/product-placeholder.svg']),
+        storeId: store.id,
+        isActive: true,
+        isDeleted: false
       });
-      allProducts.push(product);
     }
   }
 
-  console.log(`Catalogue créé : ${allProducts.length} produits insérés.`);
+  // Insertion en masse via createMany pour optimiser les performances de TiDB
+  await prisma.product.createMany({
+    data: productsToCreate
+  });
 
-  // ==========================================
-  // ÉTAPE 5 : Seeding des Commandes (Orders & Items)
-  // ==========================================
-  console.log('5. Génération de 27 commandes réparties historiquement sur 90 jours...');
+  // Récupération de tous les produits créés pour obtenir leurs IDs pour les commandes
+  const dbProducts = await prisma.product.findMany({});
+  allProducts.push(...dbProducts);
+
+  console.log(`✓ ${allProducts.length} Produits insérés dans le catalogue (15 à 20 par boutique).`);
+
+  // ========================================================
+  // ÉTAPE 5 : Seeding des Commandes (Orders & OrderItem)
+  // ========================================================
+  console.log('5. Génération de l\'historique des commandes (50 commandes)...');
   
-  // Organiser les produits par magasin pour simuler des commandes cohérentes (panier d'un seul magasin à la fois)
+  // Associer les produits par magasin pour simuler des commandes cohérentes (panier mono-boutique)
   const storeProductsMap = new Map<string, any[]>();
   for (const p of allProducts) {
     if (!storeProductsMap.has(p.storeId)) {
@@ -185,106 +256,187 @@ async function main() {
   }
 
   const activeStoreIds = Array.from(storeProductsMap.keys());
-  const statuses = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+  const allStatuses = [OrderStatus.PENDING, OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.DELIVERED, OrderStatus.CANCELLED];
   const paymentMethods = ['cash', 'airtel', 'moov', 'card'];
 
-  let ordersCreatedCount = 0;
+  let totalOrdersCreated = 0;
 
-  for (let i = 0; i < 27; i++) {
-    const client = clients[i % clients.length];
-    const storeId = activeStoreIds[i % activeStoreIds.length];
+  // 1. Commandes Spécifiques pour Emma (client@mcf.com) pour valider l'UI ActiveOrderTracker et l'Historique
+  if (emmaUser) {
+    console.log('Génération des commandes tests critiques pour Emma...');
+
+    // A. Une commande active (PAID) très récente chez Mbolo Supermarché pour le ActiveOrderTracker
+    const mboloStore = createdStores.find(s => s.name === 'Mbolo Supermarché') || createdStores[0];
+    const mboloProducts = storeProductsMap.get(mboloStore.id)!;
+    
+    // Panier de 2 produits
+    const emmaActiveItems = [
+      { product: mboloProducts[0], qty: 2 },
+      { product: mboloProducts[1], qty: 1 }
+    ];
+
+    const deliveryFee = 2000;
+    let itemsTotal = 0;
+    const orderItemsData = emmaActiveItems.map(item => {
+      itemsTotal += item.product.price * item.qty;
+      return {
+        productId: item.product.id,
+        quantity: item.qty,
+        price: item.product.price
+      };
+    });
+
+    const activeOrderDate = new Date(); // aujourd'hui
+    await prisma.order.create({
+      data: {
+        userId: emmaUser.id,
+        storeId: mboloStore.id,
+        total: itemsTotal + deliveryFee,
+        deliveryFee,
+        status: OrderStatus.PAID,
+        paymentMethod: 'airtel',
+        deliveryAddress: 'Emma - +241066554433 - Libreville, quartier Louis, Villa MCF',
+        createdAt: activeOrderDate,
+        updatedAt: activeOrderDate,
+        orderItems: {
+          create: orderItemsData
+        }
+      }
+    });
+    totalOrdersCreated++;
+
+    // B. Trois commandes passées (DELIVERED) plus anciennes pour l'onglet historique du profil
+    for (let k = 0; k < 3; k++) {
+      const randomStoreId = activeStoreIds[k % activeStoreIds.length];
+      const storeProducts = storeProductsMap.get(randomStoreId)!;
+      const product = storeProducts[Math.floor(Math.random() * storeProducts.length)];
+      
+      const qty = Math.floor(Math.random() * 2) + 1;
+      const orderDate = new Date();
+      orderDate.setDate(orderDate.getDate() - (5 + k * 8)); // il y a 5, 13 et 21 jours
+
+      await prisma.order.create({
+        data: {
+          userId: emmaUser.id,
+          storeId: randomStoreId,
+          total: (product.price * qty) + deliveryFee,
+          deliveryFee,
+          status: OrderStatus.DELIVERED,
+          paymentMethod: paymentMethods[k % paymentMethods.length],
+          deliveryAddress: 'Emma - +241066554433 - Libreville, quartier Louis, Villa MCF',
+          createdAt: orderDate,
+          updatedAt: orderDate,
+          orderItems: {
+            create: [
+              {
+                productId: product.id,
+                quantity: qty,
+                price: product.price
+              }
+            ]
+          }
+        }
+      });
+      totalOrdersCreated++;
+    }
+    console.log('✓ Commandes tests d\'Emma générées.');
+  }
+
+  // 2. Commandes Aléatoires Restantes pour atteindre au moins 50 commandes totales
+  const ordersNeeded = 50 - totalOrdersCreated;
+  console.log(`Génération des ${ordersNeeded} autres commandes aléatoires...`);
+
+  for (let i = 0; i < ordersNeeded; i++) {
+    // Pick a random client
+    const client = createdClients[i % createdClients.length];
+    
+    // Pick a random store
+    const storeId = activeStoreIds[Math.floor(Math.random() * activeStoreIds.length)];
     const storeProducts = storeProductsMap.get(storeId)!;
-    
-    // Sélectionner entre 1 et 3 produits aléatoires de ce magasin
-    const numProducts = Math.floor(Math.random() * 3) + 1;
-    const selectedProducts: any[] = [];
-    const tempProducts = [...storeProducts];
-    
-    for (let j = 0; j < numProducts && tempProducts.length > 0; j++) {
-      const idx = Math.floor(Math.random() * tempProducts.length);
-      selectedProducts.push(tempProducts.splice(idx, 1)[0]);
+
+    // Pick 1 to 3 random products from this store
+    const itemCount = Math.floor(Math.random() * 3) + 1;
+    const selectedProducts = [];
+    const tempStoreProducts = [...storeProducts];
+
+    for (let j = 0; j < itemCount && tempStoreProducts.length > 0; j++) {
+      const randIdx = Math.floor(Math.random() * tempStoreProducts.length);
+      selectedProducts.push(tempStoreProducts.splice(randIdx, 1)[0]);
     }
 
     const deliveryFee = 2000;
     let itemsTotal = 0;
-    
     const orderItemsData = selectedProducts.map(p => {
-      const qty = Math.floor(Math.random() * 3) + 1; // Quantité de 1 à 3
+      const qty = Math.floor(Math.random() * 2) + 1;
       itemsTotal += p.price * qty;
       return {
         productId: p.id,
         quantity: qty,
-        price: p.price,
+        price: p.price
       };
     });
 
-    const total = itemsTotal + deliveryFee;
-    const status = statuses[i % statuses.length];
-    const method = paymentMethods[i % paymentMethods.length];
+    // Random status
+    const status = allStatuses[Math.floor(Math.random() * allStatuses.length)];
+    const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
 
-    // Garde-fou 2 : Distribution temporelle sur 90 jours
-    const randomDaysAgo = Math.floor(Math.random() * 90);
-    const createdAtDate = new Date();
-    createdAtDate.setDate(createdAtDate.getDate() - randomDaysAgo);
+    // Random date over the last 90 days
+    const daysAgo = Math.floor(Math.random() * 90);
+    const orderDate = new Date();
+    orderDate.setDate(orderDate.getDate() - daysAgo);
 
     await prisma.order.create({
       data: {
-        userId: client.id, // Garde-fou 3 : Liaison séquentielle avec l'ID réel du parent
-        storeId: storeId,
-        total: total,
-        deliveryFee: deliveryFee,
-        status: status as any,
-        paymentMethod: method,
+        userId: client.id,
+        storeId,
+        total: itemsTotal + deliveryFee,
+        deliveryFee,
+        status,
+        paymentMethod,
         deliveryAddress: `${client.name} - ${client.phone} - ${client.address || 'Libreville, Gabon'}`,
-        createdAt: createdAtDate,
-        updatedAt: createdAtDate,
+        createdAt: orderDate,
+        updatedAt: orderDate,
         orderItems: {
-          create: orderItemsData,
-        },
-      },
+          create: orderItemsData
+        }
+      }
     });
-    
-    ordersCreatedCount++;
+    totalOrdersCreated++;
   }
 
-  console.log(`Commandes créées : ${ordersCreatedCount} commandes simulées.`);
+  console.log(`✓ ${totalOrdersCreated} Commandes simulées au total.`);
 
-  // ==========================================
-  // ÉTAPE 6 : Seeding des Notifications
-  // ==========================================
-  console.log('6. Génération des notifications administrateur...');
+  // ========================================================
+  // ÉTAPE 6 : Seeding des Notifications Administrateur
+  // ========================================================
+  console.log('6. Génération des notifications d\'administration...');
   
-  const notificationMessages = [
-    "Nouvelle commande #MCF-B439A1 en attente de traitement.",
-    "Alerte : Stock faible (inférieur à 10) pour 'Vitamine C 1000mg' à la Pharmacie de la Poste.",
-    "Paiement électronique confirmé pour la commande #MCF-F5B2E8 via Moov Money.",
-    "Alerte : 'Baguette Traditionnelle' en rupture de stock imminente chez l'Épi d'Or.",
-    "Nouvelle commande #MCF-7E8B1C reçue de Marie Mba à Prix Import Oloumi.",
-    "Nouvelle commande #MCF-2E9C5A en attente de validation à Géant Casino.",
-    "Stock critique détecté pour 'Eau Minérale 1.5L' au supermarché Mbolo.",
-    "Nouvelle commande #MCF-3C5E92 de Paul Obiang à la Pharmacie d'Oloumi.",
-    "La commande #MCF-8F9D5E a été annulée par l'acheteur.",
-    "Le magasin 'Boutique de Lalala' sollicite une mise à jour d'informations."
+  const notificationAlerts = [
+    { type: 'ORDER', message: 'Nouvelle commande reçue chez Mbolo Supermarché.', reference: 'notif-order-mbolo-1' },
+    { type: 'STOCK', message: 'Alerte : Stock faible pour "Smart TV LED 43" 4K" chez Gaza Électroménager.', reference: 'notif-stock-gaza-1' },
+    { type: 'ORDER', message: 'Nouvelle commande payée en attente chez Boutique Bio-Glow.', reference: 'notif-order-bio-1' },
+    { type: 'STOCK', message: 'Rupture de stock signalée pour "Crème Visage 50ml" chez Or & Parfums.', reference: 'notif-stock-or-1' },
+    { type: 'ORDER', message: 'Commande annulée par l\'acheteur Paul Obiang.', reference: 'notif-order-cancel-1' }
   ];
 
-  for (let i = 0; i < notificationMessages.length; i++) {
+  for (const alert of notificationAlerts) {
     await prisma.notification.create({
       data: {
-        type: i % 2 === 0 ? 'ORDER' : 'STOCK',
-        message: notificationMessages[i],
-        reference: `ref-notif-${i}-${Math.floor(100 + Math.random() * 900)}`,
-        isRead: i > 7, // Les 2 dernières sont déjà lues
-      },
+        type: alert.type,
+        message: alert.message,
+        reference: alert.reference,
+        isRead: false
+      }
     });
   }
 
-  console.log('Notifications créées : 10 notifications administratives.');
-  console.log('--- SEEDING TERMINE AVEC SUCCES ---');
+  console.log('✓ Notifications administratives créées.');
+  console.log('=== SEEDING TERMINE AVEC SUCCES ===');
 }
 
 main()
   .catch((e) => {
-    console.error('Erreur durant le seeding :', e);
+    console.error('Erreur durant le seeding de la base de données :', e);
     process.exit(1);
   })
   .finally(async () => {

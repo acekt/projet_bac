@@ -16,9 +16,9 @@ export function ProductGallery({ imagesString, name }: ProductGalleryProps) {
   const images: string[] = (() => {
     try {
       const parsed = JSON.parse(imagesString || '[]');
-      return parsed.length > 0 ? parsed : ['https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop'];
+      return parsed.length > 0 ? parsed : ['/images/product-placeholder.svg'];
     } catch(e) {
-      return imagesString ? [imagesString] : ['https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=800&auto=format&fit=crop'];
+      return imagesString ? [imagesString] : ['/images/product-placeholder.svg'];
     }
   })();
 

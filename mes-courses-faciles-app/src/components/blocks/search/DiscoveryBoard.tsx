@@ -93,7 +93,7 @@ async function TrendingProductsSection() {
       {/* Product Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {products.map((product) => {
-          let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=400&auto=format&fit=crop';
+          let imgUrl = '/images/product-placeholder.svg';
           try {
             const parsed = JSON.parse(product.images || '[]');
             if (parsed.length > 0) imgUrl = parsed[0];
@@ -182,7 +182,7 @@ async function PopularStoresSection() {
             {/* Store Image */}
             <div className="relative h-36 overflow-hidden bg-slate-100 dark:bg-slate-800">
               <Image
-                src={store.logo || 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=600&auto=format&fit=crop'}
+                src={store.logo || '/images/store-placeholder.svg'}
                 alt={store.name}
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"

@@ -120,7 +120,7 @@ export function CartDrawer({ isBottomTab = false, isFloating = false }: { isBott
                 <div key={item.id} className="flex gap-4">
                   <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-muted/50 border border-border/50 shrink-0">
                     <Image
-                      src={item.image || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400&auto=format&fit=crop"}
+                      src={item.image || "/images/product-placeholder.svg"}
                       alt={item.name}
                       fill
                       className="object-contain p-2 mix-blend-multiply"

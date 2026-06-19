@@ -10,14 +10,14 @@ import { useAuth } from '@/context/AuthContext';
 
 export const BottomTabBar = () => {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const navItems = [
     { icon: Home, label: 'Accueil', href: '/' },
     { icon: Search, label: 'Chercher', href: '/search' },
     { icon: ShoppingBag, label: 'Panier', href: '#', isCart: true },
     { icon: Heart, label: 'Favoris', href: isAuthenticated ? '/favorites' : '?auth=login' },
-    { icon: User, label: 'Profil', href: isAuthenticated ? '/profile' : '?auth=login' },
+    { icon: User, label: 'Profil', href: isAuthenticated ? (user?.role === 'ADMIN' ? '/admin/settings' : '/profile') : '?auth=login' },
   ];
 
   return (

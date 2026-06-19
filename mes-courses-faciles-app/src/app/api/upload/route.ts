@@ -3,6 +3,8 @@ import { cloudinary } from '@/lib/cloudinary';
 import { verifyJWT } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
+import crypto from 'crypto';
+
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -26,10 +28,21 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    // Nommé avec un identifiant unique (timestamp + UUID pour éviter l'écrasement)
+    const uniqueId = crypto.randomUUID();
+    const cleanFileName = file.name
+      .replace(/\.[^/.]+$/, "") // retire l'extension
+      .replace(/[^a-zA-Z0-9-_]/g, "_"); // remplace les caractères spéciaux par des underscores
+    const publicId = `${cleanFileName}_${Date.now()}_${uniqueId.substring(0, 8)}`;
+
     // Upload using stream to avoid temporary files
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: folder },
+        { 
+          folder: folder,
+          public_id: publicId,
+          overwrite: false
+        },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);

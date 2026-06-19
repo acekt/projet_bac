@@ -33,6 +33,11 @@ export default async function ProfilePage() {
     redirect('/?auth=login&callbackUrl=/profile');
   }
 
+  // Isolation stricte : Un admin requêtant le profil client est redirigé vers l'admin settings
+  if (user.role !== 'CLIENT') {
+    redirect('/admin/settings');
+  }
+
   // Fetch orders from DB directly
   const orders = await prisma.order.findMany({
     where: { userId: user.id },

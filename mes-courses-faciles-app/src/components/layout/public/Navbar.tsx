@@ -7,10 +7,9 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CartDrawer } from '@/components/blocks/cart/CartDrawer';
 import { SearchSuggestionsInput } from '@/components/blocks/search/SearchSuggestionsInput';
+import { ClientUserMenu, AdminUserMenu } from './UserMenus';
 
 
 export function Navbar() {
@@ -43,11 +42,12 @@ export function Navbar() {
 
                 <div className="h-px bg-border my-4" />
 
+
                 {isAuthenticated ? (
                   <>
                     <div className="font-medium text-muted-foreground mb-2">Bonjour, {user?.name || 'Client'}</div>
-                    <Link href="/profile" className="text-lg font-medium hover:text-primary transition-colors">Mon Compte</Link>
-                    <Link href="/profile?tab=orders" className="text-lg font-medium hover:text-primary transition-colors">Mes Commandes</Link>
+                    <Link href={user?.role === 'ADMIN' ? '/admin/settings' : '/profile'} className="text-lg font-medium hover:text-primary transition-colors">Mon Compte</Link>
+                    <Link href={user?.role === 'ADMIN' ? '/admin/orders' : '/profile?tab=orders'} className="text-lg font-medium hover:text-primary transition-colors">Mes Commandes</Link>
                     {user?.role === 'ADMIN' && (
                        <Link href="/admin" className="text-lg font-medium text-accent hover:underline">Panel Admin</Link>
                     )}
@@ -105,47 +105,11 @@ export function Navbar() {
           <div className="hidden lg:flex items-center gap-4">
              {isAuthenticated ? (
                 <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={
-                          <Button variant="ghost" className="flex items-center gap-2 hover:bg-accent/10 hover:text-accent p-2 rounded-full ring-0 focus-visible:ring-0 cursor-pointer" />
-                        }
-                      >
-                        <Avatar className="h-8 w-8 bg-primary/10 text-primary">
-                          <AvatarFallback className="font-bold bg-transparent text-primary border border-primary/20">
-                            {user?.name ? user.name.charAt(0).toUpperCase() : <User size={16} />}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="max-w-[100px] truncate font-medium">{user?.name || 'Compte'}</span>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Link href="/profile" className="cursor-pointer">Profil</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Link href="/profile?tab=orders" className="cursor-pointer">Mes commandes</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Link href="/favorites" className="cursor-pointer">Mes favoris</Link>
-                        </DropdownMenuItem>
- 
-                        {user?.role === 'ADMIN' && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>
-                              <Link href="/admin" className="cursor-pointer font-bold text-accent">Interface Admin</Link>
-                            </DropdownMenuItem>
-                          </>
-                        )}
- 
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10">
-                          Déconnexion
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {user?.role === 'ADMIN' ? (
+                      <AdminUserMenu user={user} logout={logout} />
+                    ) : (
+                      <ClientUserMenu user={user} logout={logout} />
+                    )}
                     <Button 
                       variant="ghost" 
                       size="icon" 

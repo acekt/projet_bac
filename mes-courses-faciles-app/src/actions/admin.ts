@@ -204,7 +204,7 @@ export async function updatePlatformPreferencesAction(data: z.infer<typeof platf
     }
     fs.writeFileSync(PREFERENCES_FILE_PATH, JSON.stringify(validated, null, 2));
 
-    revalidateTag("preferences");
+    revalidateTag("preferences", "max");
     revalidatePath("/admin/settings");
     return { success: true };
   } catch (e: unknown) {

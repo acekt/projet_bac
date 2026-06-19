@@ -166,7 +166,7 @@ export function SearchSuggestionsInput({ placeholder = "Rechercher...", classNam
                         <div className="flex items-center gap-3">
                           <div className="relative w-9 h-9 rounded-lg overflow-hidden border border-border/40 bg-white shrink-0">
                             <Image
-                              src={store.logo || "https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=100&auto=format&fit=crop"}
+                              src={store.logo || "/images/store-placeholder.svg"}
                               alt={store.name}
                               fill
                               sizes="36px"
@@ -194,7 +194,7 @@ export function SearchSuggestionsInput({ placeholder = "Rechercher...", classNam
                   </div>
                   <div className="space-y-1">
                     {suggestions.products.map((product) => {
-                      let imgUrl = 'https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=100&auto=format&fit=crop';
+                      let imgUrl = '/images/product-placeholder.svg';
                       try {
                         const parsed = JSON.parse(product.images || '[]');
                         if (parsed.length > 0) imgUrl = parsed[0];
