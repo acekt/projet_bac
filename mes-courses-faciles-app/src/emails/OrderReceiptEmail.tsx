@@ -231,7 +231,7 @@ export function OrderReceiptEmail({
               Suivez votre livraison en temps réel
             </Heading>
             <Text style={{ ...styles.heroSub, textAlign: 'center' as const, marginBottom: '28px' }}>
-              Consultez l'avancement de votre commande depuis votre espace client MesAchats241.
+              Consultez l&apos;avancement de votre commande depuis votre espace client MesAchats241.
             </Text>
             <Button href={trackingUrl} style={styles.ctaButton}>
               Suivre ma commande →
