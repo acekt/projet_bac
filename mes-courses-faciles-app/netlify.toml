@@ -1,6 +1,6 @@
 [build]
   base = "mes-courses-faciles-app"
-  command = "npx prisma generate && npm run build"
+  command = "prisma db push && prisma generate && next build"
   publish = ".next"
 
 [[plugins]]
