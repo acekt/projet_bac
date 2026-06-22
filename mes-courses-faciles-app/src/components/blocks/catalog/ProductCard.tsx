@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Plus, ShoppingCart, Package, Heart, Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useFavorites } from '@/hooks/useFavorites';
+import { ImageWithLoader } from '@/components/ui/ImageWithLoader';
+import { resolveImageUrl } from '@/lib/image-resolver';
 
 /** Seuil en jours pour qualifier un produit de "Nouveau" */
 const NEW_PRODUCT_DAYS = 30;
@@ -19,7 +20,8 @@ interface ProductCardProps {
   id: string;
   name: string;
   price: number;
-  image: string;
+  /** Valeur brute depuis la DB : peut être null, JSON stringifié, chemin local, URL Cloudinary. */
+  image: string | null | undefined;
   category: string;
   unit: string;
   storeId: string;
@@ -44,8 +46,10 @@ export const ProductCard = ({
   const { isFavorite, toggleFavorite } = useFavorites();
   const router = useRouter();
   const pathname = usePathname();
-  const [imgError, setImgError] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+
+  // Résolution centralisée de l'image (JSON, local, Cloudinary, null → placeholder)
+  const resolvedImage = resolveImageUrl(image, 'product');
 
   const isFav = isFavorite(id);
   const isNew = isNewProduct(createdAt);
@@ -59,7 +63,7 @@ export const ProductCard = ({
       return;
     }
 
-    addToCart({ id, name, price, image, category, unit, storeId });
+    addToCart({ id, name, price, image: resolvedImage, category, unit, storeId });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1200);
   };
@@ -73,7 +77,7 @@ export const ProductCard = ({
       return;
     }
 
-    toggleFavorite({ id, name, price, image, category, unit, storeId });
+    toggleFavorite({ id, name, price, image: resolvedImage, category, unit, storeId });
   };
 
   return (
@@ -87,24 +91,16 @@ export const ProductCard = ({
         )}
       >
         {/* ── Zone image ── */}
-        <div className="relative h-48 w-full bg-white dark:bg-slate-900/60 p-4 border-b border-slate-100/50 dark:border-white/5 overflow-hidden">
-          <Link href={`/product/${id}`} className="absolute inset-0 block">
-            {(!image || imgError) ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground/50">
-                <Package size={48} strokeWidth={1} />
-                <span className="text-[10px] font-bold uppercase tracking-tighter mt-2">Image indisponible</span>
-              </div>
-            ) : (
-              /* ── Zoom image au survol parent (CSS-first, transform-gpu) ── */
-              <Image
-                src={image}
-                alt={name}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-contain p-4 mix-blend-multiply group-hover:scale-110 transition-transform duration-500 ease-out transform-gpu"
-                onError={() => setImgError(true)}
-              />
-            )}
+        <div className="relative h-48 w-full border-b border-slate-100/50 dark:border-white/5 overflow-hidden">
+          <Link href={`/product/${id}`} className="relative block h-full w-full z-0">
+            <ImageWithLoader
+              src={resolvedImage}
+              alt={name}
+              type="product"
+              objectFit="contain"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="absolute inset-0 bg-white dark:bg-slate-900/60 group-hover:scale-110 transition-transform duration-500 ease-out transform-gpu"
+            />
           </Link>
 
           {/* ── Badge "Nouveau" (haut-gauche) ── */}
@@ -115,7 +111,7 @@ export const ProductCard = ({
             </div>
           )}
 
-          {/* ── Bouton Favoris (haut-gauche si pas de badge, sinon en bas) ── */}
+          {/* ── Bouton Favoris (haut-gauche si pas de badge) ── */}
           {!isNew && (
             <button
               onClick={handleToggleFavorite}
@@ -188,7 +184,7 @@ export const ProductCard = ({
               </span>
             </div>
 
-            {/* ── Bouton CTA principal : active:scale-95 pour l'effet d'enfoncement ── */}
+            {/* ── Bouton CTA principal ── */}
             <Button
               onClick={handleAdd}
               size="icon"

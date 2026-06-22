@@ -9,14 +9,18 @@ import { resend, FROM_EMAIL, APP_URL } from '@/lib/mail';
 import { OrderReceiptEmail } from '@/emails/OrderReceiptEmail';
 import { render } from '@react-email/components';
 import { requireAuth, requireAdminAuth, AuthError } from '@/lib/auth-guard';
+import { resolveImageUrl } from '@/lib/image-resolver';
+import { sanitizePrismaArray } from '@/lib/serialization';
 
 
 export const getCachedActiveStores = unstable_cache(
   async () => {
-    return prisma.store.findMany({
+    const stores = await prisma.store.findMany({
       where: { isActive: true, isDeleted: false },
       orderBy: { createdAt: "desc" }
     });
+    // sanitize : convertit les objets Date en strings ISO avant le passage RSC boundary
+    return sanitizePrismaArray(stores);
   },
   ["stores-list"],
   {
@@ -162,7 +166,8 @@ export async function fetchUserCartAction() {
       id:       item.productId,
       name:     item.product.name,
       price:    item.product.price,
-      image:    item.product.images ? JSON.parse(item.product.images)[0] : '',
+      // resolveImageUrl gère tous les cas : null, '[]', JSON stringifié, chemin local
+      image:    resolveImageUrl(item.product.images, 'product'),
       quantity: item.quantity,
       unit:     item.product.unit || '',
       category: item.product.category,

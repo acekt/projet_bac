@@ -37,7 +37,8 @@ export async function loginAction(data: z.infer<typeof loginSchema>) {
     const cookieStore = await cookies();
     cookieStore.set('mcf_jwt_session', token, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production', // HTTPS en prod, HTTP en dev
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });
@@ -94,7 +95,8 @@ export async function registerAction(data: z.infer<typeof userSchema>) {
     const cookieStore = await cookies();
     cookieStore.set('mcf_jwt_session', token, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production', // HTTPS en prod, HTTP en dev
+      sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
     });

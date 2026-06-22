@@ -1,10 +1,22 @@
 import { PrismaClient, Role, OrderStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('=== DEBUT DE L\'ENRICHISSEMENT DE LA BASE DE DONNEES ===');
+
+  // Chargement de la configuration des images premium
+  const configPath = path.join(__dirname, '../images-assets-config.json');
+  let config: any = { stores: {}, products: {} };
+  try {
+    config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+    console.log('✓ Configuration des images premium chargée avec succès.');
+  } catch (error) {
+    console.error('⚠ Impossible de charger la configuration des images, fallbacks par défaut utilisés.', error);
+  }
 
   // ========================================================
   // ÉTAPE 1 : Nettoyage Complet et Ordonné (Teardown)
@@ -26,10 +38,12 @@ async function main() {
   
   // Hachage unique pour accélérer l'exécution du script
   const hashedPassword = await bcrypt.hash('password123', 10);
+  const clientHashedPassword = await bcrypt.hash('Client12345', 10);
+  const adminHashedPassword = await bcrypt.hash('Admin12345', 10);
 
   // Génération de 3 Administrateurs
   const adminsData = [
-    { name: 'Christ APINDA', email: 'admin@mcf.com', password: hashedPassword, role: Role.ADMIN, phone: '+241066000000' },
+    { name: 'Christ APINDA', email: 'admin@mcf.com', password: adminHashedPassword, role: Role.ADMIN, phone: '+241066000000' },
     { name: 'Jules Nguema', email: 'jules@mcf.com', password: hashedPassword, role: Role.ADMIN, phone: '+241066112233' },
     { name: 'Sarah Bongo', email: 'sarah@mcf.com', password: hashedPassword, role: Role.ADMIN, phone: '+241077112233' }
   ];
@@ -42,7 +56,7 @@ async function main() {
   // Génération de 15 Clients Réalistes
   const clientsData = [
     // Emma (Compte test requis obligatoirement)
-    { name: 'Emma', email: 'client@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241066554433', address: 'Libreville, Louis' },
+    { name: 'Emma', email: 'client@mcf.com', password: clientHashedPassword, role: Role.CLIENT, phone: '+241066554433', address: 'Libreville, Louis' },
     
     // Autres clients
     { name: 'Marie Mba', email: 'marie@mcf.com', password: hashedPassword, role: Role.CLIENT, phone: '+241077112244', address: 'Libreville, Glass' },
@@ -73,22 +87,19 @@ async function main() {
   }
   console.log(`✓ ${createdClients.length} Clients insérés (dont Emma).`);
 
-  // ========================================================
-  // ÉTAPE 3 : Seeding des Magasins (Stores)
-  // ========================================================
   console.log('3. Génération des magasins partenaires (10 magasins)...');
-  
+
   const storeDefinitions = [
-    { name: 'Mbolo Supermarché', address: 'Boulevard Triomphal, Libreville', district: 'Mbolo', phone: '+24111740001', logo: '/images/store-placeholder.svg', description: 'Le plus grand supermarché historique de Libreville. Alimentation générale, fruits et légumes.', isActive: true, isDeleted: false, category: 'Alimentation' },
-    { name: 'Géant Casino', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760002', logo: '/images/store-placeholder.svg', description: 'Produits frais, épicerie fine et importations de qualité supérieure.', isActive: true, isDeleted: false, category: 'Alimentation' },
-    { name: 'TiDB Tech Store', address: 'Zone Industrielle Oloumi, Libreville', district: 'Oloumi', phone: '+24111720022', logo: '/images/store-placeholder.svg', description: 'Ordinateurs, téléphones, accessoires informatiques et composants high-tech.', isActive: true, isDeleted: false, category: 'Électronique' },
-    { name: 'Gaza Électroménager', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760021', logo: '/images/store-placeholder.svg', description: 'Le spécialiste de l\'électroménager et des Smart TV de Libreville.', isActive: true, isDeleted: false, category: 'Électronique' },
-    { name: 'Boutique Bio-Glow', address: 'Carrefour Angondjé, Libreville', district: 'Angondjé', phone: '+24111700024', logo: '/images/store-placeholder.svg', description: 'Savons bio locaux, soins capillaires, huiles végétales et bien-être.', isActive: true, isDeleted: false, category: 'Beauté' },
-    { name: 'Or & Parfums', address: 'Carrefour Louis, Libreville', district: 'Louis', phone: '+24111780023', logo: '/images/store-placeholder.svg', description: 'Gamme complète de parfums importés authentiques et maquillage de marque.', isActive: true, isDeleted: false, category: 'Beauté' },
-    { name: 'Shoes & Style', address: 'Avenue des Mines, Libreville', district: 'Oloumi', phone: '+24111750026', logo: '/images/store-placeholder.svg', description: 'Chaussures de créateurs, sacs à main, ceintures et maroquinerie fine.', isActive: true, isDeleted: false, category: 'Mode' },
-    { name: 'Gabon Chic & Mode', address: 'Centre-ville, Libreville', district: 'Centre-ville', phone: '+24111710025', logo: '/images/store-placeholder.svg', description: 'Prêt-à-porter, chemises, costumes et vêtements stylés pour tous.', isActive: true, isDeleted: false, category: 'Mode' },
-    { name: 'Libreville Ameublement', address: 'Rond-point des Charbonnages, Libreville', district: 'Charbonnages', phone: '+24111730027', logo: '/images/store-placeholder.svg', description: 'Meubles design, canapés confortables et agencement de salon.', isActive: true, isDeleted: false, category: 'Maison' },
-    { name: 'Brico-Déco Gabon', address: 'Carrefour Akébé, Libreville', district: 'Akébé', phone: '+24111790028', logo: '/images/store-placeholder.svg', description: 'Outils de bricolage, rideaux, décoration murale et petits accessoires maison.', isActive: true, isDeleted: false, category: 'Maison' }
+    { name: 'Mbolo Supermarché', address: 'Boulevard Triomphal, Libreville', district: 'Mbolo', phone: '+24111740001', logo: config.stores['Mbolo Supermarché']?.url || '/images/store-placeholder.svg', description: 'Le plus grand supermarché historique de Libreville. Alimentation générale, fruits et légumes.', isActive: true, isDeleted: false, category: 'Alimentation' },
+    { name: 'Géant Casino', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760002', logo: config.stores['Géant Casino']?.url || '/images/store-placeholder.svg', description: 'Produits frais, épicerie fine et importations de qualité supérieure.', isActive: true, isDeleted: false, category: 'Alimentation' },
+    { name: 'TiDB Tech Store', address: 'Zone Industrielle Oloumi, Libreville', district: 'Oloumi', phone: '+24111720022', logo: config.stores['TiDB Tech Store']?.url || '/images/store-placeholder.svg', description: 'Ordinateurs, téléphones, accessoires informatiques et composants high-tech.', isActive: true, isDeleted: false, category: 'Électronique' },
+    { name: 'Gaza Électroménager', address: 'Avenue de Cointet, Libreville', district: 'Glass', phone: '+24111760021', logo: config.stores['Gaza Électroménager']?.url || '/images/store-placeholder.svg', description: 'Le spécialiste de l\'électroménager et des Smart TV de Libreville.', isActive: true, isDeleted: false, category: 'Électronique' },
+    { name: 'Boutique Bio-Glow', address: 'Carrefour Angondjé, Libreville', district: 'Angondjé', phone: '+24111700024', logo: config.stores['Boutique Bio-Glow']?.url || '/images/store-placeholder.svg', description: 'Savons bio locaux, soins capillaires, huiles végétales et bien-être.', isActive: true, isDeleted: false, category: 'Beauté' },
+    { name: 'Or & Parfums', address: 'Carrefour Louis, Libreville', district: 'Louis', phone: '+24111780023', logo: config.stores['Or & Parfums']?.url || '/images/store-placeholder.svg', description: 'Gamme complète de parfums importés authentiques et maquillage de marque.', isActive: true, isDeleted: false, category: 'Beauté' },
+    { name: 'Shoes & Style', address: 'Avenue des Mines, Libreville', district: 'Oloumi', phone: '+24111750026', logo: config.stores['Shoes & Style']?.url || '/images/store-placeholder.svg', description: 'Chaussures de créateurs, sacs à main, ceintures et maroquinerie fine.', isActive: true, isDeleted: false, category: 'Mode' },
+    { name: 'Gabon Chic & Mode', address: 'Centre-ville, Libreville', district: 'Centre-ville', phone: '+24111710025', logo: config.stores['Gabon Chic & Mode']?.url || '/images/store-placeholder.svg', description: 'Prêt-à-porter, chemises, costumes et vêtements stylés pour tous.', isActive: true, isDeleted: false, category: 'Mode' },
+    { name: 'Libreville Ameublement', address: 'Rond-point des Charbonnages, Libreville', district: 'Charbonnages', phone: '+24111730027', logo: config.stores['Libreville Ameublement']?.url || '/images/store-placeholder.svg', description: 'Meubles design, canapés confortables et agencement de salon.', isActive: true, isDeleted: false, category: 'Maison' },
+    { name: 'Brico-Déco Gabon', address: 'Carrefour Akébé, Libreville', district: 'Akébé', phone: '+24111790028', logo: config.stores['Brico-Déco Gabon']?.url || '/images/store-placeholder.svg', description: 'Outils de bricolage, rideaux, décoration murale et petits accessoires maison.', isActive: true, isDeleted: false, category: 'Maison' }
   ];
 
   const createdStores = [];
@@ -214,6 +225,7 @@ async function main() {
       const isOutOfStock = Math.random() < 0.15;
       const stock = isOutOfStock ? 0 : Math.floor(10 + Math.random() * 190);
 
+      const productImg = config.products[temp.name]?.url || '/images/product-placeholder.svg';
       productsToCreate.push({
         name: temp.name,
         description: temp.description,
@@ -221,8 +233,7 @@ async function main() {
         stock: stock,
         unit: temp.unit,
         category: store.category,
-        // Placeholder local strict pour éviter les erreurs réseau 404
-        images: JSON.stringify(['/images/product-placeholder.svg']),
+        images: JSON.stringify([productImg]),
         storeId: store.id,
         isActive: true,
         isDeleted: false

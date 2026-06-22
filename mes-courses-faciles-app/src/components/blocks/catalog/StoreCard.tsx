@@ -1,16 +1,18 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { MapPin, Star, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { ImageWithLoader } from '@/components/ui/ImageWithLoader';
+import { resolveImageUrl } from '@/lib/image-resolver';
 
 interface StoreCardProps {
   id: string;
   name: string;
-  image: string;
+  /** Valeur brute depuis la DB (logo) : peut être null, chemin local, URL Cloudinary. */
+  image: string | null | undefined;
   location: string;
   rating: number;
   deliveryTime: string;
@@ -21,6 +23,9 @@ interface StoreCardProps {
 export const StoreCard = ({
   id, name, image, location, rating, deliveryTime, categories, isFeatured = false
 }: StoreCardProps) => {
+
+  // Résolution centralisée : null/vide → placeholder SVG local
+  const resolvedImage = resolveImageUrl(image, 'store');
 
   if (isFeatured) {
     return (
@@ -37,17 +42,18 @@ export const StoreCard = ({
               "p-0 rounded-3xl transform-gpu"
             )}
           >
-            {/* Background Image avec zoom CSS */}
-            <div className="absolute inset-0 z-0 bg-muted overflow-hidden">
-              <Image
-                src={image}
+            {/* Background Image via ImageWithLoader (gère SVG + fallback automatique) */}
+            <div className="absolute inset-0 z-0 bg-muted overflow-hidden relative h-full w-full">
+              <ImageWithLoader
+                src={resolvedImage}
                 alt={name}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out transform-gpu"
+                type="store"
+                objectFit="cover"
                 priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 ease-out transform-gpu"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent z-10 pointer-events-none" />
             </div>
 
             {/* Content overlay */}
@@ -105,23 +111,24 @@ export const StoreCard = ({
             "p-0 py-0 transform-gpu"
           )}
         >
-          {/* Image zone avec zoom CSS */}
+          {/* Image zone via ImageWithLoader */}
           <div className="relative h-36 w-full overflow-hidden bg-muted">
-            <Image
-              src={image}
+            <ImageWithLoader
+              src={resolvedImage}
               alt={name}
-              fill
+              type="store"
+              objectFit="cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out transform-gpu"
+              className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 ease-out transform-gpu"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 z-10 pointer-events-none" />
 
-            <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-md px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+            <div className="absolute top-3 right-3 z-20 bg-background/90 backdrop-blur-md px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
               <Star size={12} className="fill-accent text-accent" />
               <span className="text-foreground text-[11px]">{rating}</span>
             </div>
 
-            <div className="absolute bottom-3 left-3 right-3">
+            <div className="absolute bottom-3 left-3 right-3 z-20">
               <div className="text-white/90 text-[11px] font-medium flex items-center gap-1 truncate">
                 <MapPin size={12} className="text-primary shrink-0" />
                 <span className="truncate">{location}</span>

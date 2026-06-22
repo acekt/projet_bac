@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     // 1. Fetch pending orders from DB
     const pendingOrders = await prisma.order.findMany({
       where: { status: 'PENDING' },
-      include: { user: true },
+      include: { user: { select: { name: true } } }, // Least-privilege: name only, no password/email
       orderBy: { createdAt: 'desc' },
     });
 
