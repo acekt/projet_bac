@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Une erreur serveur interne est survenue.' }, { status: 500 });
   }
 }
 
@@ -69,7 +69,7 @@ export async function GET() {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
     // IDOR fix : isolation stricte par session.id
@@ -84,6 +84,6 @@ export async function GET() {
     return NextResponse.json(orders);
   } catch (error) {
     console.error('Fetch orders error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Une erreur serveur interne est survenue.' }, { status: 500 });
   }
 }

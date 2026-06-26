@@ -27,6 +27,7 @@ interface ProductCardProps {
   storeId: string;
   /** Date de création — optionnelle. Permet d'afficher le badge "Nouveau". */
   createdAt?: Date | string;
+  storeName?: string;
 }
 
 /** Retourne true si le produit a été créé il y a moins de NEW_PRODUCT_DAYS jours */
@@ -39,7 +40,7 @@ function isNewProduct(createdAt?: Date | string): boolean {
 }
 
 export const ProductCard = ({
-  id, name, price, image, category, unit, storeId, createdAt
+  id, name, price, image, category, unit, storeId, createdAt, storeName
 }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -162,8 +163,22 @@ export const ProductCard = ({
 
         {/* ── Zone info ── */}
         <div className="p-5 flex flex-col flex-grow">
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
-            {category}
+          <div className="flex justify-between items-center mb-1.5 gap-2">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              {category}
+            </span>
+            {storeName && (
+              <Link
+                href={`/store/${storeId}`}
+                className="text-[10px] font-extrabold text-brand-primary hover:text-brand-primary-hover flex items-center gap-1 transition-all truncate max-w-[120px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <Package size={10} className="shrink-0" />
+                <span className="truncate">{storeName}</span>
+              </Link>
+            )}
           </div>
           <h4 className="font-bold text-foreground line-clamp-2 leading-snug flex-grow min-h-[2.5rem] mb-4">
             <Link href={`/product/${id}`} className="hover:text-primary transition-colors">
@@ -175,7 +190,7 @@ export const ProductCard = ({
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1">
                 <span className="text-xl font-extrabold text-foreground">
-                  {price.toLocaleString()}
+                  {price.toLocaleString('fr-FR')}
                 </span>
                 <span className="text-xs font-bold text-muted-foreground mb-1">CFA</span>
               </div>

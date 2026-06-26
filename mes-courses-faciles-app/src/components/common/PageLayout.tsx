@@ -19,7 +19,7 @@ interface PageLayoutProps {
 export function PageLayout({ children, withPadding = true, className = '' }: PageLayoutProps) {
   return (
     <PageWrapper>
-      <div className={`min-h-screen bg-mesh bg-noise relative overflow-hidden ${withPadding ? 'py-12' : ''} ${className}`}>
+      <div className={`min-h-screen bg-mesh bg-noise relative overflow-clip ${withPadding ? 'py-12' : ''} ${className}`}>
         {/* Flare décoratif haut-droite (couleur primaire) */}
         <div
           aria-hidden="true"

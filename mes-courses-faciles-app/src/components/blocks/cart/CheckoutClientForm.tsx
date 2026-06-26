@@ -261,7 +261,7 @@ export function CheckoutClientForm({ initialUser }: CheckoutClientFormProps) {
                   >
                     {loading ? <Loader2 className="animate-spin" /> : (
                       <>
-                        Confirmer et payer {finalTotal.toLocaleString()} CFA
+                        Confirmer et payer {finalTotal.toLocaleString('fr-FR')} CFA
                         <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
@@ -293,7 +293,7 @@ export function CheckoutClientForm({ initialUser }: CheckoutClientFormProps) {
                         <h4 className="text-sm font-bold text-foreground line-clamp-2 leading-tight mb-1">{item.name}</h4>
                         <div className="flex justify-between items-center mt-auto">
                           <p className="text-xs text-muted-foreground font-medium">Qté: <span className="text-foreground">{item.quantity}</span></p>
-                          <p className="text-sm font-bold text-primary">{(item.price * item.quantity).toLocaleString()} CFA</p>
+                          <p className="text-sm font-bold text-primary">{(item.price * item.quantity).toLocaleString('fr-FR')} CFA</p>
                         </div>
                       </div>
                     </div>
@@ -305,16 +305,16 @@ export function CheckoutClientForm({ initialUser }: CheckoutClientFormProps) {
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm text-muted-foreground font-medium">
                     <span>Sous-total articles</span>
-                    <span className="text-foreground">{totalPrice.toLocaleString()} CFA</span>
+                    <span className="text-foreground">{totalPrice.toLocaleString('fr-FR')} CFA</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground font-medium">
                     <span className="flex items-center gap-1.5">Frais de livraison <Truck size={14} /></span>
-                    <span className="text-foreground">{deliveryFee.toLocaleString()} CFA</span>
+                    <span className="text-foreground">{deliveryFee.toLocaleString('fr-FR')} CFA</span>
                   </div>
 
                   <div className="pt-6 flex justify-between items-end border-t border-border/50">
                     <span className="text-lg font-bold text-foreground">Total à régler</span>
-                    <span className="text-3xl font-black text-primary tracking-tight">{finalTotal.toLocaleString()} <span className="text-lg font-bold">CFA</span></span>
+                    <span className="text-3xl font-black text-primary tracking-tight">{finalTotal.toLocaleString('fr-FR')} <span className="text-lg font-bold">CFA</span></span>
                   </div>
                 </div>
               </Card>
@@ -329,7 +329,7 @@ export function CheckoutClientForm({ initialUser }: CheckoutClientFormProps) {
                   >
                     {loading ? <Loader2 className="animate-spin" /> : (
                       <>
-                        Payer {finalTotal.toLocaleString()} CFA
+                        Payer {finalTotal.toLocaleString('fr-FR')} CFA
                         <ChevronRight className="ml-1 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}

@@ -181,7 +181,7 @@ export function PaymentMethodStep({
             </>
           ) : (
             <>
-              Confirmer et payer {totalAmount.toLocaleString()} CFA
+              Confirmer et payer {totalAmount.toLocaleString('fr-FR')} CFA
               <ChevronRight size={18} />
             </>
           )}

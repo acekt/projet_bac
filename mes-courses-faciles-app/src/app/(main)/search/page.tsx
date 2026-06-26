@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
 import { DiscoveryBoard, DiscoverySkeleton } from '@/components/blocks/search/DiscoveryBoard';
 import { SearchContent } from '@/components/blocks/search/SearchContent';
+import { SearchPageSkeleton } from '@/components/common/Skeletons';
 
 /**
  * SearchPage — Server Component (RSC)
@@ -13,9 +13,9 @@ import { SearchContent } from '@/components/blocks/search/SearchContent';
  *   → Zéro JS supplémentaire pour charger les données de découverte
  */
 export default function SearchPage() {
-  // Le DiscoveryBoard est un RSC rendu ici (côté serveur) et passé comme
-  // un slot React au Client Component. Cela permet à SearchContent de
-  // l'afficher dans son empty-state sans le moindre appel fetch côté client.
+  // Le DiscoveryBoard is a RSC rendered here (côté serveur) and passed as
+  // a React slot to the Client Component. This allows SearchContent to
+  // display it in its empty-state without any client-side fetch.
   const discoverySlot = (
     <Suspense fallback={<DiscoverySkeleton />}>
       <DiscoveryBoard />
@@ -23,13 +23,7 @@ export default function SearchPage() {
   );
 
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-mesh bg-noise py-12 flex items-center justify-center">
-          <Loader2 className="animate-spin text-brand-primary" size={32} />
-        </div>
-      }
-    >
+    <Suspense fallback={<SearchPageSkeleton />}>
       <SearchContent discoverySlot={discoverySlot} />
     </Suspense>
   );

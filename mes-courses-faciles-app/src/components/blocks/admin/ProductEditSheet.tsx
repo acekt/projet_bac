@@ -16,6 +16,7 @@ import { Loader2, Upload, X, Package } from 'lucide-react';
 import { updateProductAction } from '@/actions/ecommerce';
 import { useToast } from '@/context/ToastContext';
 import { Store as StoreType } from '@/types';
+import { CATEGORIES } from '@/lib/constants/categories';
 
 // Zod validation schema
 const productFormSchema = z.object({
@@ -127,35 +128,38 @@ export function ProductEditSheet({ isOpen, onClose, onSuccess, product }: Produc
     }
 
     setUploading(true);
-    const newUrls: string[] = [];
+    try {
+      const newUrls: string[] = [];
 
-    for (const file of validFiles) {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'mes-courses-faciles/products');
+      for (const file of validFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', 'mes-courses-faciles/products');
 
-      try {
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-        const data = await res.json();
-        if (res.ok) {
-          newUrls.push(data.url);
-        } else {
-          toast.error(data.error || `Erreur lors de l'upload de ${file.name}`);
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            newUrls.push(data.url);
+          } else {
+            toast.error(data.error || `Erreur lors de l'upload de ${file.name}`);
+          }
+        } catch (err) {
+          console.error("Upload error:", err);
+          toast.error(`Impossible d'importer l'image ${file.name}.`);
         }
-      } catch (err) {
-        console.error("Upload error:", err);
-        toast.error(`Impossible d'importer l'image ${file.name}.`);
       }
-    }
 
-    if (newUrls.length > 0) {
-      setImageUrls(prev => [...prev, ...newUrls]);
-      toast.success(`${newUrls.length} image(s) ajoutée(s).`);
+      if (newUrls.length > 0) {
+        setImageUrls(prev => [...prev, ...newUrls]);
+        toast.success(`${newUrls.length} image(s) ajoutée(s).`);
+      }
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -324,12 +328,11 @@ export function ProductEditSheet({ isOpen, onClose, onSuccess, product }: Produc
                   {...register('category')}
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all outline-none text-slate-800 dark:text-white font-medium text-sm font-bold"
                 >
-                  <option value="Alimentaire">Alimentaire</option>
-                  <option value="Hygiène">Hygiène</option>
-                  <option value="Boissons">Boissons</option>
-                  <option value="Entretien">Entretien</option>
-                  <option value="Bébé">Bébé</option>
-                  <option value="Divers">Divers</option>
+                  {Object.entries(CATEGORIES).map(([key, config]) => (
+                    <option key={key} value={key}>
+                      {config.label}
+                    </option>
+                  ))}
                 </select>
                 {errors.category && (
                   <p className="text-xs text-red-550 font-semibold">{errors.category.message}</p>

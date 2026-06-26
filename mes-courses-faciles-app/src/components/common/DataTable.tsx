@@ -12,16 +12,13 @@ import {
   getFilteredRowModel,
 } from '@tanstack/react-table';
 import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
   Search,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { DataTablePagination } from '@/components/ui/data-table-pagination';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,12 +26,18 @@ interface DataTableProps<TData, TValue> {
   searchPlaceholder?: string;
   globalFilterValue?: string;
   onGlobalFilterChangeValue?: (value: string) => void;
+  serverPagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalCount: number;
+  };
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchPlaceholder = "Rechercher...",
+  serverPagination,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState<any>('');
@@ -159,47 +162,20 @@ export function DataTable<TData, TValue>({
             </tbody>
           </table>
         </div>
-
-        {/* Pagination bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-5 border-t border-slate-200/60 dark:border-slate-800/60 bg-slate-50/40 dark:bg-slate-900/10">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-450">
-            Page {table.getState().pagination.pageIndex + 1} sur {table.getPageCount() || 1} ({table.getFilteredRowModel().rows.length} éléments au total)
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-              className="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 transition-all"
-              title="Première page"
-            >
-              <ChevronsLeft size={16} />
-            </button>
-            <button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-              className="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 transition-all"
-              title="Page précédente"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-              className="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 transition-all"
-              title="Page suivante"
-            >
-              <ChevronRight size={16} />
-            </button>
-            <button
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-              className="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-slate-900 transition-all"
-              title="Dernière page"
-            >
-              <ChevronsRight size={16} />
-            </button>
-          </div>
-        </div>
+        {serverPagination ? (
+          <DataTablePagination
+            currentPage={serverPagination.currentPage}
+            totalPages={serverPagination.totalPages}
+            totalItems={serverPagination.totalCount}
+          />
+        ) : (
+          <DataTablePagination
+            currentPage={table.getState().pagination.pageIndex + 1}
+            totalPages={table.getPageCount() || 1}
+            totalItems={table.getFilteredRowModel().rows.length}
+            onPageChange={(page) => table.setPageIndex(page - 1)}
+          />
+        )}
       </Card>
     </div>
   );

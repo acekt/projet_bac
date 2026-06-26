@@ -16,7 +16,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Mes Achats 241 | Le meilleur des magasins de Libreville à votre porte",
+  title: "Mes Courses Faciles | Le meilleur des magasins de Libreville à votre porte",
   description: "Faites vos courses en ligne dans les plus grands magasins du Gabon (Mbolo, Géant Casino, Prix Import) et faites-vous livrer rapidement.",
   manifest: "/manifest.json",
 };

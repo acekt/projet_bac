@@ -8,6 +8,6 @@ export async function GET() {
     });
     return NextResponse.json(stores);
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Une erreur serveur interne est survenue.' }, { status: 500 });
   }
 }

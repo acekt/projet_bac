@@ -46,7 +46,7 @@ export function CheckoutWizard({ initialUser }: CheckoutWizardProps) {
   const finalTotal = totalPrice + deliveryFee;
 
   // Empty cart guard (Garde-fou 3)
-  if (cart.length === 0) {
+  if (cart.length === 0 && !isProcessing && currentStep !== 3) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-6">
         <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center shadow-inner">
@@ -84,15 +84,11 @@ export function CheckoutWizard({ initialUser }: CheckoutWizardProps) {
       );
 
       if (res.success) {
-        // Clear cart client-side (Etape 14 of specs)
-        clearCart();
-        
-        // Redirect to success page or simulated gateway
-        if (res.redirectUrl) {
-          router.push(res.redirectUrl);
-        } else {
-          router.push(`/checkout/success?orderId=${res.orderCode}`);
-        }
+        // Redirect to success page (which will clear client cart on mount)
+        const targetUrl = res.redirectUrl 
+          ? `${res.redirectUrl}&clearCart=true`
+          : `/checkout/success?orderId=${res.orderCode}&clearCart=true`;
+        router.push(targetUrl);
       } else {
         toast.error(res.error || "Une erreur est survenue lors de la commande.");
         setIsProcessing(false);
@@ -242,7 +238,7 @@ export function CheckoutWizard({ initialUser }: CheckoutWizardProps) {
                             Qté: <span className="text-foreground">{item.quantity}</span>
                           </p>
                           <p className="text-sm font-bold text-primary">
-                            {(item.price * item.quantity).toLocaleString()} CFA
+                            {(item.price * item.quantity).toLocaleString('fr-FR')} CFA
                           </p>
                         </div>
                       </div>
@@ -256,17 +252,17 @@ export function CheckoutWizard({ initialUser }: CheckoutWizardProps) {
                 <div className="space-y-4">
                   <div className="flex justify-between text-sm text-muted-foreground font-medium">
                     <span>Sous-total articles</span>
-                    <span className="text-foreground">{totalPrice.toLocaleString()} CFA</span>
+                    <span className="text-foreground">{totalPrice.toLocaleString('fr-FR')} CFA</span>
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground font-medium">
                     <span className="flex items-center gap-1.5">Frais de livraison <Truck size={14} /></span>
-                    <span className="text-foreground">{deliveryFee.toLocaleString()} CFA</span>
+                    <span className="text-foreground">{deliveryFee.toLocaleString('fr-FR')} CFA</span>
                   </div>
 
                   <div className="pt-6 flex justify-between items-end border-t border-border/50">
                     <span className="text-lg font-bold text-foreground">Total à régler</span>
                     <span className="text-3xl font-black text-primary tracking-tight">
-                      {finalTotal.toLocaleString()} <span className="text-lg font-bold">CFA</span>
+                      {finalTotal.toLocaleString('fr-FR')} <span className="text-lg font-bold">CFA</span>
                     </span>
                   </div>
                 </div>

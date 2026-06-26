@@ -20,11 +20,11 @@ export async function GET(
     });
 
     if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Produit non trouvé' }, { status: 404 });
     }
 
     return NextResponse.json(product);
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Une erreur serveur interne est survenue.' }, { status: 500 });
   }
 }

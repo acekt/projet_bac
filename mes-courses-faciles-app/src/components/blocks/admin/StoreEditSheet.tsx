@@ -94,7 +94,7 @@ export function StoreEditSheet({ isOpen, onClose, onSuccess, store }: StoreEditS
         body: formData,
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.url) {
         setLogoUrl(data.url);
         toast.success("Logo téléchargé avec succès.");
       } else {

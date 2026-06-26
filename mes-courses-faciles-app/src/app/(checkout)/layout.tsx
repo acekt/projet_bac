@@ -15,7 +15,7 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
           <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
             <ShoppingCart size={18} className="text-white" />
           </div>
-          <span className="font-black text-slate-800 tracking-tight">Mes Achats 241</span>
+          <span className="font-black text-slate-800 tracking-tight">Mes Courses Faciles</span>
         </Link>
 
         <div className="w-20" /> {/* Spacer */}
@@ -27,7 +27,7 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
 
       {/* Minimal Footer */}
       <footer className="py-8 text-center text-slate-400 text-xs font-medium">
-        &copy; 2026 Mes Achats 241. Tous droits réservés. Paiement sécurisé SSL.
+        &copy; 2026 Mes Courses Faciles. Tous droits réservés. Paiement sécurisé SSL.
       </footer>
     </div>
   );

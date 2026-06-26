@@ -162,7 +162,7 @@ export function CartDrawer({ isBottomTab = false, isFloating = false }: { isBott
                       </div>
 
                       <span className="font-bold text-primary">
-                        {(item.price * item.quantity).toLocaleString()} CFA
+                        {(item.price * item.quantity).toLocaleString('fr-FR')} CFA
                       </span>
                     </div>
                   </div>
@@ -177,16 +177,16 @@ export function CartDrawer({ isBottomTab = false, isFloating = false }: { isBott
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Sous-total</span>
-                <span>{totalPrice.toLocaleString()} CFA</span>
+                <span>{totalPrice.toLocaleString('fr-FR')} CFA</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Frais de livraison estimés</span>
-                <span>{deliveryFee.toLocaleString()} CFA</span>
+                <span>{deliveryFee.toLocaleString('fr-FR')} CFA</span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between font-black text-lg text-foreground">
                 <span>Total TTC</span>
-                <span className="text-primary">{(totalPrice + deliveryFee).toLocaleString()} CFA</span>
+                <span className="text-primary">{(totalPrice + deliveryFee).toLocaleString('fr-FR')} CFA</span>
               </div>
             </div>
 

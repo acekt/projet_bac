@@ -23,7 +23,16 @@ import {
 } from 'lucide-react';
 import { OrderStatus } from '@prisma/client';
 import { updateOrderStatusAction } from '@/actions/ecommerce';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { ORDER_STATUSES } from '@/lib/constants/order-statuses';
 import { useToast } from '@/context/ToastContext';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 
 interface OrderDetailsSheetProps {
   isOpen: boolean;
@@ -55,14 +64,7 @@ export function OrderDetailsSheet({ isOpen, onClose, order, onStatusUpdated }: O
       const res = await updateOrderStatusAction(order.id, newStatus);
       if (res.success) {
         setStatus(newStatus);
-        const labelsMap: Record<OrderStatus, string> = {
-          PENDING: "En attente",
-          PAID: "En préparation",
-          SHIPPED: "En livraison",
-          DELIVERED: "Livrée",
-          CANCELLED: "Annulée"
-        };
-        toast.success(`Le statut de la commande a été changé à "${labelsMap[newStatus]}".`);
+        toast.success(`Le statut de la commande a été changé à "${ORDER_STATUSES[newStatus]?.label || newStatus}".`);
         onStatusUpdated();
       } else {
         const errMsg = res.error || "Impossible de mettre à jour le statut.";
@@ -78,25 +80,7 @@ export function OrderDetailsSheet({ isOpen, onClose, order, onStatusUpdated }: O
     }
   };
 
-  // Get status color styling
-  const getStatusBadge = (statusVal: OrderStatus) => {
-    switch (statusVal) {
-      case 'PENDING':
-        return { label: 'En attente', style: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-250/30' };
-      case 'PAID':
-        return { label: 'En préparation', style: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-250/30' };
-      case 'SHIPPED':
-        return { label: 'En livraison', style: 'bg-sky-100 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-250/30' };
-      case 'DELIVERED':
-        return { label: 'Livrée', style: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-250/30' };
-      case 'CANCELLED':
-        return { label: 'Annulée', style: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-250/30' };
-      default:
-        return { label: statusVal, style: 'bg-slate-100 text-slate-700' };
-    }
-  };
-
-  const currentBadge = getStatusBadge(status);
+  // getStatusBadge removed in favor of StatusBadge
 
   // Get payment method rendering
   const getPaymentDetails = (method: string) => {
@@ -132,9 +116,7 @@ export function OrderDetailsSheet({ isOpen, onClose, order, onStatusUpdated }: O
                 <Calendar size={14} /> Passée le {new Date(order.createdAt).toLocaleString('fr-FR')}
               </SheetDescription>
             </div>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${currentBadge.style} animate-pulse-subtle`}>
-              {currentBadge.label}
-            </span>
+            <StatusBadge status={status} className="animate-pulse-subtle" />
           </div>
         </SheetHeader>
 
@@ -155,20 +137,30 @@ export function OrderDetailsSheet({ isOpen, onClose, order, onStatusUpdated }: O
             </label>
             <div className="flex gap-3">
               <div className="relative flex-1">
-                <select
+                <Select
                   value={status}
-                  onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
+                  onValueChange={(val) => handleStatusChange(val as OrderStatus)}
                   disabled={updating}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all outline-none text-slate-800 dark:text-white font-bold text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <option value="PENDING">En attente (Jaune)</option>
-                  <option value="PAID">En préparation (Bleu)</option>
-                  <option value="SHIPPED">En livraison (Indigo)</option>
-                  <option value="DELIVERED">Livrée (Vert)</option>
-                  <option value="CANCELLED">Annulée (Rouge)</option>
-                </select>
+                  <SelectTrigger className="w-full !h-12 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:border-brand-primary text-slate-800 dark:text-white font-bold text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                    <SelectValue placeholder="Sélectionner un statut">
+                      {(value) => (value ? (ORDER_STATUSES[value as string]?.label || value) : "Sélectionner un statut")}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-xl shadow-xl">
+                    {Object.entries(ORDER_STATUSES).map(([key, config]) => (
+                      <SelectItem 
+                        key={key} 
+                        value={key}
+                        className="font-bold text-slate-700 dark:text-slate-200 focus:bg-slate-100 dark:focus:bg-slate-800 cursor-pointer"
+                      >
+                        {config.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {updating && (
-                  <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                  <div className="absolute right-10 top-1/2 -translate-y-1/2 z-10 pointer-events-none">
                     <Loader2 className="animate-spin text-brand-primary" size={18} />
                   </div>
                 )}
@@ -261,11 +253,11 @@ export function OrderDetailsSheet({ isOpen, onClose, order, onStatusUpdated }: O
                           {item.product?.name || 'Produit supprimé'}
                         </span>
                         <span className="text-xs text-slate-450 dark:text-slate-400 font-semibold mt-1 block">
-                          {item.quantity} × {item.price.toLocaleString()} CFA
+                          {item.quantity} × {item.price.toLocaleString('fr-FR')} CFA
                         </span>
                       </div>
                       <span className="text-slate-800 dark:text-slate-100 font-extrabold text-sm flex-shrink-0">
-                        {(item.quantity * item.price).toLocaleString()} CFA
+                        {(item.quantity * item.price).toLocaleString('fr-FR')} CFA
                       </span>
                     </div>
                   );
@@ -275,15 +267,15 @@ export function OrderDetailsSheet({ isOpen, onClose, order, onStatusUpdated }: O
               <div className="pt-4 border-t border-slate-100 dark:border-slate-850 space-y-2 text-sm font-semibold">
                 <div className="flex justify-between text-slate-500 dark:text-slate-400">
                   <span>Sous-total</span>
-                  <span>{(order.total - order.deliveryFee).toLocaleString()} CFA</span>
+                  <span>{(order.total - order.deliveryFee).toLocaleString('fr-FR')} CFA</span>
                 </div>
                 <div className="flex justify-between text-slate-500 dark:text-slate-400">
                   <span>Frais de livraison</span>
-                  <span>{order.deliveryFee.toLocaleString()} CFA</span>
+                  <span>{order.deliveryFee.toLocaleString('fr-FR')} CFA</span>
                 </div>
                 <div className="flex justify-between text-slate-800 dark:text-white font-extrabold text-base pt-1">
                   <span>Total</span>
-                  <span className="text-brand-primary">{order.total.toLocaleString()} CFA</span>
+                  <span className="text-brand-primary">{order.total.toLocaleString('fr-FR')} CFA</span>
                 </div>
               </div>
             </div>

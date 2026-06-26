@@ -8,40 +8,72 @@
       "prompt": "Intérieur chaleureux d'une épicerie fine haut de gamme avec des produits frais colorés, des paniers en osier, éclairage tamisé naturel, perspective soignée, bokeh doux, 8k",
       "url": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "TiDB Tech Store": {
-      "prompt": "Showroom d'ordinateurs portables et smartphones haut de gamme disposés sur des tables en bois épurées, design minimaliste style scandinave, éclairage LED indirect, angle de vue professionnel, 8k",
-      "url": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80&h=800"
+    "Prix Import": {
+      "prompt": "Rayonnages modernes d'un grand supermarché rempli de produits alimentaires et d'épicerie, caddies de course, éclairage intérieur soigné, bokeh doux, 8k",
+      "url": "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Gaza Électroménager": {
-      "prompt": "Cuisine moderne haut de gamme présentant des appareils électroménagers encastrés en acier brossé, réfrigérateur américain, éclairage naturel, design intérieur contemporain, 8k",
-      "url": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80&h=800"
+    "San Gel": {
+      "prompt": "Section de produits surgelés et frais dans un supermarché, vitrines réfrigérées lumineuses, ambiance propre et moderne, 8k",
+      "url": "https://images.unsplash.com/photo-1583258292688-d0213df4a3a8?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Boutique Bio-Glow": {
-      "prompt": "Flacons de cosmétiques naturels et huiles essentielles posés sur une pierre brute avec des feuilles vertes, fond de bois clair épuré, éclairage zénithal doux, bokeh élégant, 8k",
-      "url": "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=800&q=80&h=800"
+    "Hygiène & Beauté MCF": {
+      "prompt": "Rayon cosmétique et hygiène dans une grande enseigne, flacons de savon, shampoing, soins disposés de façon esthétique, éclairage doux, 8k",
+      "url": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Or & Parfums": {
-      "prompt": "Flacon de parfum de luxe en verre facetté posé sur un miroir avec reflets, fond sombre et doré mystérieux, éclairage de studio précis, profondeur de champ prononcée, 8k",
-      "url": "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80&h=800"
+    "Marché de Louis": {
+      "prompt": "Boutique d'épicerie fine typique avec paniers de légumes frais devant la boutique, ambiance de marché local à Libreville, 8k",
+      "url": "https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Shoes & Style": {
-      "prompt": "Chaussures richelieu en cuir marron patiné à côté d'un sac en cuir assorti sur un parquet de chêne, ambiance club anglais feutrée, éclairage chaud rasant, bokeh délicat, 8k",
-      "url": "https://images.unsplash.com/photo-1449505278894-297fdb3edbc1?auto=format&fit=crop&w=800&q=80&h=800"
+    "Bébé & Maman Libreville": {
+      "prompt": "Boutique colorée pour bébés avec peluches, paquets de couches et accessoires d'allaitement sur des étagères blanches en bois, ambiance chaleureuse, 8k",
+      "url": "https://images.unsplash.com/photo-1515488042361-404e9250afef?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Gabon Chic & Mode": {
-      "prompt": "Portant en métal noir présentant des vêtements élégants de couleurs neutres, dans un atelier de mode minimaliste baigné de lumière naturelle, bokeh doux, 8k",
-      "url": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80&h=800"
+    "Supergros Grossiste": {
+      "prompt": "Entrepôt de distribution alimentaire avec palettes de sacs de riz, cartons empilés, chariot élévateur en arrière-plan, perspective industrielle propre, 8k",
+      "url": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Libreville Ameublement": {
-      "prompt": "Salon moderne et épuré avec un canapé en tissu gris, des coussins texturés et une plante verte dans un grand pot en terre cuite, éclairage naturel matinal, 8k",
-      "url": "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80&h=800"
+    "Boulangerie Pâtisserie MCF": {
+      "prompt": "Vitrine de boulangerie artisanale présentant des baguettes dorées, des croissants frais et des pâtisseries fines, éclairage chaud gourmand, 8k",
+      "url": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80&h=800"
     },
-    "Brico-Déco Gabon": {
-      "prompt": "Composition esthétique d'outils de bricolage en bois et métal disposés avec goût à côté de pots de peinture et de pinceaux, fond d'atelier épuré, éclairage naturel, 8k",
-      "url": "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=80&h=800"
+    "Clean Gabon": {
+      "prompt": "Rayonnage propre présentant une large gamme de produits de nettoyage et d'entretien, bouteilles de lessive, pulvérisateurs et éponges colorées, 8k",
+      "url": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80&h=800"
     }
   },
   "products": {
+    "Couches Bébé Taille 4 (x50)": {
+      "prompt": "Paquet de couches pour bébés blanches empilées à côté d'un doudou en peluche sur un drap doux, tons pastel doux, 8k",
+      "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Lait 1er Âge Poudre 800g": {
+      "prompt": "Boîte métallique de lait infantile en poudre avec un biberon préparé à côté sur une table en bois, 8k",
+      "url": "https://images.unsplash.com/photo-1550572017-edd951b55104?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Lingettes Bébé Sensitives (x80)": {
+      "prompt": "Paquet de lingettes pour bébé ouvert, une lingette blanche tirée, sur fond de chambre d'enfant floue, 8k",
+      "url": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Lessive Liquide Machine 3L": {
+      "prompt": "Grand bidon bleu de lessive liquide posé à côté d'une pile de linge frais plié, bokeh doux, 8k",
+      "url": "https://images.unsplash.com/photo-1610555356070-d0efb6505f21?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Liquide Vaisselle Citron 1L": {
+      "prompt": "Bouteille de liquide vaisselle jaune au citron posée au bord d'un évier propre et étincelant, reflets de lumière, 8k",
+      "url": "https://images.unsplash.com/photo-1607344645866-009c320b63e0?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Eau de Javel 2L": {
+      "prompt": "Bouteille blanche d'eau de javel désinfectante avec gants de ménage en caoutchouc jaune à côté, fond de carrelage blanc propre, 8k",
+      "url": "https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Soda Coca-Cola 1.5L": {
+      "prompt": "Bouteille de Coca-Cola classique glacée et pétillante avec des gouttes de condensation, fond rouge dynamique flou, 8k",
+      "url": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=800&q=80&h=800"
+    },
+    "Bière Régab (canette 33cl)": {
+      "prompt": "Canette de bière locale posée sur une table en verre de bar, gouttes de condensation glacée, fond flou, 8k",
+      "url": "https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=800&q=80&h=800"
+    },
     "Riz Parfumé Premium 5kg": {
       "prompt": "Sac en toile de riz blanc parfumé, quelques grains de riz bruts éparpillés sur une table en bois rustique, éclairage naturel doux, 8k",
       "url": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80&h=800"
@@ -112,7 +144,7 @@
     },
     "Sel Fin de Table 1kg": {
       "prompt": "Tas de sel marin fin blanc avec une cuillère en bois posée à côté sur un fond d'ardoise noire, éclairage latéral contrasté, 8k",
-      "url": "https://images.unsplash.com/photo-1608405051786-81cf31a89c9c?auto=format&fit=crop&w=800&q=80&h=800"
+      "url": "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?auto=format&fit=crop&w=800&q=80&h=800"
     },
     "Biscuits Sablés Beurre": {
       "prompt": "Biscuits sablés dorés empilés sur une assiette en porcelaine à côté d'une tasse de lait, fond de cuisine chaleureuse flouté, 8k",

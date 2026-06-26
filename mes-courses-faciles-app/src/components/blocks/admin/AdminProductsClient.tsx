@@ -162,7 +162,7 @@ export default function AdminProductsClient({ initialProducts }: AdminProductsCl
       accessorKey: 'price',
       header: 'Prix',
       cell: ({ row }) => (
-        <span className="font-extrabold text-slate-850 dark:text-emerald-400">{row.original.price.toLocaleString()} CFA</span>
+        <span className="font-extrabold text-slate-850 dark:text-emerald-400">{row.original.price.toLocaleString('fr-FR')} CFA</span>
       )
     },
     {

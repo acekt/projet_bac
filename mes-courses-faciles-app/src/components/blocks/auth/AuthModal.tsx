@@ -147,7 +147,7 @@ export function AuthModal() {
             <div className="flex items-center gap-2 text-brand-primary z-10">
               <ShoppingBag className="h-6 w-6 text-brand-primary" />
               <span className="font-bold text-xl tracking-tight">
-                MesAchats<span className="text-brand-safran font-black">241</span>
+                Mes Courses Faciles
               </span>
             </div>
 
@@ -182,7 +182,7 @@ export function AuthModal() {
 
             {/* Footer */}
             <div className="text-xs text-slate-400 dark:text-slate-500 z-10">
-              © {new Date().getFullYear()} MesAchats241. Tous droits réservés.
+              © {new Date().getFullYear()} Mes Courses Faciles. Tous droits réservés.
             </div>
           </div>
 
@@ -299,7 +299,7 @@ export function AuthModal() {
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" disabled={loading} className="w-full h-14 text-base font-bold bg-brand-safran hover:bg-brand-safran-hover text-white rounded-2xl shadow-safran-btn mt-6 flex items-center justify-center gap-2">
+              <Button type="submit" disabled={loading} className="w-full h-14 text-base font-bold bg-brand-primary hover:bg-brand-primary-hover text-white rounded-2xl shadow-lg shadow-brand-primary/25 mt-6 flex items-center justify-center gap-2">
                 {loading ? <Loader2 className="animate-spin" /> : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
               </Button>
             </form>

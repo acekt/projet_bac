@@ -11,6 +11,7 @@ import { render } from '@react-email/components';
 import { requireAuth, requireAdminAuth, AuthError } from '@/lib/auth-guard';
 import { resolveImageUrl } from '@/lib/image-resolver';
 import { sanitizePrismaArray } from '@/lib/serialization';
+import { Order as OrderType } from '@/types';
 
 
 export const getCachedActiveStores = unstable_cache(
@@ -421,11 +422,18 @@ export async function processCheckoutAction(
     // Si Resend échoue, le client voit quand même sa page de succès.
     const sendReceiptEmail = async () => {
       try {
-        // Récupère l'email du client depuis la DB
-        const dbUser = await prisma.user.findUnique({
-          where: { id: userId },   // ← session.id
-          select: { email: true, name: true },
-        });
+        // Récupère l'email du client et les détails du magasin en parallèle
+        const [dbUser, store] = await Promise.all([
+          prisma.user.findUnique({
+            where: { id: userId },   // ← session.id
+            select: { email: true, name: true },
+          }),
+          prisma.store.findUnique({
+            where: { id: storeId },
+            select: { name: true },
+          })
+        ]);
+
         if (!dbUser?.email) return;
 
         // Récupère les noms des produits pour le template
@@ -436,12 +444,6 @@ export async function processCheckoutAction(
             quantity:  item.quantity,
             unitPrice: item.price,
           };
-        });
-
-        // Récupère le nom du magasin
-        const store = await prisma.store.findUnique({
-          where: { id: storeId },
-          select: { name: true },
         });
 
         const emailHtml = await render(
@@ -463,7 +465,7 @@ export async function processCheckoutAction(
         await resend.emails.send({
           from:    FROM_EMAIL,
           to:      dbUser.email,
-          subject: `✅ Commande ${orderCode} confirmée — MesAchats241`,
+          subject: `✅ Commande ${orderCode} confirmée — Mes Courses Faciles`,
           html:    emailHtml,
         });
 
@@ -492,6 +494,86 @@ export async function processCheckoutAction(
   } catch (e: any) {
     console.error("processCheckoutAction error", e);
     return { success: false, error: e.message || "Une erreur est survenue lors de la validation." };
+  }
+}
+
+export async function fetchUserOrdersAction(page: number = 1, limit: number = 10) {
+  try {
+    const session = await requireAuth();
+    const userId = session.id;
+
+    const [orders, totalCount] = await prisma.$transaction([
+      prisma.order.findMany({
+        where: { userId },
+        include: {
+          orderItems: {
+            include: {
+              product: true,
+            }
+          },
+          store: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.order.count({
+        where: { userId }
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+    
+    const formattedOrders: OrderType[] = orders.map(order => ({
+      id: order.id,
+      userId: order.userId,
+      storeId: order.storeId,
+      total: order.total,
+      deliveryFee: order.deliveryFee,
+      status: order.status as OrderType['status'],
+      paymentMethod: order.paymentMethod,
+      deliveryAddress: order.deliveryAddress,
+      createdAt: order.createdAt,
+      store: order.store ? {
+        id: order.store.id,
+        name: order.store.name,
+        address: order.store.address,
+        district: order.store.district,
+        phone: order.store.phone,
+        logo: order.store.logo,
+        description: order.store.description,
+        isActive: order.store.isActive,
+      } : undefined,
+      orderItems: order.orderItems.map(item => ({
+        id: item.id,
+        orderId: item.orderId,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        product: item.product ? {
+          id: item.product.id,
+          name: item.product.name,
+          description: item.product.description,
+          price: item.product.price,
+          category: item.product.category,
+          stock: item.product.stock,
+          unit: item.product.unit,
+          images: item.product.images,
+          isActive: item.product.isActive,
+          storeId: item.product.storeId,
+        } : undefined
+      }))
+    }));
+
+    return {
+      success: true,
+      orders: formattedOrders,
+      totalPages,
+      currentPage: page
+    };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
   }
 }
 

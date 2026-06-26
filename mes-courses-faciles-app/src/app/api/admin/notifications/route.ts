@@ -9,33 +9,34 @@ export async function GET(request: Request) {
     const token = cookieStore.get('mcf_jwt_session')?.value;
 
     if (!token) {
-       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
 
     const decoded = await verifyJWT(token);
     if (!decoded || decoded.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
 
-    // 1. Fetch pending orders from DB
-    const pendingOrders = await prisma.order.findMany({
-      where: { status: 'PENDING' },
-      include: { user: { select: { name: true } } }, // Least-privilege: name only, no password/email
-      orderBy: { createdAt: 'desc' },
-    });
+    // 1. Fetch database stats and alerts in parallel
+    const [pendingOrders, outOfStockProducts, dbNotifications] = await Promise.all([
+      prisma.order.findMany({
+        where: { status: 'PENDING' },
+        include: { user: { select: { name: true } } }, // Least-privilege: name only, no password/email
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.product.findMany({
+        where: { stock: 0, isDeleted: false },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      prisma.notification.findMany()
+    ]);
 
-    // 2. Fetch out-of-stock products from DB
-    const outOfStockProducts = await prisma.product.findMany({
-      where: { stock: 0, isDeleted: false },
-      orderBy: { updatedAt: 'desc' },
-    });
-
-    // 3. Create active alerts list
+    // 2. Create active alerts list
     const activeAlerts = [
       ...pendingOrders.map(order => ({
         reference: `order-${order.id}`,
         type: 'ORDER',
-        message: `Nouvelle commande de ${order.user?.name || 'Client'} (${order.total.toLocaleString()} CFA)`,
+        message: `Nouvelle commande de ${order.user?.name || 'Client'} (${order.total.toLocaleString('fr-FR')} CFA)`,
         createdAt: order.createdAt
       })),
       ...outOfStockProducts.map(product => ({
@@ -47,9 +48,6 @@ export async function GET(request: Request) {
     ];
 
     const activeReferences = new Set(activeAlerts.map(a => a.reference));
-
-    // 4. Fetch all existing notifications from DB
-    const dbNotifications = await prisma.notification.findMany();
     const dbRefs = new Set(dbNotifications.map(n => n.reference));
 
     // 5. Create new notifications in DB
@@ -90,6 +88,7 @@ export async function GET(request: Request) {
     });
 
     const hasUnread = finalNotifications.some(n => !n.isRead);
+    const unreadCount = finalNotifications.filter(n => !n.isRead).length;
 
     const { searchParams } = new URL(request.url);
     const getAll = searchParams.get('all') === 'true';
@@ -97,10 +96,11 @@ export async function GET(request: Request) {
     return NextResponse.json({
       hasUnread,
       hasBadge: hasUnread, // For backward compatibility
+      unreadCount,
       alerts: getAll ? finalNotifications : finalNotifications.slice(0, 5)
     });
   } catch (error) {
     console.error('Fetch notifications error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Une erreur serveur interne est survenue.' }, { status: 500 });
   }
 }

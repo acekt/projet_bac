@@ -98,7 +98,7 @@ export function OrderReceiptEmail({
       </Head>
 
       <Preview>
-        ✅ Commande {orderCode} confirmée — Merci pour votre achat sur MesAchats241 !
+        ✅ Commande {orderCode} confirmée — Merci pour votre achat sur Mes Courses Faciles !
       </Preview>
 
       <Body style={styles.body}>
@@ -108,7 +108,7 @@ export function OrderReceiptEmail({
               HEADER — Logo + Fond sombre
           ══════════════════════════════════════════ */}
           <Section style={styles.header}>
-            <Text style={styles.logo}>🛒 MesAchats241</Text>
+            <Text style={styles.logo}>🛒 Mes Courses Faciles</Text>
             <Text style={styles.tagline}>Votre marché à domicile à Libreville</Text>
           </Section>
 
@@ -231,7 +231,7 @@ export function OrderReceiptEmail({
               Suivez votre livraison en temps réel
             </Heading>
             <Text style={{ ...styles.heroSub, textAlign: 'center' as const, marginBottom: '28px' }}>
-              Consultez l&apos;avancement de votre commande depuis votre espace client MesAchats241.
+              Consultez l&apos;avancement de votre commande depuis votre espace client Mes Courses Faciles.
             </Text>
             <Button href={trackingUrl} style={styles.ctaButton}>
               Suivre ma commande →
@@ -267,7 +267,7 @@ export function OrderReceiptEmail({
           ══════════════════════════════════════════ */}
           <Section style={styles.footer}>
             <Text style={styles.footerText}>
-              © {new Date().getFullYear()} MesAchats241 · Libreville, Gabon
+              © {new Date().getFullYear()} Mes Courses Faciles · Libreville, Gabon
             </Text>
             <Text style={styles.footerText}>
               Cet email a été envoyé à <strong>{customerEmail}</strong> suite à votre commande.

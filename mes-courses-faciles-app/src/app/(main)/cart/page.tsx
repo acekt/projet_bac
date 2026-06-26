@@ -39,7 +39,7 @@ export default function CartPage() {
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-black text-slate-800">Votre Panier</h1>
               <span className="bg-brand-primary/10 text-brand-primary px-4 py-1 rounded-full font-bold text-sm">
-                {totalItems} articles
+                {totalItems} {totalItems > 1 ? 'articles' : 'article'}
               </span>
             </div>
 
@@ -88,9 +88,9 @@ export default function CartPage() {
                         </div>
 
                         <div className="text-right">
-                          <p className="text-xs text-slate-400 font-medium">{item.price.toLocaleString()} CFA / {item.unit}</p>
+                          <p className="text-xs text-slate-400 font-medium">{item.price.toLocaleString('fr-FR')} CFA / {item.unit}</p>
                           <p className="text-xl font-black text-brand-secondary">
-                            {(item.price * item.quantity).toLocaleString()} <span className="text-xs">CFA</span>
+                            {(item.price * item.quantity).toLocaleString('fr-FR')} <span className="text-xs">CFA</span>
                           </p>
                         </div>
                       </div>
@@ -112,17 +112,17 @@ export default function CartPage() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-slate-500">
                   <span>Sous-total</span>
-                  <span className="font-bold text-slate-800">{totalPrice.toLocaleString()} CFA</span>
+                  <span className="font-bold text-slate-800">{totalPrice.toLocaleString('fr-FR')} CFA</span>
                 </div>
                 <div className="flex justify-between text-slate-500">
                   <span>Frais de livraison</span>
-                  <span className="font-bold text-slate-800">{deliveryFee.toLocaleString()} CFA</span>
+                  <span className="font-bold text-slate-800">{deliveryFee.toLocaleString('fr-FR')} CFA</span>
                 </div>
                 <div className="h-px bg-slate-100 my-2" />
                 <div className="flex justify-between items-end">
                   <span className="text-lg font-bold text-slate-800">Total</span>
                   <div className="text-right">
-                    <p className="text-3xl font-black text-brand-primary">{(totalPrice + deliveryFee).toLocaleString()} <span className="text-sm">CFA</span></p>
+                    <p className="text-3xl font-black text-brand-primary">{(totalPrice + deliveryFee).toLocaleString('fr-FR')} <span className="text-sm">CFA</span></p>
                   </div>
                 </div>
               </div>

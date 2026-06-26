@@ -86,7 +86,7 @@ export function StoreCreateSheet({ isOpen, onClose, onSuccess }: StoreCreateShee
         body: formData,
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.url) {
         setLogoUrl(data.url);
         toast.success("Logo du magasin importé avec succès.");
       } else {

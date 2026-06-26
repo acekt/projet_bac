@@ -18,6 +18,7 @@ import {
   Smartphone, 
   Package
 } from 'lucide-react';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface OrderDetailsSheetProps {
   isOpen: boolean;
@@ -28,25 +29,7 @@ interface OrderDetailsSheetProps {
 export function OrderDetailsSheet({ isOpen, onClose, order }: OrderDetailsSheetProps) {
   if (!order) return null;
 
-  // Get status color styling
-  const getStatusBadge = (statusVal: string) => {
-    switch (statusVal) {
-      case 'PENDING':
-        return { label: 'En attente', style: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-250/30' };
-      case 'PAID':
-        return { label: 'Validé', style: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-250/30' };
-      case 'SHIPPED':
-        return { label: 'En route', style: 'bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border-purple-250/30' };
-      case 'DELIVERED':
-        return { label: 'Livré', style: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-250/30' };
-      case 'CANCELLED':
-        return { label: 'Annulé', style: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-250/30' };
-      default:
-        return { label: statusVal, style: 'bg-slate-100 text-slate-700' };
-    }
-  };
-
-  const currentBadge = getStatusBadge(order.status);
+  // getStatusBadge removed in favor of StatusBadge
 
   // Get payment method rendering
   const getPaymentDetails = (method: string) => {
@@ -78,13 +61,11 @@ export function OrderDetailsSheet({ isOpen, onClose, order }: OrderDetailsSheetP
               <SheetTitle className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
                 <ShoppingBag size={24} className="text-brand-primary" /> Commande #{order.id.substring(0, 8).toUpperCase()}
               </SheetTitle>
-              <SheetDescription className="text-slate-500 dark:text-slate-400 mt-1 font-semibold flex items-center gap-1.5">
+              <SheetDescription suppressHydrationWarning className="text-slate-500 dark:text-slate-400 mt-1 font-semibold flex items-center gap-1.5">
                 <Calendar size={14} /> Passée le {new Date(order.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </SheetDescription>
             </div>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${currentBadge.style}`}>
-              {currentBadge.label}
-            </span>
+            <StatusBadge status={order.status} />
           </div>
         </SheetHeader>
 
@@ -153,11 +134,11 @@ export function OrderDetailsSheet({ isOpen, onClose, order }: OrderDetailsSheetP
                           {item.product?.name || 'Produit'}
                         </span>
                         <span className="text-xs text-slate-450 dark:text-slate-400 font-semibold mt-1 block">
-                          {item.quantity} × {item.price.toLocaleString()} CFA
+                          {item.quantity} × {item.price.toLocaleString('fr-FR')} CFA
                         </span>
                       </div>
                       <span className="text-slate-800 dark:text-slate-100 font-extrabold text-sm flex-shrink-0">
-                        {(item.quantity * item.price).toLocaleString()} CFA
+                        {(item.quantity * item.price).toLocaleString('fr-FR')} CFA
                       </span>
                     </div>
                   );
@@ -167,15 +148,15 @@ export function OrderDetailsSheet({ isOpen, onClose, order }: OrderDetailsSheetP
               <div className="pt-4 border-t border-slate-100 dark:border-slate-850 space-y-2 text-sm font-semibold">
                 <div className="flex justify-between text-slate-500 dark:text-slate-400">
                   <span>Sous-total</span>
-                  <span>{(order.total - order.deliveryFee).toLocaleString()} CFA</span>
+                  <span>{(order.total - order.deliveryFee).toLocaleString('fr-FR')} CFA</span>
                 </div>
                 <div className="flex justify-between text-slate-500 dark:text-slate-400">
                   <span>Frais de livraison</span>
-                  <span>{order.deliveryFee.toLocaleString()} CFA</span>
+                  <span>{order.deliveryFee.toLocaleString('fr-FR')} CFA</span>
                 </div>
                 <div className="flex justify-between text-slate-800 dark:text-white font-extrabold text-base pt-1">
                   <span>Total</span>
-                  <span className="text-brand-primary">{order.total.toLocaleString()} CFA</span>
+                  <span className="text-brand-primary">{order.total.toLocaleString('fr-FR')} CFA</span>
                 </div>
               </div>
             </div>

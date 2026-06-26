@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   });
   const isAvailable = product && product.isActive && !product.isDeleted && product.store && product.store.isActive && !product.store.isDeleted;
   return {
-    title: isAvailable ? `${product.name} | MesAchats241` : 'Produit | MesAchats241',
+    title: isAvailable ? `${product.name} | Mes Courses Faciles` : 'Produit | Mes Courses Faciles',
     description: product?.description || 'Achetez vos produits en ligne à Libreville.',
   };
 }
@@ -107,7 +107,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </h1>
                 <div className="flex items-center gap-4">
                   <span className="text-4xl font-black text-brand-primary">
-                    {product.price.toLocaleString()} <span className="text-lg">CFA</span>
+                    {product.price.toLocaleString('fr-FR')} <span className="text-lg">CFA</span>
                   </span>
                 </div>
               </div>

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json({ error: 'User already exists' }, { status: 400 });
+      return NextResponse.json({ error: 'Cet utilisateur existe déjà.' }, { status: 400 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -56,15 +56,15 @@ export async function POST(request: Request) {
 
     if (error instanceof ZodError) {
       return NextResponse.json({
-        error: 'Validation failed',
+        error: 'Validation échouée',
         details: error.flatten().fieldErrors
       }, { status: 400 });
     }
 
     if (error.code === 'P2024' || error.message.includes('Can\'t reach database server')) {
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 503 });
+      return NextResponse.json({ error: 'La connexion à la base de données a échoué. Veuillez vérifier que MySQL est lancé.' }, { status: 503 });
     }
 
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Une erreur serveur interne est survenue.' }, { status: 500 });
   }
 }

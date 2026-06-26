@@ -29,12 +29,12 @@ export function Navbar() {
               }
             >
               <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
+              <span className="sr-only">Basculer le menu</span>
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
                  <SheetTitle className="text-left font-bold text-xl text-primary flex items-center gap-2">
-                     <ShoppingBag className="h-6 w-6" /> MesAchats241
+                     <ShoppingBag className="h-6 w-6" /> Mes Courses Faciles
                  </SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-4 mt-8">
@@ -77,14 +77,14 @@ export function Navbar() {
 
           <Link href="/" className="font-bold text-xl tracking-tight text-primary flex items-center gap-1.5 shrink-0">
             <ShoppingBag className="h-5 w-5" />
-            <span className="hidden sm:inline-block">MesAchats241</span>
+            <span className="hidden sm:inline-block">Mes Courses Faciles</span>
           </Link>
         </div>
 
         {/* Desktop Logo */}
         <Link href="/" className="hidden lg:flex font-bold text-2xl tracking-tight text-primary items-center gap-2 shrink-0">
             <ShoppingBag className="h-7 w-7" />
-            MesAchats241
+            Mes Courses Faciles
         </Link>
 
         {/* Search Bar (Desktop) */}

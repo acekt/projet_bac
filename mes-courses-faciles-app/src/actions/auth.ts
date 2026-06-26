@@ -6,6 +6,7 @@ import { loginSchema, userSchema } from "@/lib/validations/schemas";
 import { signJWT } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 export async function loginAction(data: z.infer<typeof loginSchema>) {
   try {
@@ -102,6 +103,23 @@ export async function registerAction(data: z.infer<typeof userSchema>) {
     });
 
     return { success: true, user: userWithoutPassword };
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+}
+
+export async function updateProfileAction(userId: string, data: { name: string; phone: string; address: string }) {
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+      },
+    });
+    revalidatePath("/profile");
+    return { success: true, user: updated };
   } catch (e: any) {
     return { success: false, error: e.message };
   }

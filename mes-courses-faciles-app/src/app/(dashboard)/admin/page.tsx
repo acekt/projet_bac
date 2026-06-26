@@ -13,36 +13,9 @@ import {
 } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 export const dynamic = 'force-dynamic';
-
-const getStatusBadgeClass = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border border-amber-200/20';
-    case 'PAID':
-      return 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200/20';
-    case 'SHIPPED':
-      return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400 border border-indigo-200/20';
-    case 'DELIVERED':
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-200/20';
-    case 'CANCELLED':
-      return 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-200/20';
-    default:
-      return 'bg-slate-100 text-slate-700 dark:bg-slate-900/20 dark:text-slate-400 border border-slate-200/20';
-  }
-};
-
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case 'PENDING': return 'En attente';
-    case 'PAID': return 'En préparation';
-    case 'SHIPPED': return 'En livraison';
-    case 'DELIVERED': return 'Livrée';
-    case 'CANCELLED': return 'Annulée';
-    default: return status;
-  }
-};
 
 export default async function AdminDashboard() {
   // 1. Fetch KPI figures from DB with error resilience and fallback demo stats
@@ -52,48 +25,47 @@ export default async function AdminDashboard() {
   let activeStoresCount = 0;
   let recentOrders: any[] = [];
 
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
   try {
-    // Total Revenue (all non-cancelled orders)
-    const revenueResult = await prisma.order.aggregate({
-      _sum: { total: true },
-      where: {
-        status: { not: 'CANCELLED' }
-      }
-    });
-    totalRevenue = revenueResult._sum.total || 0;
-
-    // Today's orders
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    todayOrdersCount = await prisma.order.count({
-      where: {
-        createdAt: { gte: startOfToday }
-      }
-    });
-
-    // Total client users count
-    totalClientsCount = await prisma.user.count({
-      where: { role: 'CLIENT' }
-    });
-
-    // Active stores count
-    activeStoresCount = await prisma.store.count({
-      where: { isActive: true }
-    });
-
-    // Recent 5 orders
-    recentOrders = await prisma.order.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: { name: true, email: true }
-        },
-        store: {
-          select: { name: true }
+    const [revenueResult, todayCount, clientsCount, storesCount, ordersList] = await Promise.all([
+      prisma.order.aggregate({
+        _sum: { total: true },
+        where: {
+          status: { not: 'CANCELLED' }
         }
-      }
-    });
+      }),
+      prisma.order.count({
+        where: {
+          createdAt: { gte: startOfToday }
+        }
+      }),
+      prisma.user.count({
+        where: { role: 'CLIENT' }
+      }),
+      prisma.store.count({
+        where: { isActive: true }
+      }),
+      prisma.order.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: { name: true, email: true }
+          },
+          store: {
+            select: { name: true }
+          }
+        }
+      })
+    ]);
+
+    totalRevenue = revenueResult._sum.total || 0;
+    todayOrdersCount = todayCount;
+    totalClientsCount = clientsCount;
+    activeStoresCount = storesCount;
+    recentOrders = ordersList;
   } catch (err) {
     console.error("Failed to fetch dashboard DB data:", err);
   }
@@ -118,7 +90,7 @@ export default async function AdminDashboard() {
   const kpis = [
     {
       label: 'Ventes du jour',
-      value: `${totalRevenue.toLocaleString()} CFA`,
+      value: `${totalRevenue.toLocaleString('fr-FR')} CFA`,
       change: '+14.2%',
       isUp: true,
       icon: TrendingUp,
@@ -258,12 +230,10 @@ export default async function AdminDashboard() {
                     </td>
                     <td className="py-4 text-slate-550 dark:text-slate-400 font-medium">{order.store?.name}</td>
                     <td className="py-4 font-black text-brand-secondary dark:text-white">
-                      {order.total.toLocaleString()} CFA
+                      {order.total.toLocaleString('fr-FR')} CFA
                     </td>
                     <td className="py-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${getStatusBadgeClass(order.status)}`}>
-                        {getStatusLabel(order.status)}
-                      </span>
+                      <StatusBadge status={order.status} />
                     </td>
                   </tr>
                 ))}

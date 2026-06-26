@@ -350,3 +350,91 @@ export async function deleteNotificationAction(id: string) {
     return { success: false, error: (e as Error).message };
   }
 }
+
+export async function fetchAdminOrdersAction(page: number = 1, limit: number = 10) {
+  try {
+    await requireAdminAuth();
+
+    const [dbOrders, totalCount] = await prisma.$transaction([
+      prisma.order.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              phone: true,
+              address: true,
+            }
+          },
+          store: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          orderItems: {
+            include: {
+              product: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.order.count()
+    ]);
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    const formattedOrders = dbOrders.map(order => ({
+      id: order.id,
+      userId: order.userId,
+      storeId: order.storeId,
+      total: order.total,
+      deliveryFee: order.deliveryFee,
+      status: order.status,
+      paymentMethod: order.paymentMethod,
+      deliveryAddress: order.deliveryAddress,
+      createdAt: order.createdAt.toISOString(),
+      updatedAt: order.updatedAt.toISOString(),
+      user: order.user ? {
+        id: order.user.id,
+        name: order.user.name,
+        email: order.user.email,
+        phone: order.user.phone,
+        address: order.user.address,
+      } : null,
+      store: order.store ? {
+        id: order.store.id,
+        name: order.store.name,
+      } : null,
+      orderItems: order.orderItems ? order.orderItems.map(item => ({
+        id: item.id,
+        orderId: item.orderId,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        product: item.product ? {
+          id: item.product.id,
+          name: item.product.name,
+          images: item.product.images,
+        } : null
+      })) : []
+    }));
+
+    return {
+      success: true,
+      orders: formattedOrders,
+      totalPages,
+      totalCount,
+      currentPage: page
+    };
+  } catch (e: unknown) {
+    if (e instanceof AuthError) return { success: false, error: e.message };
+    return { success: false, error: (e as Error).message };
+  }
+}

@@ -24,6 +24,7 @@ export default defineConfig({
       name: 'mobile-safari',
       use: { 
         ...devices['iPhone 12'],
+        viewport: { width: 390, height: 844 },
       },
     },
   ],

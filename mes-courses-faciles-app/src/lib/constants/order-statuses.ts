@@ -1,55 +1,43 @@
-import { OrderStatus } from '@prisma/client';
+import { Clock, CheckCircle2, Truck, XCircle, Package } from 'lucide-react';
 
 export interface OrderStatusConfig {
-  key: OrderStatus;
-  adminLabel: string;
-  clientLabel: string;
-  badgeStyle: string; // Tailwind class
-  stepperIndex: number | null; // 1, 2, 3 or null if not in active stepper
-  description: string;
+  label: string;
+  color: string;
+  icon: any;
 }
 
-export const ORDER_STATUS_MAP: Record<OrderStatus, OrderStatusConfig> = {
+export const ORDER_STATUSES: Record<string, OrderStatusConfig> = {
   PENDING: {
-    key: 'PENDING',
-    adminLabel: 'En attente',
-    clientLabel: 'Reçue',
-    badgeStyle: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-250/30',
-    stepperIndex: 1,
-    description: 'Commande enregistrée',
+    label: 'En attente',
+    color: 'bg-amber-50 text-amber-700 border border-amber-200/50 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/40',
+    icon: Clock,
   },
   PAID: {
-    key: 'PAID',
-    adminLabel: 'En préparation',
-    clientLabel: 'Validée',
-    badgeStyle: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-250/30',
-    stepperIndex: 2,
-    description: 'Paiement confirmé',
+    label: 'En préparation',
+    color: 'bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30',
+    icon: CheckCircle2,
   },
   SHIPPED: {
-    key: 'SHIPPED',
-    adminLabel: 'En livraison',
-    clientLabel: 'En route',
-    badgeStyle: 'bg-sky-100 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-250/30',
-    stepperIndex: 3,
-    description: 'En cours de livraison',
+    label: 'En livraison',
+    color: 'bg-sky-50 text-sky-600 border border-sky-100 dark:bg-sky-950/20 dark:text-sky-400 dark:border-sky-900/30',
+    icon: Truck,
   },
   DELIVERED: {
-    key: 'DELIVERED',
-    adminLabel: 'Livrée',
-    clientLabel: 'Livrée',
-    badgeStyle: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-250/30',
-    stepperIndex: null,
-    description: 'Livraison effectuée',
+    label: 'Livré',
+    color: 'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30',
+    icon: CheckCircle2,
   },
   CANCELLED: {
-    key: 'CANCELLED',
-    adminLabel: 'Annulée',
-    clientLabel: 'Annulée',
-    badgeStyle: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-250/30',
-    stepperIndex: null,
-    description: 'Commande annulée',
+    label: 'Annulé',
+    color: 'bg-rose-50 text-rose-700 border border-rose-250 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/30',
+    icon: XCircle,
   },
 };
 
-export const ACTIVE_STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED'];
+export function getOrderStatusConfig(status: string): OrderStatusConfig {
+  return ORDER_STATUSES[status] || {
+    label: status,
+    color: 'bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-white/5',
+    icon: Package,
+  };
+}

@@ -4,6 +4,7 @@ import { Package, Truck, CheckCircle2, Clock, ArrowRight, ShoppingBag, Sparkles 
 import { Button } from '@/components/ui/button';
 import prisma from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
+import { ORDER_STATUSES } from '@/lib/constants/order-statuses';
 
 // Statuts qui signifient qu'une commande est "en cours"
 const ACTIVE_STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED'];
@@ -41,13 +42,14 @@ export async function ActiveOrderTracker({ userId, userName }: ActiveOrderTracke
     });
   } catch (error) {
     console.error('ActiveOrderTracker: fetch error (silent)', error);
+    activeOrder = null;
   }
 
   // --- Stepper steps config ---
   const STEPS = [
-    { key: 'PENDING', label: 'Reçue',    icon: Clock,         desc: 'Commande enregistrée' },
-    { key: 'PAID',    label: 'Validée',  icon: CheckCircle2,  desc: 'Paiement confirmé'    },
-    { key: 'SHIPPED', label: 'En route', icon: Truck,         desc: 'En cours de livraison'},
+    { key: 'PENDING', label: ORDER_STATUSES.PENDING.label, icon: Clock,         desc: 'Commande enregistrée' },
+    { key: 'PAID',    label: ORDER_STATUSES.PAID.label,    icon: CheckCircle2,  desc: 'Préparation en cours' },
+    { key: 'SHIPPED', label: ORDER_STATUSES.SHIPPED.label, icon: Truck,         desc: 'En cours de livraison'},
   ];
 
   const currentStepIndex = activeOrder

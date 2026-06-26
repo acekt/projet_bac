@@ -45,10 +45,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const isSyncingFromServer = useRef(false);
   const prevUserRef = useRef(user);
   const [conflictProduct, setConflictProduct] = useState<Omit<CartItem, 'quantity'> | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Load cart from server if logged in, otherwise from localStorage
   useEffect(() => {
     const loadCart = async () => {
+      setIsLoaded(false);
       if (user) {
         isSyncingFromServer.current = true;
         try {
@@ -91,6 +93,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       // Update previous user ref
       prevUserRef.current = user;
+      setIsLoaded(true);
     };
 
     loadCart();
@@ -173,7 +176,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       totalPrice,
       deliveryFee
     }}>
-      {children}
+      <div data-cart-loaded={isLoaded} className="contents">
+        {children}
+      </div>
       <AlertDialog open={!!conflictProduct} onOpenChange={(open) => !open && setConflictProduct(null)}>
         <AlertDialogContent className="rounded-[2rem] p-6 sm:p-8 border-white/20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl">
           <AlertDialogHeader>

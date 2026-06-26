@@ -1,82 +1,42 @@
 import React, { Suspense } from 'react';
-import prisma from "@/lib/prisma";
 import AdminOrdersClient from "@/components/blocks/admin/AdminOrdersClient";
 import { ShoppingBag } from 'lucide-react';
 import Loading from './loading';
+import { fetchAdminOrdersAction } from '@/actions/admin';
 
 // Force dynamic fetching from DB on each request
 export const dynamic = 'force-dynamic';
 
-async function OrdersTableLoader() {
-  const dbOrders = await prisma.order.findMany({
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          phone: true,
-          address: true,
-        }
-      },
-      store: {
-        select: {
-          id: true,
-          name: true,
-        }
-      },
-      orderItems: {
-        include: {
-          product: true
-        }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
+async function OrdersTableLoader({ page, limit }: { page: number; limit: number }) {
+  const res = await fetchAdminOrdersAction(page, limit);
 
-  // Map and serialize Prisma objects, transforming Dates to ISO strings
-  const initialOrders = dbOrders.map(order => ({
-    id: order.id,
-    userId: order.userId,
-    storeId: order.storeId,
-    total: order.total,
-    deliveryFee: order.deliveryFee,
-    status: order.status,
-    paymentMethod: order.paymentMethod,
-    deliveryAddress: order.deliveryAddress,
-    createdAt: order.createdAt.toISOString(),
-    updatedAt: order.updatedAt.toISOString(),
-    user: order.user ? {
-      id: order.user.id,
-      name: order.user.name,
-      email: order.user.email,
-      phone: order.user.phone,
-      address: order.user.address,
-    } : null,
-    store: order.store ? {
-      id: order.store.id,
-      name: order.store.name,
-    } : null,
-    orderItems: order.orderItems ? order.orderItems.map(item => ({
-      id: item.id,
-      orderId: item.orderId,
-      productId: item.productId,
-      quantity: item.quantity,
-      price: item.price,
-      product: item.product ? {
-        id: item.product.id,
-        name: item.product.name,
-        images: item.product.images,
-      } : null
-    })) : []
-  }));
+  if (!res.success) {
+    return (
+      <div className="p-8 text-center text-red-500 font-bold bg-red-50/50 dark:bg-red-955/10 border border-red-200 dark:border-red-900/30 rounded-2xl">
+        Une erreur est survenue lors de la récupération des commandes : {res.error}
+      </div>
+    );
+  }
 
-  return <AdminOrdersClient initialOrders={initialOrders} />;
+  return (
+    <AdminOrdersClient
+      initialOrders={res.orders || []}
+      currentPage={res.currentPage || page}
+      totalPages={res.totalPages || 0}
+      totalCount={res.totalCount || 0}
+    />
+  );
 }
 
-export default function AdminOrdersPage() {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; limit?: string }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const page = Number(resolvedSearchParams?.page) || 1;
+  const limit = Number(resolvedSearchParams?.limit) || 10;
+
   return (
     <div className="flex-1 flex flex-col min-h-0 space-y-8 animate-in relative overflow-hidden">
       {/* Page Header (instant 0ms render) */}
@@ -93,8 +53,8 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Streaming the actual table and sheets inside Suspense */}
-      <Suspense fallback={<Loading />}>
-        <OrdersTableLoader />
+      <Suspense key={`${page}-${limit}`} fallback={<Loading />}>
+        <OrdersTableLoader page={page} limit={limit} />
       </Suspense>
     </div>
   );

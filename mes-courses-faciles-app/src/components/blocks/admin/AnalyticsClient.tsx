@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
         <p className="font-black text-white">{label}</p>
         {payload.map((pld, index) => (
           <p key={`${pld.name || ''}-${index}`} className="font-bold" style={{ color: pld.color || pld.fill }}>
-            {pld.name} : {pld.value.toLocaleString()} {pld.name.includes('Revenu') ? 'CFA' : ''}
+            {pld.name} : {pld.value.toLocaleString('fr-FR')} {pld.name.includes('Revenu') ? 'CFA' : ''}
           </p>
         ))}
       </div>
@@ -93,7 +93,7 @@ export default function AnalyticsClient({
           </div>
           <div>
             <p className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-widest">Revenus Totaux</p>
-            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{totalRevenue.toLocaleString()} CFA</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{totalRevenue.toLocaleString('fr-FR')} CFA</p>
             <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mt-0.5">+14.2% vs semestre précédent</p>
           </div>
         </Card>
@@ -104,7 +104,7 @@ export default function AnalyticsClient({
           </div>
           <div>
             <p className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-widest">Volume Commandes</p>
-            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{totalOrders.toLocaleString()}</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{totalOrders.toLocaleString('fr-FR')}</p>
             <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mt-0.5">+9.6% vs semestre précédent</p>
           </div>
         </Card>
@@ -115,7 +115,7 @@ export default function AnalyticsClient({
           </div>
           <div>
             <p className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-widest">Panier Moyen</p>
-            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{Math.round(averageBasket).toLocaleString()} CFA</p>
+            <p className="text-2xl font-black text-slate-800 dark:text-white mt-1 tracking-tight">{Math.round(averageBasket).toLocaleString('fr-FR')} CFA</p>
             <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mt-0.5">+4.1% de valeur d&apos;achat</p>
           </div>
         </Card>
@@ -135,7 +135,7 @@ export default function AnalyticsClient({
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={revenueData}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                margin={{ top: 10, right: -10, left: -10, bottom: 0 }}
               >
                 <XAxis 
                   dataKey="name" 
@@ -145,21 +145,33 @@ export default function AnalyticsClient({
                   axisLine={false} 
                 />
                 <YAxis 
+                  yAxisId="left"
                   stroke="#94a3b8" 
                   fontSize={12} 
                   tickLine={false} 
                   axisLine={false} 
                   tickFormatter={(value) => `${value / 1000}k`}
                 />
+                <YAxis 
+                  yAxisId="right"
+                  orientation="right"
+                  stroke="#94a3b8" 
+                  fontSize={12} 
+                  tickLine={false} 
+                  axisLine={false} 
+                  tickFormatter={(value) => `${value}`}
+                />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                 <Bar 
+                  yAxisId="left"
                   dataKey="Revenus (CFA)" 
                   fill="#10b981"
                   radius={[8, 8, 0, 0]} 
                   maxBarSize={40}
                 />
                 <Bar 
+                  yAxisId="right"
                   dataKey="Commandes" 
                   fill="#e07a5f"
                   radius={[8, 8, 0, 0]} 
@@ -201,7 +213,7 @@ export default function AnalyticsClient({
             <div className="absolute text-center">
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Total Ventes</span>
               <span className="text-lg font-black text-slate-800 dark:text-white">
-                {totalSalesFromCategories.toLocaleString()}
+                {totalSalesFromCategories.toLocaleString('fr-FR')}
               </span>
               <span className="text-[10px] text-slate-550 font-medium block">CFA</span>
             </div>
@@ -217,7 +229,7 @@ export default function AnalyticsClient({
                 </div>
                 <div className="text-right">
                   <span className="font-black text-slate-800 dark:text-white block">
-                    {cat.value.toLocaleString()} CFA
+                    {cat.value.toLocaleString('fr-FR')} CFA
                   </span>
                   <span className="text-[10px] text-slate-450">
                     {totalSalesFromCategories > 0 ? ((cat.value / totalSalesFromCategories) * 100).toFixed(1) : 0}%

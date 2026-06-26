@@ -28,7 +28,7 @@ import {
   updateAdminPasswordAction, 
   updatePlatformPreferencesAction 
 } from "@/actions/admin";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/context/ToastContext";
 
 interface SettingsClientProps {
@@ -52,6 +52,7 @@ export default function SettingsClient({
   initialPreferences
 }: SettingsClientProps) {
   const toast = useToast();
+  const [activeTab, setActiveTab] = useState("profile");
 
 
   // States for Profile Form
@@ -196,7 +197,7 @@ export default function SettingsClient({
         <p className="text-slate-550 dark:text-slate-400 font-medium">Gérez le profil, la sécurité et les préférences globales de la plateforme.</p>
       </div>
 
-      <Tabs defaultValue="profile" className="w-full space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
         {/* Navigation Tabs */}
         <TabsList className="flex bg-slate-100/80 dark:bg-slate-900/60 p-1.5 rounded-2xl max-w-xl h-14 border border-slate-200/50 dark:border-slate-800/50 shadow-inner">
           <TabsTrigger 
@@ -223,368 +224,398 @@ export default function SettingsClient({
           <div className="p-8">
             <AnimatePresence mode="wait">
               {/* Profile Settings Content */}
-              <TabsContent value="profile" className="mt-0 outline-none space-y-6">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                    <User className="text-brand-primary" size={20} /> Profil Administrateur
-                  </h3>
-                  <p className="text-slate-550 dark:text-slate-400 text-xs font-semibold">
-                    Configurez vos informations personnelles visibles par le système.
-                  </p>
-                </div>
-
-                <hr className="border-slate-200/50 dark:border-slate-800/50" />
-
-                {profileSuccess && (
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
-                    <CheckCircle2 size={18} />
-                    {profileSuccess}
-                  </div>
-                )}
-                {profileError && (
-                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
-                    <AlertCircle size={18} />
-                    {profileError}
-                  </div>
-                )}
-
-                <form onSubmit={handleProfileSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-name" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Nom complet
-                      </Label>
-                      <Input
-                        id="profile-name"
-                        type="text"
-                        value={profileForm.name}
-                        onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                        required
-                        placeholder="Nom Admin"
-                        className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                      />
+              {activeTab === "profile" && (
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TabsContent value="profile" keepMounted className="mt-0 outline-none space-y-6">
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+                        <User className="text-brand-primary" size={20} /> Profil Administrateur
+                      </h3>
+                      <p className="text-slate-550 dark:text-slate-400 text-xs font-semibold">
+                        Configurez vos informations personnelles visibles par le système.
+                      </p>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-email" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Adresse Email
-                      </Label>
-                      <Input
-                        id="profile-email"
-                        type="email"
-                        value={profileForm.email}
-                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                        required
-                        placeholder="admin@email.com"
-                        className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                      />
-                    </div>
+                    <hr className="border-slate-200/50 dark:border-slate-800/50" />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-phone" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Numéro de Téléphone
-                      </Label>
-                      <Input
-                        id="profile-phone"
-                        type="tel"
-                        value={profileForm.phone}
-                        onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                        placeholder="+241 XX XX XX XX"
-                        className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                      />
-                    </div>
+                    {profileSuccess && (
+                      <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
+                        <CheckCircle2 size={18} />
+                        {profileSuccess}
+                      </div>
+                    )}
+                    {profileError && (
+                      <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
+                        <AlertCircle size={18} />
+                        {profileError}
+                      </div>
+                    )}
 
-                    <div className="space-y-2">
-                      <Label htmlFor="profile-address" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Adresse Géographique
-                      </Label>
-                      <Input
-                        id="profile-address"
-                        type="text"
-                        value={profileForm.address}
-                        onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
-                        placeholder="Quartier, Ville, Gabon"
-                        className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                      />
-                    </div>
-                  </div>
+                    <form onSubmit={handleProfileSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="profile-name" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Nom complet
+                          </Label>
+                          <Input
+                            id="profile-name"
+                            type="text"
+                            value={profileForm.name}
+                            onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                            required
+                            placeholder="Nom Admin"
+                            className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                          />
+                        </div>
 
-                  <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
-                    <Button 
-                      type="submit" 
-                      disabled={profileSaving}
-                      className="h-12 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {profileSaving ? (
-                        <>
-                          <Loader2 className="animate-spin" size={18} /> Enregistrement...
-                        </>
-                      ) : (
-                        "Sauvegarder"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
+                        <div className="space-y-2">
+                          <Label htmlFor="profile-email" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Adresse Email
+                          </Label>
+                          <Input
+                            id="profile-email"
+                            type="email"
+                            value={profileForm.email}
+                            onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                            required
+                            placeholder="admin@email.com"
+                            className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="profile-phone" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Numéro de Téléphone
+                          </Label>
+                          <Input
+                            id="profile-phone"
+                            type="tel"
+                            value={profileForm.phone}
+                            onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                            placeholder="+241 XX XX XX XX"
+                            className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="profile-address" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Adresse Géographique
+                          </Label>
+                          <Input
+                            id="profile-address"
+                            type="text"
+                            value={profileForm.address}
+                            onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
+                            placeholder="Quartier, Ville, Gabon"
+                            className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
+                        <Button 
+                          type="submit" 
+                          disabled={profileSaving}
+                          className="h-12 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {profileSaving ? (
+                            <>
+                              <Loader2 className="animate-spin" size={18} /> Enregistrement...
+                            </>
+                          ) : (
+                            "Sauvegarder"
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </TabsContent>
+                </motion.div>
+              )}
 
               {/* Security settings content */}
-              <TabsContent value="security" className="mt-0 outline-none space-y-6">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                    <Lock className="text-brand-primary" size={20} /> Sécurité du Compte
-                  </h3>
-                  <p className="text-slate-550 dark:text-slate-400 text-xs font-semibold">
-                    Modifiez votre mot de passe d&apos;accès administrateur.
-                  </p>
-                </div>
-
-                <hr className="border-slate-200/50 dark:border-slate-800/50" />
-
-                {securitySuccess && (
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
-                    <CheckCircle2 size={18} />
-                    {securitySuccess}
-                  </div>
-                )}
-                {securityError && (
-                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
-                    <AlertCircle size={18} />
-                    {securityError}
-                  </div>
-                )}
-
-                <form onSubmit={handlePasswordSubmit} className="space-y-6">
-                  <div className="space-y-5 max-w-xl">
-                    <div className="space-y-2">
-                      <Label htmlFor="current-password" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Mot de passe actuel
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="current-password"
-                          type={showCurrentPassword ? "text" : "password"}
-                          value={securityForm.currentPassword}
-                          onChange={(e) => setSecurityForm({ ...securityForm, currentPassword: e.target.value })}
-                          required
-                          className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-12 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        >
-                          {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
+              {activeTab === "security" && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TabsContent value="security" keepMounted className="mt-0 outline-none space-y-6">
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+                        <Lock className="text-brand-primary" size={20} /> Sécurité du Compte
+                      </h3>
+                      <p className="text-slate-550 dark:text-slate-400 text-xs font-semibold">
+                        Modifiez votre mot de passe d&apos;accès administrateur.
+                      </p>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <Label htmlFor="new-password" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          Nouveau mot de passe
-                        </Label>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide flex items-center gap-1">
-                          <Info size={10} /> 1 Majuscule + 1 Chiffre min. (8 caract.)
-                        </span>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="new-password"
-                          type={showNewPassword ? "text" : "password"}
-                          value={securityForm.newPassword}
-                          onChange={(e) => setSecurityForm({ ...securityForm, newPassword: e.target.value })}
-                          required
-                          className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-12 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        >
-                          {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                    </div>
+                    <hr className="border-slate-200/50 dark:border-slate-800/50" />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Confirmer le nouveau mot de passe
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="confirm-password"
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={securityForm.confirmPassword}
-                          onChange={(e) => setSecurityForm({ ...securityForm, confirmPassword: e.target.value })}
-                          required
-                          className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-12 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        >
-                          {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
+                    {securitySuccess && (
+                      <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
+                        <CheckCircle2 size={18} />
+                        {securitySuccess}
                       </div>
-                    </div>
-                  </div>
+                    )}
+                    {securityError && (
+                      <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
+                        <AlertCircle size={18} />
+                        {securityError}
+                      </div>
+                    )}
 
-                  <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
-                    <Button 
-                      type="submit" 
-                      disabled={securitySaving}
-                      className="h-12 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {securitySaving ? (
-                        <>
-                          <Loader2 className="animate-spin" size={18} /> Modification...
-                        </>
-                      ) : (
-                        "Modifier le mot de passe"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
+                    <form onSubmit={handlePasswordSubmit} className="space-y-6">
+                      <div className="space-y-5 max-w-xl">
+                        <div className="space-y-2">
+                          <Label htmlFor="current-password" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Mot de passe actuel
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="current-password"
+                              type={showCurrentPassword ? "text" : "password"}
+                              value={securityForm.currentPassword}
+                              onChange={(e) => setSecurityForm({ ...securityForm, currentPassword: e.target.value })}
+                              required
+                              className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-12 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            >
+                              {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <Label htmlFor="new-password" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                              Nouveau mot de passe
+                            </Label>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wide flex items-center gap-1">
+                              <Info size={10} /> 1 Majuscule + 1 Chiffre min. (8 caract.)
+                            </span>
+                          </div>
+                          <div className="relative">
+                            <Input
+                              id="new-password"
+                              type={showNewPassword ? "text" : "password"}
+                              value={securityForm.newPassword}
+                              onChange={(e) => setSecurityForm({ ...securityForm, newPassword: e.target.value })}
+                              required
+                              className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-12 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            >
+                              {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="confirm-password" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            Confirmer le nouveau mot de passe
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="confirm-password"
+                              type={showConfirmPassword ? "text" : "password"}
+                              value={securityForm.confirmPassword}
+                              onChange={(e) => setSecurityForm({ ...securityForm, confirmPassword: e.target.value })}
+                              required
+                              className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-12 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                            >
+                              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
+                        <Button 
+                          type="submit" 
+                          disabled={securitySaving}
+                          className="h-12 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {securitySaving ? (
+                            <>
+                              <Loader2 className="animate-spin" size={18} /> Modification...
+                            </>
+                          ) : (
+                            "Modifier le mot de passe"
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </TabsContent>
+                </motion.div>
+              )}
 
               {/* Preferences Settings Content */}
-              <TabsContent value="preferences" className="mt-0 outline-none space-y-6">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
-                    <Sliders className="text-brand-primary" size={20} /> Préférences de la plateforme
-                  </h3>
-                  <p className="text-slate-550 dark:text-slate-400 text-xs font-semibold">
-                    Configurez le comportement global de l&apos;application MesCoursesFaciles.
-                  </p>
-                </div>
-
-                <hr className="border-slate-200/50 dark:border-slate-800/50" />
-
-                {preferencesSuccess && (
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
-                    <CheckCircle2 size={18} />
-                    {preferencesSuccess}
-                  </div>
-                )}
-                {preferencesError && (
-                  <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
-                    <AlertCircle size={18} />
-                    {preferencesError}
-                  </div>
-                )}
-
-                <form onSubmit={handlePreferencesSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="prefs-name" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Server size={14} className="text-slate-400" /> Nom de la plateforme
-                      </Label>
-                      <Input
-                        id="prefs-name"
-                        type="text"
-                        value={preferencesForm.platformName}
-                        onChange={(e) => setPreferencesForm({ ...preferencesForm, platformName: e.target.value })}
-                        required
-                        className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                      />
+              {activeTab === "preferences" && (
+                <motion.div
+                  key="preferences"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TabsContent value="preferences" keepMounted className="mt-0 outline-none space-y-6">
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+                        <Sliders className="text-brand-primary" size={20} /> Préférences de la plateforme
+                      </h3>
+                      <p className="text-slate-550 dark:text-slate-400 text-xs font-semibold">
+                        Configurez le comportement global de l&apos;application MesCoursesFaciles.
+                      </p>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="prefs-fee" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <DollarSign size={14} className="text-slate-400" /> Frais de livraison par défaut
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="prefs-fee"
-                          type="number"
-                          value={preferencesForm.defaultDeliveryFee}
-                          onChange={(e) => setPreferencesForm({ ...preferencesForm, defaultDeliveryFee: Number(e.target.value) })}
-                          required
-                          min={0}
-                          className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-16 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 uppercase tracking-wide">
-                          CFA
-                        </span>
+                    <hr className="border-slate-200/50 dark:border-slate-800/50" />
+
+                    {preferencesSuccess && (
+                      <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
+                        <CheckCircle2 size={18} />
+                        {preferencesSuccess}
                       </div>
-                    </div>
+                    )}
+                    {preferencesError && (
+                      <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-sm font-bold flex items-center gap-2.5 animate-in slide-in-from-top-4">
+                        <AlertCircle size={18} />
+                        {preferencesError}
+                      </div>
+                    )}
 
-                    <div className="space-y-2">
-                      <Label htmlFor="prefs-support" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <Phone size={14} className="text-slate-400" /> Contact Support Client
-                      </Label>
-                      <Input
-                        id="prefs-support"
-                        type="text"
-                        value={preferencesForm.supportContact}
-                        onChange={(e) => setPreferencesForm({ ...preferencesForm, supportContact: e.target.value })}
-                        required
-                        className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-850">
-                      {/* Checkbox Preferences */}
-                      <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
-                        <div className="flex items-center h-5">
-                          <input
-                            id="prefs-notifications"
-                            type="checkbox"
-                            checked={preferencesForm.enableEmailNotifications}
-                            onChange={(e) => setPreferencesForm({ ...preferencesForm, enableEmailNotifications: e.target.checked })}
-                            className="w-5 h-5 rounded-md border-slate-300 dark:border-slate-700 text-brand-primary focus:ring-brand-primary transition-all cursor-pointer"
+                    <form onSubmit={handlePreferencesSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="prefs-name" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Server size={14} className="text-slate-400" /> Nom de la plateforme
+                          </Label>
+                          <Input
+                            id="prefs-name"
+                            type="text"
+                            value={preferencesForm.platformName}
+                            onChange={(e) => setPreferencesForm({ ...preferencesForm, platformName: e.target.value })}
+                            required
+                            className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
                           />
                         </div>
-                        <div className="text-sm">
-                          <label htmlFor="prefs-notifications" className="font-bold text-slate-800 dark:text-slate-200 cursor-pointer flex items-center gap-1.5">
-                            <Bell size={14} className="text-slate-400" /> Notifications E-mail
-                          </label>
-                          <p className="text-slate-550 dark:text-slate-400 text-xs font-medium mt-1 leading-normal">
-                            Envoyer des alertes e-mail automatiques aux administrateurs pour les nouvelles commandes.
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="flex items-start gap-3 p-4 rounded-2xl bg-rose-500/5 dark:bg-rose-500/5 border border-rose-500/10 dark:border-rose-955/20">
-                        <div className="flex items-center h-5">
-                          <input
-                            id="prefs-maintenance"
-                            type="checkbox"
-                            checked={preferencesForm.maintenanceMode}
-                            onChange={(e) => setPreferencesForm({ ...preferencesForm, maintenanceMode: e.target.checked })}
-                            className="w-5 h-5 rounded-md border-slate-300 dark:border-slate-700 text-rose-500 focus:ring-rose-500 transition-all cursor-pointer"
+                        <div className="space-y-2">
+                          <Label htmlFor="prefs-fee" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <DollarSign size={14} className="text-slate-400" /> Frais de livraison par défaut
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="prefs-fee"
+                              type="number"
+                              value={preferencesForm.defaultDeliveryFee}
+                              onChange={(e) => setPreferencesForm({ ...preferencesForm, defaultDeliveryFee: Number(e.target.value) })}
+                              required
+                              min={0}
+                              className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 pl-4 pr-16 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 uppercase tracking-wide">
+                              CFA
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="prefs-support" className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Phone size={14} className="text-slate-400" /> Contact Support Client
+                          </Label>
+                          <Input
+                            id="prefs-support"
+                            type="text"
+                            value={preferencesForm.supportContact}
+                            onChange={(e) => setPreferencesForm({ ...preferencesForm, supportContact: e.target.value })}
+                            required
+                            className="h-12 w-full rounded-xl border border-slate-250 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-4 focus-visible:border-brand-primary focus-visible:ring-2 focus-visible:ring-brand-primary/20 transition-all outline-none font-bold text-slate-800 dark:text-white"
                           />
                         </div>
-                        <div className="text-sm">
-                          <label htmlFor="prefs-maintenance" className="font-bold text-rose-600 dark:text-rose-455 cursor-pointer flex items-center gap-1.5">
-                            <ShieldAlert size={14} className="text-rose-400" /> Mode Maintenance
-                          </label>
-                          <p className="text-rose-500/70 dark:text-rose-450 text-xs font-medium mt-1 leading-normal">
-                            Restreindre l&apos;accès public à l&apos;application. Seuls les comptes admin pourront y naviguer.
-                          </p>
+
+                        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-850">
+                          {/* Checkbox Preferences */}
+                          <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50">
+                            <div className="flex items-center h-5">
+                              <input
+                                id="prefs-notifications"
+                                type="checkbox"
+                                checked={preferencesForm.enableEmailNotifications}
+                                onChange={(e) => setPreferencesForm({ ...preferencesForm, enableEmailNotifications: e.target.checked })}
+                                className="w-5 h-5 rounded-md border-slate-300 dark:border-slate-700 text-brand-primary focus:ring-brand-primary transition-all cursor-pointer"
+                              />
+                            </div>
+                            <div className="text-sm">
+                              <label htmlFor="prefs-notifications" className="font-bold text-slate-800 dark:text-slate-200 cursor-pointer flex items-center gap-1.5">
+                                <Bell size={14} className="text-slate-400" /> Notifications E-mail
+                              </label>
+                              <p className="text-slate-550 dark:text-slate-400 text-xs font-medium mt-1 leading-normal">
+                                Envoyer des alertes e-mail automatiques aux administrateurs pour les nouvelles commandes.
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3 p-4 rounded-2xl bg-rose-500/5 dark:bg-rose-500/5 border border-rose-500/10 dark:border-rose-955/20">
+                            <div className="flex items-center h-5">
+                              <input
+                                id="prefs-maintenance"
+                                type="checkbox"
+                                checked={preferencesForm.maintenanceMode}
+                                onChange={(e) => setPreferencesForm({ ...preferencesForm, maintenanceMode: e.target.checked })}
+                                className="w-5 h-5 rounded-md border-slate-300 dark:border-slate-700 text-rose-500 focus:ring-rose-500 transition-all cursor-pointer"
+                              />
+                            </div>
+                            <div className="text-sm">
+                              <label htmlFor="prefs-maintenance" className="font-bold text-rose-600 dark:text-rose-455 cursor-pointer flex items-center gap-1.5">
+                                <ShieldAlert size={14} className="text-rose-400" /> Mode Maintenance
+                              </label>
+                              <p className="text-rose-500/70 dark:text-rose-450 text-xs font-medium mt-1 leading-normal">
+                                Restreindre l&apos;accès public à l&apos;application. Seuls les comptes admin pourront y naviguer.
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
-                    <Button 
-                      type="submit" 
-                      disabled={preferencesSaving}
-                      className="h-12 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {preferencesSaving ? (
-                        <>
-                          <Loader2 className="animate-spin" size={18} /> Enregistrement...
-                        </>
-                      ) : (
-                        "Enregistrer les préférences"
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
+                      <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-850">
+                        <Button 
+                          type="submit" 
+                          disabled={preferencesSaving}
+                          className="h-12 px-6 rounded-xl font-bold bg-brand-primary text-white hover:bg-brand-primary-hover shadow-lg shadow-brand-primary/20 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {preferencesSaving ? (
+                            <>
+                              <Loader2 className="animate-spin" size={18} /> Enregistrement...
+                            </>
+                          ) : (
+                            "Enregistrer les préférences"
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </TabsContent>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </Card>

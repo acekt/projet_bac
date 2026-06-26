@@ -10,11 +10,11 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     const token = cookieStore.get('mcf_jwt_session')?.value;
     if (!token) {
-       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
     const decoded = await verifyJWT(token);
     if (!decoded || decoded.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
 
     const formData = await request.formData();
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const folder = formData.get('folder') as string || 'mes-courses-faciles';
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -38,11 +38,7 @@ export async function POST(request: Request) {
     // Upload using stream to avoid temporary files
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { 
-          folder: folder,
-          public_id: publicId,
-          overwrite: false
-        },
+        { folder: folder, public_id: publicId },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
@@ -55,6 +51,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'Upload failed', details: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Erreur lors du téléversement', details: error.message }, { status: 500 });
   }
 }

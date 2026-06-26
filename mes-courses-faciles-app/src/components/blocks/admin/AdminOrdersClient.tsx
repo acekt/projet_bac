@@ -7,12 +7,22 @@ import { DataTable } from '@/components/common/DataTable';
 import { OrderDetailsSheet } from '@/components/blocks/admin/OrderDetailsSheet';
 import { ColumnDef } from '@tanstack/react-table';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { getOrderStatusConfig } from '@/lib/constants/order-statuses';
 
 interface AdminOrdersClientProps {
   initialOrders: any[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
 }
 
-export default function AdminOrdersClient({ initialOrders }: AdminOrdersClientProps) {
+export default function AdminOrdersClient({
+  initialOrders,
+  currentPage,
+  totalPages,
+  totalCount,
+}: AdminOrdersClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [_isPending, startTransition] = useTransition();
@@ -68,7 +78,7 @@ export default function AdminOrdersClient({ initialOrders }: AdminOrdersClientPr
       header: 'Montant',
       cell: ({ row }) => (
         <span className="font-extrabold text-slate-800 dark:text-emerald-400">
-          {row.original.total.toLocaleString()} CFA
+          {row.original.total.toLocaleString('fr-FR')} CFA
         </span>
       )
     },
@@ -93,7 +103,18 @@ export default function AdminOrdersClient({ initialOrders }: AdminOrdersClientPr
       }
     },
     {
-      accessorKey: 'paymentMethod',
+      id: 'paymentMethod',
+      accessorFn: (row) => {
+        const method = row.paymentMethod || '';
+        switch (method.toLowerCase()) {
+          case 'airtel': return 'Airtel Money';
+          case 'moov': return 'Moov Money';
+          case 'card': return 'Carte Bancaire';
+          case 'cash':
+          default:
+            return 'Espèces';
+        }
+      },
       header: 'Paiement',
       cell: ({ row }) => {
         const method = row.original.paymentMethod;
@@ -120,33 +141,12 @@ export default function AdminOrdersClient({ initialOrders }: AdminOrdersClientPr
       }
     },
     {
-      accessorKey: 'status',
+      id: 'status',
+      accessorFn: (row) => getOrderStatusConfig(row.status).label,
       header: 'Statut',
-      cell: ({ row }) => {
-        const status = row.original.status as OrderStatus;
-        const statusMap = (s: OrderStatus) => {
-          switch (s) {
-            case 'PENDING':
-              return { label: 'En attente', style: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40' };
-            case 'PAID':
-              return { label: 'Préparation', style: 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/40' };
-            case 'SHIPPED':
-              return { label: 'En livraison', style: 'bg-sky-100 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-900/40' };
-            case 'DELIVERED':
-              return { label: 'Livrée', style: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40' };
-            case 'CANCELLED':
-              return { label: 'Annulée', style: 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-900/40' };
-            default:
-              return { label: s, style: 'bg-slate-100 text-slate-700 border-slate-200' };
-          }
-        };
-        const st = statusMap(status);
-        return (
-          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${st.style}`}>
-            {st.label}
-          </span>
-        );
-      }
+      cell: ({ row }) => (
+        <StatusBadge status={row.original.status} />
+      )
     },
     {
       id: 'actions',
@@ -168,6 +168,11 @@ export default function AdminOrdersClient({ initialOrders }: AdminOrdersClientPr
         columns={columns} 
         data={initialOrders} 
         searchPlaceholder="Rechercher par ID, client, montant, statut..." 
+        serverPagination={{
+          currentPage,
+          totalPages,
+          totalCount,
+        }}
       />
 
       {/* Slide-out details Drawer (Sheet) */}

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/context/ToastContext';
 import { markAllNotificationsAsReadAction, markNotificationAsReadAction } from '@/actions/admin';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 const MENU_ITEMS = [
   { icon: LayoutDashboard, label: 'Vue d\'ensemble', href: '/admin' },
@@ -38,12 +39,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { logout } = useAuth();
   const toast = useToast();
   
-  const [notifications, setNotifications] = useState<{ hasUnread: boolean; hasBadge: boolean; alerts: any[] }>({
+  const [notifications, setNotifications] = useState<{ hasUnread: boolean; hasBadge: boolean; unreadCount?: number; alerts: any[] }>({
     hasUnread: false,
     hasBadge: false,
+    unreadCount: 0,
     alerts: []
   });
-  const [isNotifDropdownOpen, setIsNotifDropdownOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -112,7 +114,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <ShoppingBag size={20} />
             </div>
             {isSidebarOpen && (
-              <span className="font-bold text-lg whitespace-nowrap">Admin MCF</span>
+              <span className="font-bold text-lg whitespace-nowrap">Mes Courses Faciles</span>
             )}
             <button className="lg:hidden ml-auto p-1.5 hover:bg-white/10 rounded-lg cursor-pointer" onClick={() => setIsSidebarOpen(false)}>
               <X size={20} />
@@ -163,117 +165,107 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg cursor-pointer">
             <Menu size={20} />
           </button>
-
           <div className="flex items-center gap-6">
             <div className="relative">
-              <button 
-                onClick={() => setIsNotifDropdownOpen(!isNotifDropdownOpen)}
-                className="relative p-2 text-slate-400 hover:text-brand-primary cursor-pointer transition-colors"
-                title="Notifications"
-              >
-                <Bell size={20} />
-                {(notifications.hasUnread || notifications.hasBadge) && (
-                  <>
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full" />
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-ping opacity-75" />
-                  </>
-                )}
-              </button>
-              
-              <AnimatePresence>
-                {isNotifDropdownOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40 cursor-default" 
-                      onClick={() => setIsNotifDropdownOpen(false)}
-                    />
-                    
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden"
+              <Popover open={isNotifOpen} onOpenChange={setIsNotifOpen}>
+                <PopoverTrigger
+                  render={
+                    <button 
+                      className="relative p-2 text-slate-400 hover:text-brand-primary cursor-pointer transition-colors"
+                      title="Notifications"
                     >
-                      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
-                        <span className="font-extrabold text-sm text-slate-800 dark:text-white">Alertes du Centre de Contrôle</span>
-                        {(notifications.hasUnread || notifications.hasBadge) && (
-                          <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-brand-primary hover:underline font-bold cursor-pointer"
+                      <Bell size={20} />
+                      {((notifications.unreadCount || 0) > 0) && (
+                        <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                          {(notifications.unreadCount || 0) > 99 ? '99+' : notifications.unreadCount}
+                        </span>
+                      )}
+                    </button>
+                  }
+                />
+                
+                <PopoverContent align="end" className="w-80 p-0 overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50">
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-950/20">
+                    <span className="font-extrabold text-sm text-slate-800 dark:text-white">Notifications</span>
+                    {((notifications.unreadCount || 0) > 0) && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-xs text-brand-primary hover:underline font-bold cursor-pointer"
+                      >
+                        Tout marquer comme lu
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-[300px] overflow-y-auto">
+                    {notifications.alerts.length > 0 ? (
+                      notifications.alerts.map((alert) => {
+                        const isUnread = !alert.isRead;
+                        const title = alert.type === 'ORDER' ? 'Nouvelle Commande' : 'Alerte Stock';
+                        return (
+                          <div
+                            key={alert.id}
+                            onClick={() => isUnread && handleMarkAsRead(alert.id)}
+                            className={`p-4 transition-colors flex gap-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                              isUnread 
+                                ? 'bg-blue-50/20 dark:bg-blue-950/10' 
+                                : ''
+                            }`}
                           >
-                            Tout lire
-                          </button>
-                        )}
-                      </div>
-                      
-                      <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto">
-                        {notifications.alerts.length > 0 ? (
-                          notifications.alerts.map((alert) => {
-                            const isUnread = !alert.isRead;
-                            return (
-                              <div
-                                key={alert.id}
-                                onClick={() => isUnread && handleMarkAsRead(alert.id)}
-                                className={`p-4 transition-colors flex gap-3 cursor-pointer ${
-                                  isUnread 
-                                    ? 'bg-blue-50/20 hover:bg-blue-50/40 dark:bg-blue-950/10 dark:hover:bg-blue-950/20' 
-                                    : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/40'
-                                }`}
-                              >
-                                <div className="mt-0.5">
-                                  {alert.type === 'ORDER' ? (
-                                    <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center">
-                                      <ShoppingBag size={16} />
-                                    </div>
-                                  ) : (
-                                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
-                                      <Package size={16} />
-                                    </div>
-                                  )}
+                            <div className="mt-0.5">
+                              {alert.type === 'ORDER' ? (
+                                <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-600 flex items-center justify-center">
+                                  <ShoppingBag size={16} />
                                 </div>
-                                <div className="flex-1 flex flex-col gap-1 min-w-0">
-                                  <span className={`text-xs leading-normal ${isUnread ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-600 dark:text-slate-400'}`}>
-                                    {alert.message}
-                                  </span>
-                                  <span className="text-[10px] text-slate-450 font-semibold font-mono">
-                                    {new Date(alert.createdAt).toLocaleString('fr-FR', {
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                      day: '2-digit',
-                                      month: '2-digit'
-                                    })}
-                                  </span>
+                              ) : (
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                                  <Package size={16} />
                                 </div>
-                                {isUnread && (
-                                  <div className="w-1.5 h-1.5 rounded-full bg-brand-primary mt-2 flex-shrink-0" />
-                                )}
-                              </div>
-                            );
-                          })
-                        ) : (
-                          <div className="p-6 text-center text-slate-450 dark:text-slate-500 text-xs font-bold flex flex-col items-center gap-2">
-                            <span className="text-xl">🎉</span>
-                            <span>Aucune alerte en attente</span>
-                            <span className="text-[10px] text-slate-450 font-normal">Toutes les commandes sont traitées et les stocks sont OK.</span>
+                              )}
+                            </div>
+                            <div className="flex-1 flex flex-col gap-1 min-w-0">
+                              <span className="text-xs font-bold text-slate-850 dark:text-slate-200">
+                                {title}
+                              </span>
+                              <span className={`text-xs leading-normal ${isUnread ? 'font-bold text-slate-900 dark:text-white' : 'text-slate-650 dark:text-slate-400'}`}>
+                                {alert.message}
+                              </span>
+                              <span className="text-[10px] text-slate-450 font-semibold font-mono">
+                                {new Date(alert.createdAt).toLocaleString('fr-FR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                  day: '2-digit',
+                                  month: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            {isUnread && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-brand-primary mt-2 flex-shrink-0" />
+                            )}
                           </div>
-                        )}
+                        );
+                      })
+                    ) : (
+                      <div className="p-6 text-center text-slate-450 dark:text-slate-500 text-xs font-bold flex flex-col items-center gap-2">
+                        <span className="text-xl">🎉</span>
+                        <span>Aucune alerte en attente</span>
+                        <span className="text-[10px] text-slate-450 font-normal">Toutes les commandes sont traitées et les stocks sont OK.</span>
                       </div>
-                      
-                      <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/10 text-center">
-                        <Link
-                          href="/admin/notifications"
-                          onClick={() => setIsNotifDropdownOpen(false)}
-                          className="text-xs font-bold text-brand-primary hover:text-brand-primary/80 transition-colors inline-flex items-center gap-1"
-                        >
-                          Voir toutes les notifications
-                          <ChevronRight size={14} />
-                        </Link>
-                      </div>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
+                    )}
+                  </div>
+                  
+                  <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/10 text-center">
+                    <Link
+                      href="/admin/notifications"
+                      onClick={() => setIsNotifOpen(false)}
+                      className="text-xs font-bold text-brand-primary hover:text-brand-primary/80 transition-colors inline-flex items-center gap-1"
+                    >
+                      Voir toutes les notifications
+                      <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="h-6 w-px bg-slate-200" />
             <div className="flex items-center gap-3">

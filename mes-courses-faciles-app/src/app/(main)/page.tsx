@@ -26,6 +26,7 @@ async function BentoStoreList() {
     stores = allStores.slice(0, 5);
   } catch (error) {
     console.error("BentoStoreList load error (silent):", error);
+    stores = [];
   }
 
   if (stores.length === 0) {
@@ -68,6 +69,7 @@ async function RecommendedStores() {
     stores = allStores.slice(0, 6);
   } catch (error) {
     console.error("RecommendedStores load error (silent):", error);
+    stores = [];
   }
 
   if (stores.length === 0) {
@@ -107,6 +109,7 @@ async function SuggestedProducts() {
     });
   } catch (error) {
     console.error("SuggestedProducts load error (silent):", error);
+    products = [];
   }
 
   if (products.length === 0) {
@@ -171,7 +174,7 @@ export default async function HomePage() {
                 <h2 className="text-3xl font-black text-foreground tracking-tight">Vos Magasins Partenaires</h2>
                 <p className="text-sm text-muted-foreground font-medium">Commandez directement dans les meilleurs supermarchés de Libreville.</p>
               </div>
-              <Link href="/search" className="text-sm font-bold text-primary hover:text-primary-hover flex items-center gap-1 group transition-all">
+              <Link href="/stores" className="text-sm font-bold text-primary hover:text-primary-hover flex items-center gap-1 group transition-all">
                 Voir tout <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -208,22 +211,6 @@ export default async function HomePage() {
             }>
               <SuggestedProducts />
             </Suspense>
-          </section>
-
-          {/* Banner Promo */}
-          <section className="glass-card rounded-[2rem] p-8 border-luminous bg-brand-safran/5 flex flex-col sm:flex-row justify-between items-center gap-6">
-            <div className="space-y-2 text-center sm:text-left">
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2 justify-center sm:justify-start">
-                <Flame className="text-brand-safran" size={20} /> Livraison offerte dès 25 000 FCFA !
-              </h3>
-              <p className="text-sm text-muted-foreground font-medium">Profitez de frais de livraison gratuits pour remplir votre garde-manger ce week-end.</p>
-            </div>
-            <Link 
-              href="/search" 
-              className="bg-brand-safran hover:bg-brand-safran-hover text-white rounded-xl px-6 h-12 font-bold shadow-safran-btn shrink-0 flex items-center justify-center text-sm"
-            >
-              Faire mes courses
-            </Link>
           </section>
         </div>
         <Footer />
@@ -276,7 +263,7 @@ export default async function HomePage() {
           </Suspense>
 
           <div className="mt-16 text-center">
-             <Link href="/search">
+             <Link href="/stores">
                 <Button variant="outline" size="lg" className="h-14 px-8 rounded-full border-border bg-background hover:bg-muted font-bold text-foreground group">
                    Voir tous nos magasins partenaires <ArrowUpRight className="ml-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" size={20} />
                 </Button>
